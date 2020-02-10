@@ -1,0 +1,43 @@
+<html>
+    <head>
+        <link href="https://stackpath.bootstrapcdn.com/bootswatch/4.3.1/slate/bootstrap.min.css" rel="stylesheet" integrity="sha384-FBPbZPVh+7ks5JJ70RJmIaqyGnvMbeJ5JQfEbW0Ac6ErfvEg9yG56JQJuMNptWsH" crossorigin="anonymous">
+        <link rel="stylesheet" type="text/css" href="css/style.css" />
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <script src="scripts/scriptCountry.js"></script>
+    </head>
+    <body>
+        <%- include('../header') -%>
+            <div class="container-fluid">
+                <table class="table table-hover">
+                        <thead>
+                        <tr style="width: 60%">
+                            <th scope="col">Id</th>
+                            <th scope="col">Name</th>
+                            <th scope="col">Country Code</th>
+                            <th scope="col">Size [km2]</th>
+                            <th scope="col">Population [mil]</th>
+                            <th scope="col">Continent</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <% countries.forEach(function(country){ %>
+                        <tr class="table-secondary" style="width: 60%">
+                                
+                                <td><%=country.Id%></td>
+                                <td><%=country.Name%></td>
+                                <td><%=country.Code%></td>
+                                <td><%=country.Size%></td>
+                                <td><%=country.Population%></td>
+                                <td><%=country.Continent%></td>
+                                <td>
+                                <button type="button" class="btn-primary" name="edit" id=<%=country.id%>>Edit</button>
+                                </td>
+                        </tr>
+                        <% }) %>
+                        </tbody>
+                </table>
+            </div>
+            <button type="button" class="btn btn-primary" id="createCountryModButton">Create country</button>
+            <%- include('create') -%>
+    </body>
+</html>

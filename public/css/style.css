@@ -1,0 +1,9 @@
+.container-fluid{
+    padding-left: 15% !important;
+    padding-right: 15% !important;
+}
+
+.modal-body{
+    max-height: calc(100vh - 210px);
+    overflow-y: auto;
+}

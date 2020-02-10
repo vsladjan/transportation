@@ -1,0 +1,50 @@
+            <div class="modal" id="createCountryModal">
+              <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title">Create country</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close" id="createCountryX">
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                  </div>
+                  <div class="modal-body">
+                    <form method="GET" action="/transportation/country/create" id="createCountryForm">
+                      <fieldset>
+                        <div class="form-group">
+                          <label for="name">Name</label>
+                          <input type="text" class="form-control" id="name" name="name" placeholder="Enter name">
+                        </div>
+                        <div class="form-group">
+                          <label for="countryCode">Country code</label>
+                          <input type="text" class="form-control" id="countryCode" name="countryCode"  placeholder="Country code">
+                        </div>
+                        <div class="form-group">
+                          <label for="size">Size</label>
+                          <input type="text" class="form-control" id="size" name="size"  placeholder="Size">
+                        </div>
+                        <div class="form-group">
+                          <label for="population">Population</label>
+                          <input type="text" class="form-control" id="population" name="population"  placeholder="Population">
+                        </div>
+                        <div class="form-group">
+                          <label for="continentSelect">Continent</label>
+                          <select class="form-control" id="continentSelect" name="continentSelect">
+                            <option value="Europe">Europe</option>
+                            <option value="Asia">Asia</option>
+                            <option value="South America">South America</option>
+                            <option value="North America">North America</option>
+                            <option value="Australia">Australia</option>
+                            <option value="Africa">Africa</option>
+                          </select>
+                        </div>
+                        </fieldset>
+                      </fieldset>
+                    </form>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="createCountryButton">Create</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal" id="createCountryClose">Close</button>
+                  </div>
+                </div>
+              </div>
+            </div>
