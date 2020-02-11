@@ -4,6 +4,7 @@
         <link rel="stylesheet" type="text/css" href="css/style.css" />
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
         <script src="scripts/scriptCountry.js"></script>
+        <link rel="shortcut icon" href="#" />
     </head>
     <body>
         <%- include('../header') -%>
@@ -20,7 +21,7 @@
                         </tr>
                         </thead>
                         <tbody>
-                        <% countries.forEach(function(country){ %>
+                        <% countries.country.forEach(function(country){ %>
                         <tr class="table-secondary" style="width: 60%">
                                 
                                 <td><%=country.Id%></td>
@@ -30,14 +31,25 @@
                                 <td><%=country.Population%></td>
                                 <td><%=country.Continent%></td>
                                 <td>
-                                <button type="button" class="btn-primary" name="edit" id=<%=country.id%>>Edit</button>
+                                    <button type="button" class="btn-primary" name="edit" id=<%="edit_" + country.Id%>>Edit</button>
+                                    <button type="button" class="btn-primary" name="delete" id=<%="delete_" + country.Id%>>Delete</button>
                                 </td>
                         </tr>
                         <% }) %>
                         </tbody>
                 </table>
+                <button type="button" class="btn btn-primary" id="createCountryModButton">Create country</button>
             </div>
-            <button type="button" class="btn btn-primary" id="createCountryModButton">Create country</button>
             <%- include('create') -%>
+            <%- include('edit') -%>
+            <br>
+            <br>
+            <br>
+            <div class="alert alert-dismissible alert-success" id="message">
+              <button type="button" class="close" id="messageClose" data-dismiss="alert">&times;</button>
+              <div id="messageText">
+                  <%=countries.message%>
+              </div>
+            </div>        
     </body>
 </html>

@@ -1,4 +1,5 @@
 var express = require("express");
+const session = require('express-session');
 var router = require("./router/router.js");
 var db = require("./sequelize.js");
 const bodyParser = require("body-parser");
@@ -6,6 +7,7 @@ const bodyParser = require("body-parser");
 var app = express();
 var port = 3000;
 
+app.use(session({secret: 'ssshhhhh',saveUninitialized: true,resave: true}));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 
