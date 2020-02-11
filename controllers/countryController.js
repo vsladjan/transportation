@@ -30,39 +30,47 @@ var getShowOne = function(req, res){
 
 // Create country
 var createCountry = function(req, res){
-    Country.create({
-          Name: req.query.name,
-          Code: req.query.countryCode,
-          Size: req.query.size,
-          Population: req.query.population,
-          Continent: req.query.continentSelect
-    }).then(function(result){
-        req.session.message = "Record is created in database.";
-        res.redirect("show");
-  }).catch(function(err){
-        req.session.message = "Error when creating data.";
-        res.redirect("show");
-  });
+      var reg = new RegExp("[A-Z]{3}")
+      if (!reg.test(req.query.countryCode) || req.query.name == "" || req.query.continentSelect == ""){
+            req.query.countryCode = null;
+      }
+      Country.create({
+            Name: req.query.name,
+            Code: req.query.countryCode,
+            Size: req.query.size,
+            Population: req.query.population,
+            Continent: req.query.continentSelect
+      }).then(function(result){
+            req.session.message = "Record is created in database.";
+            res.redirect("show");
+      }).catch(function(err){
+            req.session.message = "Error when creating data.";
+            res.redirect("show");
+      });
 }
 
 // Edit Country
 var editCountry = function(req, res){
-    Country.update({
-          Name: req.query.name,
-          Code: req.query.countryCode,
-          Size: req.query.size,
-          Population: req.query.population,
-          Continent: req.query.continentSelect
-    },
-    {
-          where: {Id: req.query.id}
-    }).then(function(result){
-        req.session.message = "Record is edited in database.";
-        res.redirect("show");
-    }).catch(function(err){
-        req.session.message = "Error when editing data.";
-        res.redirect("show");
-    });
+      var reg = new RegExp("[A-Z]{3}")
+      if (!reg.test(req.query.countryCode) || req.query.name == "" || req.query.continentSelect == ""){
+            req.query.countryCode = null;
+      }
+      Country.update({
+      Name: req.query.name,
+      Code: req.query.countryCode,
+      Size: req.query.size,
+      Population: req.query.population,
+      Continent: req.query.continentSelect
+      },
+      {
+      where: {Id: req.query.id}
+      }).then(function(result){
+            req.session.message = "Record is edited in database.";
+            res.redirect("show");
+      }).catch(function(err){
+            req.session.message = "Error when editing data.";
+            res.redirect("show");
+      });
 }
 
 /* Delete Country */
