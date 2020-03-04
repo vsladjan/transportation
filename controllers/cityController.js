@@ -56,7 +56,7 @@ var createCity = function(req, res){
     });
 }
 
-// Edit Country
+// Edit City
 var editCity = function(req, res){
     if (req.query.name == ""){
         req.query.name = null;
@@ -78,7 +78,7 @@ var editCity = function(req, res){
     });
 }
 
-// Delete Country
+// Delete City
 var deleteCity = function(req, res){
   var response = {};
   City.destroy({
