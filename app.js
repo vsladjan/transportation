@@ -24,4 +24,5 @@ app.listen(port, function(){
 
 
 app.use("/transportation/country", express.static(__dirname + "/public"));
+app.use("/transportation/city", express.static(__dirname + "/public"));
 app.use("/transportation", router);

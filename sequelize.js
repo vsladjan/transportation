@@ -25,5 +25,7 @@ const sequelize = new Sequelize('transportation', config.db_username, config.db_
 
 //Models/tables
 db.country = require('./models/country.js')(sequelize, Sequelize)
+db.city = require('./models/city.js')(sequelize, Sequelize)
+db.city.belongsTo(db.country);
 
 module.exports = db;

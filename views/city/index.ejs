@@ -1,0 +1,54 @@
+<html>
+    <head>
+        <link href="https://stackpath.bootstrapcdn.com/bootswatch/4.3.1/slate/bootstrap.min.css" rel="stylesheet" integrity="sha384-FBPbZPVh+7ks5JJ70RJmIaqyGnvMbeJ5JQfEbW0Ac6ErfvEg9yG56JQJuMNptWsH" crossorigin="anonymous">
+        <link rel="stylesheet" type="text/css" href="css/style.css" />
+        <link href="https://stackpath.bootstrapcdn.com/bootswatch/4.3.1/slate/bootstrap.min.css" rel="stylesheet" integrity="sha384-FBPbZPVh+7ks5JJ70RJmIaqyGnvMbeJ5JQfEbW0Ac6ErfvEg9yG56JQJuMNptWsH" crossorigin="anonymous">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <script src="scripts/scriptCity.js"></script>
+    </head>
+    <body>
+        <%- include('../header') -%>
+        <br/> <br/>
+        <div class="container-fluid">
+            <table class="table table-hover">
+                    <thead>
+                      <tr style="width: 60%">
+                        <th scope="col">Id</th>
+                        <th scope="col">Name</th>
+                        <th scope="col">Population</th>
+                        <th scope="col">Size</th>
+                        <th scope="col">Country</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                     <% cities.city.forEach(function(city){ %>
+                      <tr class="table-secondary" style="width: 60%">
+                            
+                            <td><%=city.Id%></td>
+                            <td><%=city.Name%></td>
+                            <td><%=city.Population%></td>
+                            <td><%=city.Size%></td>
+                            <td><%=city.country.Name%></td>
+                            <td>
+                              <button type="button" class="btn-primary" name="edit" id=<%="edit_" + city.Id%>>Edit</button>
+                              <button type="button" class="btn-primary" name="delete" id=<%="delete_" + city.Id%>>Delete</button>
+                          </td>
+                      </tr>
+                     <% }) %>
+                    </tbody>
+            </table>
+            <button type="button" class="btn btn-primary" id="createCityModButton">Create city</button>
+            <%- include('create') -%>
+            <%- include('edit') -%>
+            <br>
+            <br>
+            <br>
+            <div class="alert alert-dismissible alert-success" id="message">
+              <button type="button" class="close" id="messageClose" data-dismiss="alert">&times;</button>
+              <div id="messageText">
+                  <%=cities.message%>
+              </div>
+            </div>    
+        </div>    
+    </body>
+</html>

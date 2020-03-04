@@ -20,17 +20,25 @@ var getShow = function(req, res){
 }
 
 
-// Send one country in JSON
-var getShowOne = function(req, res){
-    Country.findByPk(req.query.id).then(country => {
-        // Send requested Country to Client
-        res.send(country.dataValues);
-    });
+// Send country in JSON
+var getCountry = function(req, res){
+      var reg = new RegExp("[0-9]+");
+      if (!reg.test(req.query.id)){
+            Country.findAll().then(country => {
+                  // Send countries to Client
+                  res.send(country);    
+            });
+      }else{
+            Country.findByPk(req.query.id).then(country => {
+                  // Send requested Country to Client
+                  res.send(country.dataValues);
+            });
+      }
 }
 
 // Create country
 var createCountry = function(req, res){
-      var reg = new RegExp("[A-Z]{3}")
+      var reg = new RegExp("[A-Z]{3}");
       if (!reg.test(req.query.countryCode) || req.query.name == "" || req.query.continentSelect == ""){
             req.query.countryCode = null;
       }
@@ -73,7 +81,7 @@ var editCountry = function(req, res){
       });
 }
 
-/* Delete Country */
+// Delete Country
 var deleteCountry = function(req, res){
     var response = {};
     Country.destroy({
@@ -96,6 +104,6 @@ var deleteCountry = function(req, res){
 
 module.exports.createCountry = createCountry;
 module.exports.getShow = getShow;
-module.exports.getShowOne = getShowOne;
+module.exports.getCountry = getCountry;
 module.exports.editCountry = editCountry;
 module.exports.deleteCountry = deleteCountry;
