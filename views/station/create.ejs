@@ -1,0 +1,40 @@
+<div class="modal" id="createStationModal">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Create station</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close" id="createStationX">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form method="GET" action="/transportation/station/create" id="createStationForm">
+            <fieldset>
+              <div class="form-group">
+                <label for="name">Name</label>
+                <input type="text" class="form-control" id="name" name="name" placeholder="Enter name">
+              </div>
+              <div class="form-group">
+                <label for="description">Description</label>
+                <input type="text" class="form-control" id="description" name="description"  placeholder="Description">
+              </div>
+              <div class="form-group">
+                <label for="location">Location</label>
+                <input type="text" class="form-control" id="location" name="location"  placeholder="Location">
+              </div>
+              <div class="form-group">
+                <label for="cityareaSelect">City area</label>
+                <select class="form-control" id="cityareaSelect" name="cityareaSelect">
+                </select>
+              </div>
+              </fieldset>
+            </fieldset>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" id="createStationButton">Create</button>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal" id="createStationClose">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>

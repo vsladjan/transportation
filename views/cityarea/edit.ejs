@@ -1,0 +1,43 @@
+<div class="modal" id="editCityareaModal">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Edit city area</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close" id="editCityareaX">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form method="GET" action="/transportation/cityarea/edit" id="editCityareaForm">
+            <fieldset>
+              <div class="form-group">
+                <label for="idEdit">Id</label>
+                <input type="text" readonly class="form-control" id="idEdit" name="id" placeholder="Id">
+              </div>
+              <div class="form-group">
+                <label for="name">Name</label>
+                <input type="text" class="form-control" id="nameEdit" name="name" placeholder="Enter name">
+              </div>
+              <div class="form-group">
+                <label for="size">Size</label>
+                <input type="text" class="form-control" id="sizeEdit" name="size"  placeholder="Size">
+              </div>
+              <div class="form-group">
+                <label for="description">Description</label>
+                <input type="text" class="form-control" id="descriptionEdit" name="description"  placeholder="Description">
+              </div>
+              <div class="form-group">
+                <label for="citySelect">City</label>
+                <select class="form-control" id="citySelectEdit" name="citySelect">
+                </select>
+              </div>
+            </fieldset>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" id="editCityareaButton">Edit</button>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal" id="editCityareaClose">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
