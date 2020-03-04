@@ -33,7 +33,7 @@ $(document).ready(function(){
         $.ajax({
             type: "GET",
             contentType: "application/json",
-            url: "/transportation/country/showOne?id=" + this.id.substr(5),
+            url: "/transportation/country/get?id=" + this.id.substr(5),
             success: function(data){
                 $("#idEdit").val(data.Id);
                 $("#nameEdit").val(data.Name);
