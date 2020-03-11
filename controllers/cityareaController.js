@@ -1,60 +1,60 @@
 var express = require("express");
 const db = require("../sequelize.js");
+var Cityarea = db.cityarea;
 var City = db.city;
-var Country = db.country;
 
 
 var getShow = function(req, res){
     var text = "Message";
-    City.findAll({
+    Cityarea.findAll({
         include: [{
-            model: Country,
+            model: City,
             required: true
         }]
-    }).then(city => {
-        // Send all cities to Client
+    }).then(cityarea => {
+        // Send all citie areas to Client
         if (req.session.message){
             text = req.session.message;
             req.session.message = null;
         }
         var response = {};
-        response.city = city;
+        response.cityarea = cityarea;
         response.message = text;
-        res.render("city", {cities:response});
+        res.render("cityarea", {cityareas:response});
     });
 }
 
-// Send city in JSON
-var getCity = function(req, res){
+// Send cityarea in JSON
+var getCityarea = function(req, res){
     var reg = new RegExp("[0-9]+");
     if (!reg.test(req.query.id)){
-        City.findAll().then(country => {
-                // Send cities to Client
-                res.send(country);    
+        Cityarea.findAll().then(cityarea => {
+                // Send city areas to Client
+                res.send(cityarea);    
         });
     }else{
-        City.findByPk(req.query.id, {
+        Cityarea.findByPk(req.query.id, {
             include: [{
-                model: Country,
+                model: City,
                 required: true
             }]
-        }).then(city => {
-            // Send requested City to Client
-            res.send(city.dataValues);
+        }).then(cityarea => {
+            // Send requested City area to Client
+            res.send(cityarea.dataValues);
         });
     }
 }
 
-// Create city
-var createCity = function(req, res){
+// Create city area
+var createCityarea = function(req, res){
     if (req.query.name == ""){
           req.query.name = null;
     }
-    City.create({
+    Cityarea.create({
           Name: req.query.name,
-          Population: req.query.population,
           Size: req.query.size,
-          CountryId: req.query.countrySelect
+          Description: req.query.description,
+          CityId: req.query.citySelect
     }).then(function(result){
           req.session.message = "Record is created in database.";
           res.redirect("show");
@@ -65,15 +65,15 @@ var createCity = function(req, res){
 }
 
 // Edit City
-var editCity = function(req, res){
+var editCityarea = function(req, res){
     if (req.query.name == ""){
         req.query.name = null;
     }
-    City.update({
+    Cityarea.update({
         Name: req.query.name,
-        Population: req.query.population,
         Size: req.query.size,
-        CountryId: req.query.countrySelect
+        Description: req.query.description,
+        CityId: req.query.citySelect
     },
     {
         where: {Id: req.query.id}
@@ -87,9 +87,9 @@ var editCity = function(req, res){
 }
 
 // Delete City
-var deleteCity = function(req, res){
+var deleteCityarea = function(req, res){
   var response = {};
-  City.destroy({
+  Cityarea.destroy({
         where: {
               Id : req.query.id
         }
@@ -99,7 +99,7 @@ var deleteCity = function(req, res){
         res.send(response);
   }).catch(function(err){
         if (err.name == "SequelizeForeignKeyConstraintError")
-              response.message = "There are City Areas that are from this City, please delete them first!";
+              response.message = "There are Stations that are from this City area, please delete them first!";
         else
               response.message = "Error when deleting data."
         res.send(response);
@@ -107,7 +107,7 @@ var deleteCity = function(req, res){
 }
 
 module.exports.getShow = getShow;
-module.exports.getCity = getCity;
-module.exports.createCity = createCity;
-module.exports.editCity = editCity;
-module.exports.deleteCity = deleteCity;
+module.exports.getCityarea = getCityarea;
+module.exports.createCityarea = createCityarea;
+module.exports.editCityarea = editCityarea;
+module.exports.deleteCityarea = deleteCityarea;

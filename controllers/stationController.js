@@ -1,60 +1,60 @@
 var express = require("express");
 const db = require("../sequelize.js");
-var City = db.city;
-var Country = db.country;
+var Station = db.station;
+var Cityarea = db.cityarea;
 
 
 var getShow = function(req, res){
     var text = "Message";
-    City.findAll({
+    Station.findAll({
         include: [{
-            model: Country,
+            model: Cityarea,
             required: true
         }]
-    }).then(city => {
+    }).then(station => {
         // Send all cities to Client
         if (req.session.message){
             text = req.session.message;
             req.session.message = null;
         }
         var response = {};
-        response.city = city;
+        response.station = station;
         response.message = text;
-        res.render("city", {cities:response});
+        res.render("station", {stations:response});
     });
 }
 
-// Send city in JSON
-var getCity = function(req, res){
+// Send station in JSON
+var getStation = function(req, res){
     var reg = new RegExp("[0-9]+");
     if (!reg.test(req.query.id)){
-        City.findAll().then(country => {
-                // Send cities to Client
-                res.send(country);    
+        Station.findAll().then(station => {
+                // Send stations to Client
+                res.send(station);    
         });
     }else{
-        City.findByPk(req.query.id, {
+        Station.findByPk(req.query.id, {
             include: [{
-                model: Country,
+                model: Cityarea,
                 required: true
             }]
-        }).then(city => {
+        }).then(station => {
             // Send requested City to Client
-            res.send(city.dataValues);
+            res.send(station.dataValues);
         });
     }
 }
 
-// Create city
-var createCity = function(req, res){
+// Create station
+var createStation = function(req, res){
     if (req.query.name == ""){
           req.query.name = null;
     }
-    City.create({
+    Station.create({
           Name: req.query.name,
-          Population: req.query.population,
-          Size: req.query.size,
-          CountryId: req.query.countrySelect
+          Description: req.query.description,
+          Location: req.query.location,
+          CityAreaId: req.query.cityareaSelect
     }).then(function(result){
           req.session.message = "Record is created in database.";
           res.redirect("show");
@@ -64,16 +64,16 @@ var createCity = function(req, res){
     });
 }
 
-// Edit City
-var editCity = function(req, res){
+// Edit station
+var editStation = function(req, res){
     if (req.query.name == ""){
         req.query.name = null;
     }
-    City.update({
+    Station.update({
         Name: req.query.name,
-        Population: req.query.population,
-        Size: req.query.size,
-        CountryId: req.query.countrySelect
+        Description: req.query.description,
+        Location: req.query.location,
+        CityAreaId: req.query.cityareaSelect
     },
     {
         where: {Id: req.query.id}
@@ -86,10 +86,10 @@ var editCity = function(req, res){
     });
 }
 
-// Delete City
-var deleteCity = function(req, res){
+// Delete station
+var deleteStation = function(req, res){
   var response = {};
-  City.destroy({
+  Station.destroy({
         where: {
               Id : req.query.id
         }
@@ -107,7 +107,7 @@ var deleteCity = function(req, res){
 }
 
 module.exports.getShow = getShow;
-module.exports.getCity = getCity;
-module.exports.createCity = createCity;
-module.exports.editCity = editCity;
-module.exports.deleteCity = deleteCity;
+module.exports.getStation = getStation;
+module.exports.createStation = createStation;
+module.exports.editStation = editStation;
+module.exports.deleteStation = deleteStation;

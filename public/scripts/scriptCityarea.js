@@ -11,42 +11,42 @@ $(document).ready(function(){
         
     }
 
-    $("#createCityModButton").click(function(){
-        $("#createCityModal").show();
+    $("#createCityareaModButton").click(function(){
+        $("#createCityareaModal").show();
         $.ajax({
             type: "GET",
             contentType: "application/json",
-            url: "/transportation/country/get",
+            url: "/transportation/city/get",
             success: function(data){
                 $.each(data, function(i, value) {
-                    $('#countrySelect').append($('<option>').text(value.Name).attr('value', value.Id));
+                    $('#citySelect').append($('<option>').text(value.Name).attr('value', value.Id));
                 });
             }
         });
     });
 
-    $("#createCityX").click(function(){
-        $("#createCityModal").hide();
+    $("#createCityareaX").click(function(){
+        $("#createCityareaModal").hide();
     });
 
-    $("#createCityClose").click(function(){
-        $("#createCityModal").hide();
+    $("#createCityareaClose").click(function(){
+        $("#createCityareaModal").hide();
     });
 
-    $("#createCityButton").click(function(){
-        $("#createCityForm").submit();
+    $("#createCityareaButton").click(function(){
+        $("#createCityareaForm").submit();
     });
 
     $("button[name='edit']").click(function(){
-        $("#editCityModal").show();
+        $("#editCityareaModal").show();
 
         $.ajax({
             type: "GET",
             contentType: "application/json",
-            url: "/transportation/country/get",
+            url: "/transportation/city/get",
             success: function(data){
                 $.each(data, function(i, value) {
-                    $('#countrySelectEdit').append($('<option>').text(value.Name).attr('value', value.Id));
+                    $('#citySelectEdit').append($('<option>').text(value.Name).attr('value', value.Id));
                 });
             }
         });
@@ -54,13 +54,13 @@ $(document).ready(function(){
         $.ajax({
             type: "GET",
             contentType: "application/json",
-            url: "/transportation/city/get?id=" + this.id.substr(5),
+            url: "/transportation/cityarea/get?id=" + this.id.substr(5),
             success: function(data){
                 $("#idEdit").val(data.Id);
                 $("#nameEdit").val(data.Name);
                 $("#sizeEdit").val(data.Size);
-                $("#populationEdit").val(data.Population);
-                $("#countrySelectEdit").val(data.CountryId).change();
+                $("#descriptionEdit").val(data.Description);
+                $("#citySelectEdit").val(data.CityId).change();
             }
         });
 
@@ -70,7 +70,7 @@ $(document).ready(function(){
         $.ajax({
             type: "GET",
             contentType: "application/json",
-            url: "/transportation/city/delete?id=" + this.id.substr(7),
+            url: "/transportation/cityarea/delete?id=" + this.id.substr(7),
             success: function(data){
                 if (data.message == "Ok"){
                     $("#delete_" + data.id).parent().parent().remove();
@@ -86,16 +86,16 @@ $(document).ready(function(){
         });
     });
 
-    $("#editCityClose").click(function(){
-        $("#editCityModal").hide();
+    $("#editCityareaClose").click(function(){
+        $("#editCityareaModal").hide();
     });
     
-    $("#editCityX").click(function(){
-        $("#editCityModal").hide();
+    $("#editCityareaX").click(function(){
+        $("#editCityareaModal").hide();
     });
 
-    $("#editCityButton").click(function(){
-        $("#editCityForm").submit();
+    $("#editCityareaButton").click(function(){
+        $("#editCityareaForm").submit();
     });
 
     $("#messageClose").click(function(){
