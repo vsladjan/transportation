@@ -1,10 +1,11 @@
 /* jshint indent: 2 */
 
 module.exports = function(sequelize, DataTypes) {
-  return sequelize.define('transoprtationtype', {
+  return sequelize.define('transportationtype', {
     Id: {
       type: DataTypes.INTEGER(11),
       allowNull: false,
+      autoIncrement: true,
       primaryKey: true
     },
     Name: {
@@ -12,6 +13,6 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: false
     }
   }, {
-    tableName: 'transoprtationtype'
+    tableName: 'transportationtype'
   });
 };

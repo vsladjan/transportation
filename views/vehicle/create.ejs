@@ -1,0 +1,44 @@
+<div class="modal" id="createVehicleModal">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Create vehicle</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close" id="createVehicleX">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form method="GET" action="/transportation/vehicle/create" id="createVehicleForm">
+            <fieldset>
+              <div class="form-group">
+                <label for="name">Name</label>
+                <input type="text" class="form-control" id="name" name="name" placeholder="Enter name">
+              </div>
+              <div class="form-group">
+                <label for="description">Description</label>
+                <input type="text" class="form-control" id="description" name="description"  placeholder="Description">
+              </div>
+              <div class="form-group">
+                <label for="color">Color</label>
+                <input type="text" class="form-control" id="color" name="color"  placeholder="Color">
+              </div>
+              <div class="form-group">
+                <label for="productionYear">Production year</label>
+                <input type="text" class="form-control" id="productionYear" name="productionYear"  placeholder="ProductionYear">
+              </div>
+              <div class="form-group">
+                <label for="typeSelect">Type</label>
+                <select class="form-control" id="typeSelect" name="typeSelect">
+                </select>
+              </div>
+              </fieldset>
+            </fieldset>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" id="createVehicleButton">Create</button>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal" id="createVehicleClose">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>

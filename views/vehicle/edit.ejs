@@ -1,0 +1,47 @@
+<div class="modal" id="editVehicleModal">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Edit vehicle</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close" id="editVehicleX">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form method="GET" action="/transportation/vehicle/edit" id="editVehicleForm">
+            <fieldset>
+              <div class="form-group">
+                <label for="idEdit">Id</label>
+                <input type="text" readonly class="form-control" id="idEdit" name="id" placeholder="Id">
+              </div>
+              <div class="form-group">
+                <label for="name">Name</label>
+                <input type="text" class="form-control" id="nameEdit" name="name" placeholder="Enter name">
+              </div>
+              <div class="form-group">
+                <label for="description">Description</label>
+                <input type="text" class="form-control" id="descriptionEdit" name="description"  placeholder="Description">
+              </div>
+              <div class="form-group">
+                <label for="color">Color</label>
+                <input type="text" class="form-control" id="colorEdit" name="color"  placeholder="Color">
+              </div>
+              <div class="form-group">
+                <label for="productionYear">Production year</label>
+                <input type="text" class="form-control" id="productionYearEdit" name="productionYear"  placeholder="ProductionYear">
+              </div>
+              <div class="form-group">
+                <label for="typeSelect">Type</label>
+                <select class="form-control" id="typeSelectEdit" name="typeSelect">
+                </select>
+              </div>
+            </fieldset>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" id="editVehicleButton">Edit</button>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal" id="editVehicleClose">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
