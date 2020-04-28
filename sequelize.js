@@ -28,8 +28,11 @@ db.country = require('./models/country.js')(sequelize, Sequelize)
 db.city = require('./models/city.js')(sequelize, Sequelize)
 db.cityarea = require('./models/cityarea.js')(sequelize, Sequelize)
 db.station = require('./models/station.js')(sequelize, Sequelize)
+db.transportationtype = require('./models/transportationtype.js')(sequelize, Sequelize)
+db.transportationvehicle = require('./models/transportationvehicle.js')(sequelize, Sequelize)
 db.city.belongsTo(db.country);
 db.cityarea.belongsTo(db.city);
 db.station.belongsTo(db.cityarea);
+db.transportationvehicle.belongsTo(db.transportationtype);
 
 module.exports = db;

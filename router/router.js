@@ -4,6 +4,8 @@ var cityController = require("../controllers/cityController.js");
 var countryController = require("../controllers/countryController.js");
 var cityareaController = require("../controllers/cityareaController.js");
 var stationController = require("../controllers/stationController.js");
+var transportationtypeController = require("../controllers/transportationtypeController.js");
+var transportationvehicleController = require("../controllers/transportationvehicleController.js");
 
 
 //City router handler
@@ -103,6 +105,56 @@ router.get("/station/edit/", function(req, res){
 // Station delete router handler
 router.get("/station/delete/", function(req, res){
     stationController.deleteStation(req, res);
+ });
+
+// Transportation type router handler
+router.get("/type/show/", function(req, res){
+    transportationtypeController.getShow(req, res);
+});
+
+// Transportation type get json handler
+router.get("/type/get/", function(req, res){
+    transportationtypeController.getType(req, res);
+});
+
+// Transportation type create router handler
+router.get("/type/create/", function(req, res){
+    transportationtypeController.createType(req, res);
+ });
+
+// Transportation type edit router handler
+router.get("/type/edit/", function(req, res){
+    transportationtypeController.editType(req, res);
+ });
+ 
+// Transportation type delete router handler
+router.get("/type/delete/", function(req, res){
+    transportationtypeController.deleteType(req, res);
+ });
+
+// Transportation vehicle router handler
+router.get("/vehicle/show/", function(req, res){
+    transportationvehicleController.getShow(req, res);
+});
+
+// Transportation vehicle get json handler
+router.get("/vehicle/get/", function(req, res){
+    transportationvehicleController.getVehicle(req, res);
+});
+
+// Transportation vehicle create router handler
+router.get("/vehicle/create/", function(req, res){
+    transportationvehicleController.createVehicle(req, res);
+ });
+
+// Transportation vehicle edit router handler
+router.get("/vehicle/edit/", function(req, res){
+    transportationvehicleController.editVehicle(req, res);
+ });
+ 
+// Transportation vehicle delete router handler
+router.get("/vehicle/delete/", function(req, res){
+    transportationvehicleController.deleteVehicle(req, res);
  });
 
 

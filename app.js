@@ -27,4 +27,6 @@ app.use("/transportation/country", express.static(__dirname + "/public"));
 app.use("/transportation/city", express.static(__dirname + "/public"));
 app.use("/transportation/cityarea", express.static(__dirname + "/public"));
 app.use("/transportation/station", express.static(__dirname + "/public"));
+app.use("/transportation/type", express.static(__dirname + "/public"));
+app.use("/transportation/vehicle", express.static(__dirname + "/public"));
 app.use("/transportation", router);

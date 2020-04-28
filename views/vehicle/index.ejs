@@ -1,0 +1,56 @@
+<html>
+    <head>
+        <link href="https://stackpath.bootstrapcdn.com/bootswatch/4.3.1/slate/bootstrap.min.css" rel="stylesheet" integrity="sha384-FBPbZPVh+7ks5JJ70RJmIaqyGnvMbeJ5JQfEbW0Ac6ErfvEg9yG56JQJuMNptWsH" crossorigin="anonymous">
+        <link rel="stylesheet" type="text/css" href="css/style.css" />
+        <link href="https://stackpath.bootstrapcdn.com/bootswatch/4.3.1/slate/bootstrap.min.css" rel="stylesheet" integrity="sha384-FBPbZPVh+7ks5JJ70RJmIaqyGnvMbeJ5JQfEbW0Ac6ErfvEg9yG56JQJuMNptWsH" crossorigin="anonymous">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <script src="scripts/scriptVehicle.js"></script>
+    </head>
+    <body>
+        <%- include('../header') -%>
+        <br/> <br/>
+        <div class="container-fluid">
+            <table class="table table-hover">
+                    <thead>
+                      <tr style="width: 60%">
+                        <th scope="col">Id</th>
+                        <th scope="col">Name</th>
+                        <th scope="col">Description</th>
+                        <th scope="col">Color</th>
+                        <th scope="col">Production year</th>
+                        <th scope="col">Type</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                     <% vehicles.vehicle.forEach(function(vehicle){ %>
+                      <tr class="table-secondary" style="width: 60%">
+                            
+                            <td><%=vehicle.Id%></td>
+                            <td><%=vehicle.Name%></td>
+                            <td><%=vehicle.Description%></td>
+                            <td><%=vehicle.Color%></td>
+                            <td><%=vehicle.ProductionYear%></td>
+                            <td><%=vehicle.transportationtype.Name%></td>
+                            <td>
+                              <button type="button" class="btn-primary" name="edit" id=<%="edit_" + vehicle.Id%>>Edit</button>
+                              <button type="button" class="btn-primary" name="delete" id=<%="delete_" + vehicle.Id%>>Delete</button>
+                          </td>
+                      </tr>
+                     <% }) %>
+                    </tbody>
+            </table>
+            <button type="button" class="btn btn-primary" id="createVehicleModButton">Create vehicle</button>
+            <%- include('create') -%>
+            <%- include('edit') -%>
+            <br>
+            <br>
+            <br>
+            <div class="alert alert-dismissible alert-success" id="message">
+              <button type="button" class="close" id="messageClose" data-dismiss="alert">&times;</button>
+              <div id="messageText">
+                  <%=vehicles.message%>
+              </div>
+            </div>    
+        </div>    
+    </body>
+</html>

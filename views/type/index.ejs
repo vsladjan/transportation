@@ -1,0 +1,47 @@
+<html>
+    <head>
+        <link href="https://stackpath.bootstrapcdn.com/bootswatch/4.3.1/slate/bootstrap.min.css" rel="stylesheet" integrity="sha384-FBPbZPVh+7ks5JJ70RJmIaqyGnvMbeJ5JQfEbW0Ac6ErfvEg9yG56JQJuMNptWsH" crossorigin="anonymous">
+        <link rel="stylesheet" type="text/css" href="css/style.css" />
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <script src="scripts/scriptType.js"></script>
+        <link rel="shortcut icon" href="#" />
+    </head>
+    <body>
+        <%- include('../header') -%>
+            <div class="container-fluid">
+                <table class="table table-hover">
+                        <thead>
+                        <tr style="width: 60%">
+                            <th scope="col">Id</th>
+                            <th scope="col">Name</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <% types.type.forEach(function(type){ %>
+                        <tr class="table-secondary" style="width: 60%">
+                                
+                                <td><%=type.Id%></td>
+                                <td><%=type.Name%></td>
+                                <td>
+                                    <button type="button" class="btn-primary" name="edit" id=<%="edit_" + type.Id%>>Edit</button>
+                                    <button type="button" class="btn-primary" name="delete" id=<%="delete_" + type.Id%>>Delete</button>
+                                </td>
+                        </tr>
+                        <% }) %>
+                        </tbody>
+                </table>
+                <button type="button" class="btn btn-primary" id="createTypeModButton">Create transportation type</button>
+            </div>
+            <%- include('create') -%>
+            <%- include('edit') -%>
+            <br>
+            <br>
+            <br>
+            <div class="alert alert-dismissible alert-success" id="message">
+              <button type="button" class="close" id="messageClose" data-dismiss="alert">&times;</button>
+              <div id="messageText">
+                  <%=types.message%>
+              </div>
+            </div>        
+    </body>
+</html>

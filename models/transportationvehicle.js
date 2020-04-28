@@ -5,6 +5,7 @@ module.exports = function(sequelize, DataTypes) {
     Id: {
       type: DataTypes.INTEGER(11),
       allowNull: false,
+      autoIncrement: true,
       primaryKey: true
     },
     Name: {
@@ -23,11 +24,11 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.INTEGER(11),
       allowNull: true
     },
-    TransoprtationTypeId: {
+    TransportationTypeId: {
       type: DataTypes.INTEGER(11),
       allowNull: false,
       references: {
-        model: 'transoprtationtype',
+        model: 'transportationtype',
         key: 'Id'
       }
     }

@@ -1,0 +1,30 @@
+<div class="modal" id="editTypeModal">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Edit type</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close" id="editTypeX">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form method="GET" action="/transportation/type/edit" id="editTypeForm">
+            <fieldset>
+              <div class="form-group">
+                    <label for="idEdit">Id</label>
+                    <input type="text" readonly class="form-control" id="idEdit" name="id" placeholder="Id">
+              </div>
+              <div class="form-group">
+                <label for="nameEdit">Name</label>
+                <input type="text" class="form-control" id="nameEdit" name="name" placeholder="Enter name">
+              </div>
+            </fieldset>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" id="editTypeButton">Edit</button>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal" id="editTypeClose">Close</button>
+        </div>
+      </div>
+    </div>
+</div>
