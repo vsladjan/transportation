@@ -1,0 +1,50 @@
+<html>
+    <head>
+        <link href="https://stackpath.bootstrapcdn.com/bootswatch/4.3.1/slate/bootstrap.min.css" rel="stylesheet" integrity="sha384-FBPbZPVh+7ks5JJ70RJmIaqyGnvMbeJ5JQfEbW0Ac6ErfvEg9yG56JQJuMNptWsH" crossorigin="anonymous">
+        <link rel="stylesheet" type="text/css" href="css/style.css" />
+        <link href="https://stackpath.bootstrapcdn.com/bootswatch/4.3.1/slate/bootstrap.min.css" rel="stylesheet" integrity="sha384-FBPbZPVh+7ks5JJ70RJmIaqyGnvMbeJ5JQfEbW0Ac6ErfvEg9yG56JQJuMNptWsH" crossorigin="anonymous">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <script src="scripts/scriptRoute.js"></script>
+    </head>
+    <body>
+        <%- include('../header') -%>
+        <br/> <br/>
+        <div class="container-fluid">
+            <table class="table table-hover">
+                    <thead>
+                      <tr style="width: 60%">
+                        <th scope="col">Id</th>
+                        <th scope="col">Name</th>
+                        <th scope="col">Description</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                     <% routes.route.forEach(function(route){ %>
+                      <tr class="table-secondary" style="width: 60%">
+                            
+                            <td><%=route.Id%></td>
+                            <td><%=route.Name%></td>
+                            <td><%=route.Description%></td>
+                            <td>
+                              <button type="button" class="btn-primary" name="edit" id=<%="edit_" + route.Id%>>Edit</button>
+                              <button type="button" class="btn-primary" name="delete" id=<%="delete_" + route.Id%>>Delete</button>
+                          </td>
+                      </tr>
+                     <% }) %>
+                    </tbody>
+            </table>
+            <button type="button" class="btn btn-primary" id="createRouteModButton">Create route</button>
+            <%- include('create') -%>
+            <%- include('edit') -%>
+            <br>
+            <br>
+            <br>
+            <div class="alert alert-dismissible alert-success" id="message">
+              <button type="button" class="close" id="messageClose" data-dismiss="alert">&times;</button>
+              <div id="messageText">
+                  <%=routes.message%>
+              </div>
+            </div>    
+        </div>    
+    </body>
+</html>

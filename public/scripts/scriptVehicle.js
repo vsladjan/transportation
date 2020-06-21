@@ -60,7 +60,7 @@ $(document).ready(function(){
                 $("#nameEdit").val(data.Name);
                 $("#descriptionEdit").val(data.Description);
                 $("#colorEdit").val(data.Color);
-                $("#productionEdit").val(data.ProductionYear);
+                $("#productionYearEdit").val(data.ProductionYear);
                 $("#typeSelectEdit").val(data.TransportationTypeId).change();
             }
         });
