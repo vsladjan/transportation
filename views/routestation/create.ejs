@@ -1,0 +1,45 @@
+<div class="modal" id="createRoutestationModal">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Create routestation</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close" id="createRoutestationX">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form method="GET" action="/transportation/routestation/create" id="createRoutestationForm">
+            <fieldset>
+              <div class="form-group">
+                <label for="routeSelect">Route</label>
+                <select class="form-control" id="routeSelect" name="routeSelect">
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="stationSelect">Station</label>
+                <select class="form-control" id="stationSelect" name="stationSelect">
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="vehicleSelect">Vehicle</label>
+                <select class="form-control" id="vehicleSelect" name="vehicleSelect">
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="time">Time</label>
+                <input type="text" class="form-control" id="time" name="time"  placeholder="Time">
+              </div>
+              <div class="form-group">
+                <label for="type">Type</label>
+                <input type="text" class="form-control" id="type" name="type"  placeholder="Type">
+              </div>
+            </fieldset>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" id="createRoutestationButton">Create</button>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal" id="createRoutestationClose">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>

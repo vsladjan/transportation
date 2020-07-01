@@ -7,6 +7,7 @@ var stationController = require("../controllers/stationController.js");
 var transportationtypeController = require("../controllers/transportationtypeController.js");
 var transportationvehicleController = require("../controllers/transportationvehicleController.js");
 var routeController = require("../controllers/routeController.js");
+var routestationController = require("../controllers/routestationController.js");
 
 
 //City router handler
@@ -181,6 +182,31 @@ router.get("/route/edit/", function(req, res){
  // Route delete router handler
 router.get("/route/delete/", function(req, res){
     routeController.deleteRoute(req, res);
+ });
+
+ // Routestation router handler
+router.get("/routestation/show/", function(req, res){
+    routestationController.getShow(req, res);
+});
+
+// Routestation get json handler
+router.get("/routestation/get/", function(req, res){
+    routestationController.getRoutestation(req, res);
+});
+
+// Routestation create router handler
+router.get("/routestation/create/", function(req, res){
+    routestationController.createRoutestation(req, res);
+ });
+ 
+// Routestation edit router handler
+router.get("/routestation/edit/", function(req, res){
+    routestationController.editRoutestation(req, res);
+ });
+
+ // Routestation delete router handler
+router.get("/routestation/delete/", function(req, res){
+    routestationController.deleteRoutestation(req, res);
  });
 
 
