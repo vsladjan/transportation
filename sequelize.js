@@ -31,9 +31,16 @@ db.station = require('./models/station.js')(sequelize, Sequelize)
 db.transportationtype = require('./models/transportationtype.js')(sequelize, Sequelize)
 db.transportationvehicle = require('./models/transportationvehicle.js')(sequelize, Sequelize)
 db.route = require('./models/route.js')(sequelize, Sequelize)
+db.routestation = require('./models/routestation.js')(sequelize, Sequelize)
 db.city.belongsTo(db.country);
 db.cityarea.belongsTo(db.city);
 db.station.belongsTo(db.cityarea);
 db.transportationvehicle.belongsTo(db.transportationtype);
+db.routestation.belongsTo(db.station);
+db.routestation.belongsTo(db.route);
+db.routestation.belongsTo(db.transportationvehicle);
+db.station.belongsToMany(db.routestation, {through: 'Stationroutes', foreignKey: 'StationId', as: 'stations'});
+db.route.belongsToMany(db.routestation, {through: 'Stationroutes', foreignKey: 'RouteId', as: 'routes'});
+db.transportationvehicle.belongsToMany(db.routestation, {through: 'Stationroutes', foreignKey: 'TransportationVehicleId', as: 'vehicles'});
 
 module.exports = db;

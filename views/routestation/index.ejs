@@ -1,0 +1,54 @@
+<html>
+    <head>
+        <link href="https://stackpath.bootstrapcdn.com/bootswatch/4.3.1/slate/bootstrap.min.css" rel="stylesheet" integrity="sha384-FBPbZPVh+7ks5JJ70RJmIaqyGnvMbeJ5JQfEbW0Ac6ErfvEg9yG56JQJuMNptWsH" crossorigin="anonymous">
+        <link rel="stylesheet" type="text/css" href="css/style.css" />
+        <link href="https://stackpath.bootstrapcdn.com/bootswatch/4.3.1/slate/bootstrap.min.css" rel="stylesheet" integrity="sha384-FBPbZPVh+7ks5JJ70RJmIaqyGnvMbeJ5JQfEbW0Ac6ErfvEg9yG56JQJuMNptWsH" crossorigin="anonymous">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <script src="scripts/scriptRoutestation.js"></script>
+    </head>
+    <body>
+        <%- include('../header') -%>
+        <br/> <br/>
+        <div class="container-fluid">
+            <table class="table table-hover">
+                    <thead>
+                      <tr style="width: 60%">
+                        <th scope="col">Route</th>
+                        <th scope="col">Station</th>
+                        <th scope="col">Vehicle</th>
+                        <th scope="col">Time</th>
+                        <th scope="col">Type</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                     <% routestations.routestation.forEach(function(routestation){ %>
+                      <tr class="table-secondary" style="width: 60%">
+                            <td name=<%="rs_" + routestation.RouteId%>><%=routestation.route.Name%></td>
+                            <td name=<%="rs_" + routestation.StationId%>><%=routestation.station.Name%></td>
+                            <td name=<%="rs_" + routestation.TransportationVehicleId%>><%=routestation.transportationvehicle.Name%></td>
+                            <td name=<%=routestation.Time%>><%=routestation.Time%></td>
+                            <td><%=routestation.Type%></td>
+                            <td>
+                              <button type="button" class="btn-primary" name="edit" >Edit</button>
+                              <button type="button" class="btn-primary" name="delete">
+                               Delete</button>
+                          </td>
+                      </tr>
+                     <% }) %>
+                    </tbody>
+            </table>
+            <button type="button" class="btn btn-primary" id="createRoutestationModButton">Create routestation</button>
+            <%- include('create') -%>
+            <%- include('edit') -%>
+            <br>
+            <br>
+            <br>
+            <div class="alert alert-dismissible alert-success" id="message">
+              <button type="button" class="close" id="messageClose" data-dismiss="alert">&times;</button>
+              <div id="messageText">
+                  <%=routestations.message%>
+              </div>
+            </div>    
+        </div>    
+    </body>
+</html>
