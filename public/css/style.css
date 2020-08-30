@@ -15,3 +15,7 @@ input:read-only {
 #message{
     display: none;
 }
+
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+    color: white !important;
+}

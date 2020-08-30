@@ -79,5 +79,10 @@ $(document).ready(function(){
     $("#messageClose").click(function(){
         $("#message").hide();
     });
-
+     
+    var table = $('#data').DataTable();         
+    // Event listener to the two range filtering inputs to redraw on input
+    $('#min, #max').keyup( function() {
+        table.draw();
+    } );
 });

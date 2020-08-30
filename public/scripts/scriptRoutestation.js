@@ -185,7 +185,6 @@ $(document).ready(function(){
     });
 
     $("#editRoutestationButton").click(function(){
-        setCookie('kolacc', 'pita', 1);
         var routeId = getCookie('routeId');
         var stationId = getCookie('stationId');
         var vehicleId = getCookie('vehicleId');
@@ -213,10 +212,13 @@ $(document).ready(function(){
                 var msg = data.message;
                 if (msg.includes("Error"))
                     $('#message').css('background-color', 'red');
-                else
+                else{
                     $('#message').css('background-color', 'green');
+                }
+                $("#message").text(msg);
                 $("#message").show();
                 $("#editRoutestationModal").hide();
+                location.reload();
             }
         });
         //$("#editRoutestationForm").submit();
@@ -225,5 +227,11 @@ $(document).ready(function(){
     $("#messageClose").click(function(){
         $("#message").hide();
     });
+
+    var table = $('#data').DataTable();         
+    // Event listener to the two range filtering inputs to redraw on input
+    $('#min, #max').keyup( function() {
+        table.draw();
+    } );
 
 });
