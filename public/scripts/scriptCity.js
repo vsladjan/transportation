@@ -11,6 +11,20 @@ $(document).ready(function(){
         
     }
 
+    /* Handling of which ORM will be used */
+    var ormSelected = getCookie("orm");
+    if (ormSelected == ""){
+        ormSelected = "Sequelize";
+        setCookie("orm", ormSelected, 1);
+    }
+    $("#ormSelect").val(ormSelected).change();
+
+    $('#ormSelect').on('change', function() {
+        ormSelected = $("#ormSelect").val();
+        setCookie("orm", ormSelected, 1);
+    });
+
+    /* Create city click */ 
     $("#createCityModButton").click(function(){
         $("#createCityModal").show();
         $.ajax({
@@ -39,7 +53,7 @@ $(document).ready(function(){
 
     $("button[name='edit']").click(function(){
         $("#editCityModal").show();
-
+        var editId = this.id.substr(5);
         $.ajax({
             type: "GET",
             contentType: "application/json",
@@ -48,19 +62,18 @@ $(document).ready(function(){
                 $.each(data, function(i, value) {
                     $('#countrySelectEdit').append($('<option>').text(value.Name).attr('value', value.Id));
                 });
-            }
-        });
-
-        $.ajax({
-            type: "GET",
-            contentType: "application/json",
-            url: "/transportation/city/get?id=" + this.id.substr(5),
-            success: function(data){
-                $("#idEdit").val(data.Id);
-                $("#nameEdit").val(data.Name);
-                $("#sizeEdit").val(data.Size);
-                $("#populationEdit").val(data.Population);
-                $("#countrySelectEdit").val(data.CountryId).change();
+                $.ajax({
+                    type: "GET",
+                    contentType: "application/json",
+                    url: "/transportation/city/get?id=" + editId,
+                    success: function(data){
+                        $("#idEdit").val(data.Id);
+                        $("#nameEdit").val(data.Name);
+                        $("#sizeEdit").val(data.Size);
+                        $("#populationEdit").val(data.Population);
+                        $("#countrySelectEdit").val(data.CountryId).change();
+                    }
+                });
             }
         });
 

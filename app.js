@@ -1,5 +1,7 @@
+var cookieParser = require('cookie-parser');
 var express = require("express");
 const session = require('express-session');
+var bookshelfDb = require("./bookshelf.js").createConection();
 var router = require("./router/router.js");
 var db = require("./sequelize.js");
 const bodyParser = require("body-parser");
@@ -10,12 +12,14 @@ var port = 3000;
 app.use(session({secret: 'ssshhhhh',saveUninitialized: true,resave: true}));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
+app.use(cookieParser());
 
 app.set("view engine", "ejs");
 
 db.sequelize.sync().then(() => {
     console.log('Sync db');
 });
+
 
 app.listen(port, function(){
     console.log("Server started on port " + port + "...");

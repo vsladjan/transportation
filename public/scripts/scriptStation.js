@@ -11,6 +11,19 @@ $(document).ready(function(){
         
     }
 
+    /* Handling of which ORM will be used */
+    var ormSelected = getCookie("orm");
+    if (ormSelected == ""){
+        ormSelected = "Sequelize";
+        setCookie("orm", ormSelected, 1);
+    }
+    $("#ormSelect").val(ormSelected).change();
+
+    $('#ormSelect').on('change', function() {
+        ormSelected = $("#ormSelect").val();
+        setCookie("orm", ormSelected, 1);
+    });
+
     $("#createStationModButton").click(function(){
         $("#createStationModal").show();
         $.ajax({
@@ -39,6 +52,7 @@ $(document).ready(function(){
 
     $("button[name='edit']").click(function(){
         $("#editStationModal").show();
+        var editId = this.id.substr(5);
 
         $.ajax({
             type: "GET",
@@ -48,21 +62,22 @@ $(document).ready(function(){
                 $.each(data, function(i, value) {
                     $('#cityareaSelectEdit').append($('<option>').text(value.Name).attr('value', value.Id));
                 });
+                $.ajax({
+                    type: "GET",
+                    contentType: "application/json",
+                    url: "/transportation/station/get?id=" + editId,
+                    success: function(data){
+                        $("#idEdit").val(data.Id);
+                        $("#nameEdit").val(data.Name);
+                        $("#descriptionEdit").val(data.Description);
+                        $("#locationEdit").val(data.Location);
+                        $("#cityareaSelectEdit").val(data.CityAreaId).change();
+                    }
+                });
             }
         });
 
-        $.ajax({
-            type: "GET",
-            contentType: "application/json",
-            url: "/transportation/station/get?id=" + this.id.substr(5),
-            success: function(data){
-                $("#idEdit").val(data.Id);
-                $("#nameEdit").val(data.Name);
-                $("#descriptionEdit").val(data.Description);
-                $("#locationEdit").val(data.Location);
-                $("#cityareaSelectEdit").val(data.CityAreaId).change();
-            }
-        });
+        
 
     });
 

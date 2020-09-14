@@ -11,6 +11,19 @@ $(document).ready(function(){
         
     }
 
+    /* Handling of which ORM will be used */
+    var ormSelected = getCookie("orm");
+    if (ormSelected == ""){
+        ormSelected = "Sequelize";
+        setCookie("orm", ormSelected, 1);
+    }
+    $("#ormSelect").val(ormSelected).change();
+
+    $('#ormSelect').on('change', function() {
+        ormSelected = $("#ormSelect").val();
+        setCookie("orm", ormSelected, 1);
+    });
+
     $("#createRouteModButton").click(function(){
         $("#createRouteModal").show();
     });
