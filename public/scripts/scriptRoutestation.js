@@ -77,6 +77,7 @@ $(document).ready(function(){
 
         $.ajax({
             type: "GET",
+            async: false,
             contentType: "application/json",
             url: "/transportation/route/get",
             success: function(data){
@@ -87,6 +88,7 @@ $(document).ready(function(){
         });
         $.ajax({
             type: "GET",
+            async: false,
             contentType: "applicaiton/json",
             url: "/transportation/station/get",
             success: function(data){
@@ -97,6 +99,7 @@ $(document).ready(function(){
         });
         $.ajax({
             type: "GET",
+            async: false,
             contentType: "applicaiton/json",
             url: "/transportation/vehicle/get",
             success: function(data){
@@ -209,7 +212,11 @@ $(document).ready(function(){
                 $("#message").text(msg);
                 $("#message").show();
                 $("#editRoutestationModal").hide();
-                location.reload();
+                setTimeout(
+                    function() 
+                    {
+                        location.reload();
+                    }, 1000);
             }
         });
         //$("#editRoutestationForm").submit();

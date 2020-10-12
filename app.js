@@ -5,6 +5,11 @@ var bookshelfDb = require("./bookshelf.js").createConection();
 var router = require("./router/router.js");
 var db = require("./sequelize.js");
 const bodyParser = require("body-parser");
+require ("reflect-metadata");
+//import pkg from "typeorm";
+pkg = require('typeorm');
+const {createConnection} = pkg;
+var typeormCity = require ("./models/typeorm/entities/City.js").City;
 
 var app = express();
 var port = 3000;
@@ -15,6 +20,8 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
 
 app.set("view engine", "ejs");
+
+createConnection();
 
 db.sequelize.sync().then(() => {
     console.log('Sync db');

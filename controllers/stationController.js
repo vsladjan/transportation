@@ -1,17 +1,33 @@
 var express = require("express");
 var cookie = require("../helper/cookie.js");
+var service = require("../helper/service.js");
 const db = require("../sequelize.js");
 const dbBookshelf = require("../models/bookshelf/model.js");
+const typeorm = require('typeorm');
 var Station = db.station;
 var Cityarea = db.cityarea;
 var BookshelfStation = dbBookshelf.Station;
+var TypeORMStation = require("../models/typeorm/entities/Station.js").Station;
 
 
 var getShow = function(req, res){
     var text = "Message";
     var orm = cookie.getOrm(req, res);
     
-    if (orm == 'Bookshelf'){
+    if (orm == 'TypeORM'){
+        console.log("TypeORM");
+        const stationRepository = typeorm.getConnection().getRepository(TypeORMStation);
+        stationRepository.find({relations: ["cityarea"]}).then(station => {
+              if (req.session.message){
+                  text = req.session.message;
+                  req.session.message = null;
+              }
+              var response = {};
+              response.station = service.capitalizeKeys(station);
+              response.message = text;
+              res.render("station", {stations:response});
+        });
+    }else if (orm == 'Bookshelf'){
         BookshelfStation.fetchAll({withRelated:['cityarea']}).then(station => {
             // Send all stations to Client
             if (req.session.message){
@@ -19,7 +35,7 @@ var getShow = function(req, res){
                 req.session.message = null;
             }
             var response = {};
-            response.station = station.toJSON();
+            response.station = service.capitalizeKeys(station.toJSON());
             response.message = text;
             res.render("station", {stations:response});
         });
@@ -28,7 +44,9 @@ var getShow = function(req, res){
             include: [{
                 model: Cityarea,
                 required: true
-            }]
+            }],
+            raw: true,
+            nest: true 
         }).then(station => {
             // Send all stations to Client
             if (req.session.message){
@@ -36,7 +54,7 @@ var getShow = function(req, res){
                 req.session.message = null;
             }
             var response = {};
-            response.station = station;
+            response.station = service.capitalizeKeys(station);;
             response.message = text;
             res.render("station", {stations:response});
         });
@@ -48,35 +66,55 @@ var getStation = function(req, res){
     var reg = new RegExp("[0-9]+");
     var orm = cookie.getOrm(req, res);
 
-    if (orm == 'Bookshelf'){
+    if (orm == 'TypeORM'){
+        if (!reg.test(req.query.id)){
+            const stationRepository = typeorm.getConnection().getRepository(TypeORMStation);
+            stationRepository.find().then(station => {
+                let data = service.capitalizeKeys(station);
+                res.send(data);
+            });
+        }else{
+            const stationRepository = typeorm.getConnection().getRepository(TypeORMStation);
+            stationRepository.findOne(req.query.id, {relations: ["cityarea"]}).then(station => {
+                let data = service.capitalizeKeys(station);
+                res.send(data);
+            });
+        }
+    }else  if (orm == 'Bookshelf'){
         if (!reg.test(req.query.id)){
             BookshelfStation.fetchAll().then(station => {
                 // Send requested Stations to Client 
-                res.send(station.toJSON());
+                let data = service.capitalizeKeys(station.toJSON());
+                res.send(data);
             });
         }else{
             BookshelfStation.where('Id', req.query.id).fetchAll({
                 withRelated:['cityarea']
             }).then(station => {
                 // Send requested Station to Client
-                res.send(station.toJSON()[0]);
+                var data = service.capitalizeKeys(station.toJSON()[0]);
+                res.send(data);
             });
         }
     }else if (orm = 'Sequelize'){
         if (!reg.test(req.query.id)){
-            Station.findAll().then(station => {
+            Station.findAll({raw: true, nest: true}).then(station => {
                     // Send stations to Client
-                    res.send(station);    
+                    let data = service.capitalizeKeys(station);
+                    res.send(data);       
             });
         }else{
             Station.findByPk(req.query.id, {
                 include: [{
                     model: Cityarea,
                     required: true
-                }]
+                }],
+                raw: true,
+                nest: true
             }).then(station => {
                 // Send requested Station to Client
-                res.send(station.dataValues);
+                let data = service.capitalizeKeys(station);
+                res.send(data);
             });
         }
     }
@@ -89,7 +127,21 @@ var createStation = function(req, res){
     }
     var orm = cookie.getOrm(req, res);
 
-    if (orm == 'Bookshelf'){
+    if (orm == 'TypeORM'){
+        const stationRepository = typeorm.getConnection().getRepository(TypeORMStation);
+        let typeORMStation = new TypeORMStation();
+        typeORMStation.name = req.query.name;
+        typeORMStation.description = req.query.description;
+        typeORMStation.location = req.query.location;
+        typeORMStation.cityAreaId = req.query.cityareaSelect;
+        stationRepository.save(typeORMStation).then(function(result){
+            req.session.message = "Record is created in database.";
+            res.redirect("show");
+        }).catch(function(err){
+            req.session.message = "Error when creating data.";
+            res.redirect("show");
+        });
+    }else if (orm == 'Bookshelf'){
         BookshelfStation.forge({
             Name: req.query.name,
             Description: req.query.description,
@@ -125,7 +177,23 @@ var editStation = function(req, res){
     }
     var orm = cookie.getOrm(req, res);
 
-    if (orm == 'Bookshelf'){
+    if (orm == 'TypeORM'){
+        const stationRepository = typeorm.getConnection().getRepository(TypeORMStation);
+        let typeORMStation = new TypeORMStation();
+        let id = parseInt(req.query.id);
+        typeORMStation.id = id;
+        typeORMStation.name = req.query.name;
+        typeORMStation.description = req.query.description;
+        typeORMStation.location = req.query.location;
+        typeORMStation.cityAreaId = req.query.cityareaSelect;
+        stationRepository.save(typeORMStation).then(function(result){
+            req.session.message = "Record is created in database.";
+            res.redirect("show");
+        }).catch(function(err){
+            req.session.message = "Error when creating data.";
+            res.redirect("show");
+        });
+    }else if (orm == 'Bookshelf'){
         BookshelfStation.where({
             Id: req.query.id
         }).save({
@@ -164,10 +232,23 @@ var editStation = function(req, res){
 
 // Delete station
 var deleteStation = function(req, res){
-  var response = {};
-  var orm = cookie.getOrm(req, res);
-    
-  if (orm == 'Bookshelf'){
+    var response = {};
+    var orm = cookie.getOrm(req, res);
+ 
+    if (orm == 'TypeORM'){
+        const stationRepository = typeorm.getConnection().getRepository(TypeORMStation);
+        stationRepository.delete(req.query.id).then(function(){
+            response.message = "Ok";
+            response.id = req.query.id;
+            res.send(response);
+        }).catch(function(err){
+            if (err.name == "SequelizeForeignKeyConstraintError")
+                response.message = "There are City Areas that are from this City, please delete them first!";
+            else
+                response.message = "Error when deleting data."
+            res.send(response);
+        });
+    }else if (orm == 'Bookshelf'){
       BookshelfStation.where({
           Id: req.query.id
       }).destroy().then(function(){

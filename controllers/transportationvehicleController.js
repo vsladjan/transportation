@@ -1,17 +1,33 @@
 var express = require("express");
 var cookie = require("../helper/cookie.js");
+var service = require("../helper/service.js");
 const db = require("../sequelize.js");
 const dbBookshelf = require("../models/bookshelf/model.js");
+const typeorm = require('typeorm');
 var Type = db.transportationtype;
 var Vehicle = db.transportationvehicle;
 var BookshelfVehicle = dbBookshelf.Transportationvehicle;
+var TypeORMVehicle = require("../models/typeorm/entities/Transportationvehicle.js").Transportationvehicle;
 
 
 var getShow = function(req, res){
     var text = "Message";
     var orm = cookie.getOrm(req, res);
     
-    if (orm == 'Bookshelf'){
+    if (orm == 'TypeORM'){
+        console.log("TypeORM");
+        const vehicleRepository = typeorm.getConnection().getRepository(TypeORMVehicle);
+        vehicleRepository.find({relations: ["transportationtype"]}).then(vehicle => {
+              if (req.session.message){
+                  text = req.session.message;
+                  req.session.message = null;
+              }
+              var response = {};
+              response.vehicle = service.capitalizeKeys(vehicle);
+              response.message = text;
+              res.render("vehicle", {vehicles:response});
+        });
+    }else if (orm == 'Bookshelf'){
         BookshelfVehicle.fetchAll({withRelated:['transportationtype']}).then(vehicle => {
             // Send all vehicles to Client
             if (req.session.message){
@@ -19,7 +35,7 @@ var getShow = function(req, res){
                 req.session.message = null;
             }
             var response = {};
-            response.vehicle = vehicle.toJSON();
+            response.vehicle = service.capitalizeKeys(vehicle.toJSON());
             response.message = text;
             res.render("vehicle", {vehicles:response});
         });
@@ -28,7 +44,9 @@ var getShow = function(req, res){
             include: [{
                 model: Type,
                 required: true
-            }]
+            }],
+            raw: true,
+            nest: true
         }).then(vehicle => {
             // Send all vehicles to Client
             if (req.session.message){
@@ -36,7 +54,7 @@ var getShow = function(req, res){
                 req.session.message = null;
             }
             var response = {};
-            response.vehicle = vehicle;
+            response.vehicle = service.capitalizeKeys(vehicle);
             response.message = text;
             res.render("vehicle", {vehicles:response});
         });
@@ -48,35 +66,57 @@ var getVehicle = function(req, res){
     var reg = new RegExp("[0-9]+");
     var orm = cookie.getOrm(req, res);
 
-    if (orm == 'Bookshelf'){
+    if (orm == 'TypeORM'){
+        if (!reg.test(req.query.id)){
+            const vehicleRepository = typeorm.getConnection().getRepository(TypeORMVehicle);
+            vehicleRepository.find().then(vehicle => {
+                let data = service.capitalizeKeys(vehicle);
+                res.send(data);
+            });
+        }else{
+            const vehicleRepository = typeorm.getConnection().getRepository(TypeORMVehicle);
+            vehicleRepository.findOne(req.query.id, {relations: ["transportationtype"]}).then(vehicle => {
+                let data = service.capitalizeKeys(vehicle);
+                res.send(data);
+            });
+        }
+    }else if (orm == 'Bookshelf'){
         if (!reg.test(req.query.id)){
             BookshelfVehicle.fetchAll().then(vehicle => {
                 // Send requested vehicle to Client 
-                res.send(vehicle.toJSON());
+                var data = service.capitalizeKeys(vehicle.toJSON());
+                res.send(data);
             });
         }else{
             BookshelfVehicle.where('Id', req.query.id).fetchAll({
                 withRelated:['transportationtype']
             }).then(vehicle => {
                 // Send requested vehicle to Client
-                res.send(vehicle.toJSON()[0]);
+                var data = service.capitalizeKeys(vehicle.toJSON()[0]);
+                res.send(data);
             });
         }
     }else if (orm = 'Sequelize'){
         if (!reg.test(req.query.id)){
-            Vehicle.findAll().then(vehicle => {
+            Vehicle.findAll({
+                raw: true, nest: true
+            }).then(vehicle => {
                     // Send vehicles to Client
-                    res.send(vehicle);    
+                    var data = service.capitalizeKeys(vehicle);
+                    res.send(data);   
             });
         }else{
             Vehicle.findByPk(req.query.id, {
                 include: [{
                     model: Type,
                     required: true
-                }]
+                }],
+                raw: true,
+                nest: true 
             }).then(vehicle => {
                 // Send requested Vehicle to Client
-                res.send(vehicle.dataValues);
+                var data = service.capitalizeKeys(vehicle);
+                res.send(data);
             });
         }
     }
@@ -89,7 +129,22 @@ var createVehicle = function(req, res){
     }
     var orm = cookie.getOrm(req, res);
 
-    if (orm == 'Bookshelf'){
+    if (orm == 'TypeORM'){
+        const vehicleRepository = typeorm.getConnection().getRepository(TypeORMVehicle);
+        let typeORMVehicle = new TypeORMVehicle();
+        typeORMVehicle.name = req.query.name;
+        typeORMVehicle.description = req.query.description;
+        typeORMVehicle.color = req.query.color;
+        typeORMVehicle.productionYear = req.query.productionYear;
+        typeORMVehicle.transportationTypeId = req.query.typeSelect;
+        vehicleRepository.save(typeORMVehicle).then(function(result){
+            req.session.message = "Record is created in database.";
+            res.redirect("show");
+        }).catch(function(err){
+            req.session.message = "Error when creating data.";
+            res.redirect("show");
+        });
+    }else if (orm == 'Bookshelf'){
         BookshelfVehicle.forge({
             Name: req.query.name,
             Description: req.query.description,
@@ -127,7 +182,24 @@ var editVehicle = function(req, res){
     }
     var orm = cookie.getOrm(req, res);
 
-    if (orm == 'Bookshelf'){
+    if (orm == 'TypeORM'){
+        const vehicleRepository = typeorm.getConnection().getRepository(TypeORMVehicle);
+        let typeORMVehicle = new TypeORMVehicle();
+        let id = parseInt(req.query.id);
+        typeORMVehicle.id = id;
+        typeORMVehicle.name = req.query.name;
+        typeORMVehicle.description = req.query.description;
+        typeORMVehicle.color = req.query.color;
+        typeORMVehicle.productionYear = req.query.productionYear;
+        typeORMVehicle.transportationTypeId = req.query.typeSelect;
+        vehicleRepository.save(typeORMVehicle).then(function(result){
+            req.session.message = "Record is created in database.";
+            res.redirect("show");
+        }).catch(function(err){
+            req.session.message = "Error when creating data.";
+            res.redirect("show");
+        });
+    }else if (orm == 'Bookshelf'){
         BookshelfVehicle.where({
             Id: req.query.id
         }).save({
@@ -171,7 +243,20 @@ var deleteVehicle = function(req, res){
   var response = {};
   var orm = cookie.getOrm(req, res);
     
-    if (orm == 'Bookshelf'){
+    if (orm == 'TypeORM'){
+        const vehicleRepository = typeorm.getConnection().getRepository(TypeORMVehicle);
+        vehicleRepository.delete(req.query.id).then(function(){
+            response.message = "Ok";
+            response.id = req.query.id;
+            res.send(response);
+        }).catch(function(err){
+            if (err.name == "SequelizeForeignKeyConstraintError")
+                response.message = "There are City Areas that are from this City, please delete them first!";
+            else
+                response.message = "Error when deleting data."
+            res.send(response);
+        });
+    }else if (orm == 'Bookshelf'){
         BookshelfVehicle.where({
             Id: req.query.id
         }).destroy().then(function(){

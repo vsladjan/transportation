@@ -4,6 +4,7 @@ const config = require('./config.json');
 const sequelize = new Sequelize('transportation', config.db_username, config.db_password, {
     host: 'localhost',
     dialect: 'mysql',
+    logging: false,
     operatorsAliases: false,
     define: {
       timestamps: false,
