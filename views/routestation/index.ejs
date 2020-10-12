@@ -26,9 +26,9 @@
                     <tbody>
                      <% routestations.routestation.forEach(function(routestation){ %>
                       <tr class="table-secondary" style="width: 60%">
-                            <td name=<%="rs_" + routestation.RouteId%>><%=routestation.route.Name%></td>
-                            <td name=<%="rs_" + routestation.StationId%>><%=routestation.station.Name%></td>
-                            <td name=<%="rs_" + routestation.TransportationVehicleId%>><%=routestation.transportationvehicle.Name%></td>
+                            <td name=<%="rs_" + routestation.RouteId%>><%=routestation.Route.Name%></td>
+                            <td name=<%="rs_" + routestation.StationId%>><%=routestation.Station.Name%></td>
+                            <td name=<%="rs_" + routestation.TransportationVehicleId%>><%=routestation.Transportationvehicle.Name%></td>
                             <td name=<%=routestation.Time%>><%=routestation.Time%></td>
                             <td><%=routestation.Type%></td>
                             <td>

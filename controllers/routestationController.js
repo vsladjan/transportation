@@ -1,19 +1,41 @@
 var express = require("express");
 var cookie = require("../helper/cookie.js");
+var service = require("../helper/service.js");
 const db = require("../sequelize.js");
 const dbBookshelf = require("../models/bookshelf/model.js");
+const typeorm = require('typeorm');
 var Routestation = db.routestation;
 var Station = db.station;
 var Route = db.route;
 var Vehicle = db.transportationvehicle;
 var BookshelfRoutestation = dbBookshelf.Routestation;
+var TypeORMRoutestation = require("../models/typeorm/entities/Routestation.js").Routestation;
 
 
 var getShow = function(req, res){
     var text = "Message";
     var orm = cookie.getOrm(req, res);
     
-    if (orm == 'Bookshelf'){
+    if (orm == 'TypeORM'){
+        console.log("TypeORM");
+        const rsRepository = typeorm.getConnection().getRepository(TypeORMRoutestation);
+        rsRepository.find({
+            relations: [
+                    "station", 
+                    "route", 
+                    "transportationvehicle"
+            ]
+        }).then(routestation => {
+            if (req.session.message){
+                text = req.session.message;
+                req.session.message = null;
+            }
+            var response = {};
+            response.routestation = service.capitalizeKeys(routestation);
+            response.message = text;
+            res.render("routestation", {routestations:response});
+        });
+    }else if (orm == 'Bookshelf'){
         BookshelfRoutestation.fetchAll({
             withRelated:['station', 'route', 'transportationvehicle']
         }).then(routestation => {
@@ -23,7 +45,7 @@ var getShow = function(req, res){
                 req.session.message = null;
             }
             var response = {};
-            response.routestation = routestation.toJSON();
+            response.routestation = service.capitalizeKeys(routestation.toJSON());
             response.message = text;
             res.render("routestation", {routestations:response});
         });
@@ -33,7 +55,9 @@ var getShow = function(req, res){
                 { model: Station, required: true },
                 { model: Route, required: true },
                 { model: Vehicle, required: true }
-            ]
+            ],
+            raw: true,
+            nest: true
         }).then(routestation => {
             // Send all rotuestations to Client
             if (req.session.message){
@@ -41,7 +65,7 @@ var getShow = function(req, res){
                 req.session.message = null;
             }
             var response = {};
-            response.routestation = routestation;
+            response.routestation = service.capitalizeKeys(routestation);
             response.message = text;
             res.render("routestation", {routestations:response});
         });
@@ -53,11 +77,38 @@ var getRoutestation = function(req, res){
     var reg = new RegExp("[0-9]+");
     var orm = cookie.getOrm(req, res);
 
-    if (orm == 'Bookshelf'){
+    if (orm == 'TypeORM'){
+        if (!reg.test(req.query.routeId)){
+            const rsRepository = typeorm.getConnection().getRepository(TypeORMRoutestation);
+            rsRepository.find().then(routestation => {
+                let data = service.capitalizeKeys(routestation);
+                res.send(data);
+            });
+        }else{
+            const rsRepository = typeorm.getConnection().getRepository(TypeORMRoutestation);
+            rsRepository.findOne({
+                where: { 
+                    routeId : req.query.routeId,
+                    stationId : req.query.stationId,
+                    transportationVehicleId : req.query.vehicleId,
+                    time: req.query.time
+                },
+                relations: [
+                        "station", 
+                        "route", 
+                        "transportationvehicle"
+                ]
+            }).then(routestation => {
+                let data = service.capitalizeKeys(routestation);
+                res.send(data);
+            });
+        }
+    }else if (orm == 'Bookshelf'){
         if (!reg.test(req.query.routeId)){
             BookshelfRoutestation.fetchAll().then(routestation => {
                 // Send requested Routestation to Client 
-                res.send(routestation.toJSON());
+                let data = service.capitalizeKeys(routestation.toJSON());
+                res.send(data);
             });
         }else{
             BookshelfRoutestation.where({
@@ -69,14 +120,16 @@ var getRoutestation = function(req, res){
                 withRelated:['station', 'route', 'transportationvehicle']
             }).then(routestation => {
                 // Send requested Routestation to Client
-                res.send(routestation.toJSON()[0]);
+                var data = service.capitalizeKeys(routestation.toJSON()[0]);
+                res.send(data);
             });
         }
     }else if (orm = 'Sequelize'){
         if (!reg.test(req.query.routeId)){
-            Routestation.findAll().then(routestation => {
+            Routestation.findAll({raw: true, nest: true}).then(routestation => {
                     // Send routestation to Client
-                    res.send(routestation);    
+                    let data = service.capitalizeKeys(routestation);
+                    res.send(data);     
             });
         }else{
             Routestation.findAll({
@@ -90,10 +143,13 @@ var getRoutestation = function(req, res){
                     { model: Station, required: true },
                     { model: Route, required: true },
                     { model: Vehicle, required: true }
-                ]
+                ],
+                raw: true,
+                nest: true
             }).then(routestation => {
                 // Send requested Routestation to Client
-                res.send(routestation[0].dataValues);
+                let data = service.capitalizeKeys(routestation[0]);
+                res.send(data);
             });
         }
     }
@@ -106,7 +162,22 @@ var createRoutestation = function(req, res){
     }
     var orm = cookie.getOrm(req, res);
 
-    if (orm == 'Bookshelf'){
+    if (orm == 'TypeORM'){
+        const rsRepository = typeorm.getConnection().getRepository(TypeORMRoutestation);
+        let typeORMrs = new TypeORMRoutestation();
+        typeORMrs.stationId = req.query.stationSelect;
+        typeORMrs.routeId = req.query.routeSelect;
+        typeORMrs.transportationVehicleId = req.query.vehicleSelect;
+        typeORMrs.time = req.query.time;
+        typeORMrs.type = req.query.type ;
+        rsRepository.insert(typeORMrs).then(function(result){
+            req.session.message = "Record is created in database.";
+            res.redirect("show");
+        }).catch(function(err){
+            req.session.message = "Error when creating data.";
+            res.redirect("show");
+        });
+    }else if (orm == 'Bookshelf'){
         BookshelfRoutestation.forge({
             StationId: req.query.stationSelect,
             RouteId: req.query.routeSelect,
@@ -145,12 +216,32 @@ var editRoutestation = function(req, res){
     }
     var orm = cookie.getOrm(req, res);
 
-    if (orm == 'Bookshelf'){
+    if (orm == 'TypeORM'){
+        const rsRepository = typeorm.getConnection().getRepository(TypeORMRoutestation);
+        let typeORMrs = new TypeORMRoutestation();
+        typeORMrs.stationId = req.query.stationId;
+        typeORMrs.routeId = req.query.routeId;
+        typeORMrs.transportationVehicleId = req.query.vehicleId;
+        typeORMrs.time = req.query.time;
+        typeORMrs.type = req.query.type;
+        rsRepository.update({
+            routeId : req.query.oldRouteId,
+            stationId : req.query.oldStationId,
+            transportationVehicleId : req.query.oldVehicleId,
+            time: req.query.oldTime
+        }, typeORMrs).then(function(result){
+            response.message = "Record is edited in database.";
+            res.send(response);
+        }).catch(function(err){
+            response.message = "Error when editing data.";
+            res.send(response);
+        });
+    }else if (orm == 'Bookshelf'){
         BookshelfRoutestation.where({
-            RouteId : req.query.routeId,
-            StationId : req.query.stationId,
-            TransportationVehicleId : req.query.vehicleId,
-            Time: req.query.time
+            RouteId : req.query.oldRouteId,
+            StationId : req.query.oldStationId,
+            TransportationVehicleId : req.query.oldVehicleId,
+            Time: req.query.oldTime
         }).save({
             StationId: req.query.stationId,
             RouteId: req.query.routeId,
@@ -161,11 +252,11 @@ var editRoutestation = function(req, res){
             method: 'update',
             patch:true
         }).then(function(result){
-            req.session.message = "Record is edited in database.";
-            res.redirect("show");
+            response.message = "Record is edited in database.";
+            res.send(response);
         }).catch(function(err){
-            req.session.message = "Error when editing data.";
-            res.redirect("show");
+            response.message = "Error when editing data.";
+            res.send(response);
         });
     }else if (orm == 'Sequelize'){
         Routestation.update({
@@ -197,7 +288,25 @@ var deleteRoutestation = function(req, res){
     var response = {};
     var orm = cookie.getOrm(req, res);
     
-    if (orm == 'Bookshelf'){
+    if (orm == 'TypeORM'){
+        const rsRepository = typeorm.getConnection().getRepository(TypeORMRoutestation);
+        rsRepository.delete({
+                routeId : req.query.routeId,
+                stationId : req.query.stationId,
+                transportationVehicleId : req.query.vehicleId,
+                time: req.query.time 
+            }).then(function(){
+            response.message = "Ok";
+            response.id = req.query.id;
+            res.send(response);
+        }).catch(function(err){
+            if (err.name == "SequelizeForeignKeyConstraintError")
+                response.message = "There are City Areas that are from this City, please delete them first!";
+            else
+                response.message = "Error when deleting data."
+            res.send(response);
+        });
+    }else if (orm == 'Bookshelf'){
         BookshelfRoutestation.where({
             RouteId : req.query.routeId,
             StationId : req.query.stationId,
