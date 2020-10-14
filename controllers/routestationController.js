@@ -4,6 +4,7 @@ var service = require("../helper/service.js");
 const db = require("../sequelize.js");
 const dbBookshelf = require("../models/bookshelf/model.js");
 const typeorm = require('typeorm');
+var knex = require("../knexdb.js").getConnection();
 var Routestation = db.routestation;
 var Station = db.station;
 var Route = db.route;
@@ -16,7 +17,40 @@ var getShow = function(req, res){
     var text = "Message";
     var orm = cookie.getOrm(req, res);
     
-    if (orm == 'TypeORM'){
+    if (orm == 'Knex'){
+        knex("routestation").join("route", "route.Id", "routestation.RouteId").join(
+            "station", "station.Id", "routestation.StationId"
+        ).join(
+            "transportationvehicle", "transportationvehicle.Id", "routestation.TransportationVehicleId"
+        ).select(
+                "Time", 
+                "Type",
+                "RouteId",
+                "StationId",
+                "TransportationVehicleId",
+                knex.ref("route.Name").as('RouteName'),
+                knex.ref("station.Name").as('StationName'),
+                knex.ref("transportationvehicle.Name").as('VehicleName')
+        ).then(function(data){
+            data.forEach(element => {
+                let route = {}, station = {}, vehicle = {};
+                route.Name = element.RouteName;
+                station.Name = element.StationName;
+                vehicle.Name = element.VehicleName;
+                element['Route'] = route;
+                element['Station'] = station;
+                element['Transportationvehicle'] = vehicle;
+            });
+            if (req.session.message){
+                text = req.session.message;
+                req.session.message = null;
+            }
+            var response = {};
+            response.routestation = data;
+            response.message = text;
+            res.render("routestation", {routestations:response});
+        });
+    }else if (orm == 'TypeORM'){
         console.log("TypeORM");
         const rsRepository = typeorm.getConnection().getRepository(TypeORMRoutestation);
         rsRepository.find({
@@ -77,7 +111,43 @@ var getRoutestation = function(req, res){
     var reg = new RegExp("[0-9]+");
     var orm = cookie.getOrm(req, res);
 
-    if (orm == 'TypeORM'){
+    if (orm == 'Knex'){
+        if (!reg.test(req.query.routeId)){
+            knex("routestation").then(function(data){
+                res.send(data);
+            });
+        }else{
+            knex("routestation").where({
+                RouteId : req.query.routeId,
+                StationId : req.query.stationId,
+                TransportationVehicleId : req.query.vehicleId,
+                Time: req.query.time
+            }).join("route", "route.Id", "routestation.RouteId").join(
+                "station", "station.Id", "routestation.StationId"
+            ).join(
+                "transportationvehicle", "transportationvehicle.Id", "routestation.TransportationVehicleId"
+            ).select(
+                    "Time", 
+                    "Type",
+                    "RouteId",
+                    "StationId",
+                    "TransportationVehicleId",
+                    knex.ref("route.Name").as('RouteName'),
+                    knex.ref("station.Name").as('StationName'),
+                    knex.ref("transportationvehicle.Name").as('VehicleName')
+            ).then(function(data){
+                    element = data[0];
+                    let route = {}, station = {}, vehicle = {};
+                    route.Name = element.RouteName;
+                    station.Name = element.StationName;
+                    vehicle.Name = element.VehicleName;
+                    element['Route'] = route;
+                    element['Station'] = station;
+                    element['Transportationvehicle'] = vehicle;
+                    res.send(element);
+            });
+        }
+    }else if (orm == 'TypeORM'){
         if (!reg.test(req.query.routeId)){
             const rsRepository = typeorm.getConnection().getRepository(TypeORMRoutestation);
             rsRepository.find().then(routestation => {
@@ -124,7 +194,7 @@ var getRoutestation = function(req, res){
                 res.send(data);
             });
         }
-    }else if (orm = 'Sequelize'){
+    }else if (orm == 'Sequelize'){
         if (!reg.test(req.query.routeId)){
             Routestation.findAll({raw: true, nest: true}).then(routestation => {
                     // Send routestation to Client
@@ -162,7 +232,21 @@ var createRoutestation = function(req, res){
     }
     var orm = cookie.getOrm(req, res);
 
-    if (orm == 'TypeORM'){
+    if (orm == 'Knex'){
+        knex("routestation").insert({
+            StationId: req.query.stationSelect,
+            RouteId: req.query.routeSelect,
+            TransportationVehicleId: req.query.vehicleSelect,
+            Time: req.query.time,
+            Type: req.query.type 
+        }).then(function(result){
+            req.session.message = "Record is created in database.";
+            res.redirect("show");
+        }).catch(function(err){
+            req.session.message = "Error when creating data.";
+            res.redirect("show");
+        });
+    }else if (orm == 'TypeORM'){
         const rsRepository = typeorm.getConnection().getRepository(TypeORMRoutestation);
         let typeORMrs = new TypeORMRoutestation();
         typeORMrs.stationId = req.query.stationSelect;
@@ -216,7 +300,26 @@ var editRoutestation = function(req, res){
     }
     var orm = cookie.getOrm(req, res);
 
-    if (orm == 'TypeORM'){
+    if (orm == 'Knex'){
+        knex("routestation").where({
+            RouteId : req.query.oldRouteId,
+            StationId : req.query.oldStationId,
+            TransportationVehicleId : req.query.oldVehicleId,
+            Time: req.query.oldTime
+        }).update({
+            StationId: req.query.stationId,
+            RouteId: req.query.routeId,
+            TransportationVehicleId: req.query.vehicleId,
+            Time: req.query.time,
+            Type: req.query.type
+        }).then(function(result){
+            response.message = "Record is edited in database.";
+            res.send(response);
+        }).catch(function(err){
+            response.message = "Error when editing data.";
+            res.send(response);
+        });
+    }else if (orm == 'TypeORM'){
         const rsRepository = typeorm.getConnection().getRepository(TypeORMRoutestation);
         let typeORMrs = new TypeORMRoutestation();
         typeORMrs.stationId = req.query.stationId;
@@ -288,7 +391,24 @@ var deleteRoutestation = function(req, res){
     var response = {};
     var orm = cookie.getOrm(req, res);
     
-    if (orm == 'TypeORM'){
+    if (orm == 'Knex'){
+        knex('routestation').where({
+            RouteId : req.query.routeId,
+            StationId : req.query.stationId,
+            TransportationVehicleId : req.query.vehicleId,
+            Time: req.query.time
+        }).del().then(function(){
+            response.message = "Ok";
+            response.id = req.query.id;
+            res.send(response);
+        }).catch(function(err){
+            if (err.name == "SequelizeForeignKeyConstraintError")
+                response.message = "There are City Areas that are from this City, please delete them first!";
+            else
+                response.message = "Error when deleting data."
+            res.send(response);
+        });
+    }else if (orm == 'TypeORM'){
         const rsRepository = typeorm.getConnection().getRepository(TypeORMRoutestation);
         rsRepository.delete({
                 routeId : req.query.routeId,
