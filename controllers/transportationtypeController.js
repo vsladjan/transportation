@@ -4,6 +4,7 @@ var service = require("../helper/service.js");
 const db = require("../sequelize.js");
 const dbBookshelf = require("../models/bookshelf/model.js");
 const typeorm = require('typeorm');
+var knex = require("../knexdb.js").getConnection();
 var TransportationType = db.transportationtype;
 var BookshelfTransportationtype = dbBookshelf.Transportationtype;
 var TypeORMTransportationtype = require("../models/typeorm/entities/Transportationtype.js").Transportationtype;
@@ -14,7 +15,18 @@ var getShow = function(req, res){
     var text = "Message";
     var orm = cookie.getOrm(req, res);
     
-    if (orm == 'TypeORM'){
+    if (orm == 'Knex'){
+        knex("transportationtype").then(function(data){
+            if (req.session.message){
+                text = req.session.message;
+                req.session.message = null;
+            }
+            var response = {};
+            response.type = data;
+            response.message = text;
+            res.render("type", {types:response});
+        });
+    }else if (orm == 'TypeORM'){
         console.log("TypeORM");
         const typeRepository = typeorm.getConnection().getRepository(TypeORMTransportationtype);
         typeRepository.find().then(type => {
@@ -62,7 +74,19 @@ var getType = function(req, res){
     var reg = new RegExp("[0-9]+");
     var orm = cookie.getOrm(req, res);
 
-    if (orm == 'TypeORM'){
+    if (orm == 'Knex'){
+        if (!reg.test(req.query.id)){
+            knex("transportationtype").then(function(data){
+                res.send(data);
+            });
+        }else{
+            knex("transportationtype").where(
+                'transportationtype.Id', req.query.id).then(function(data){
+                let element = data[0];
+                res.send(element);
+            });
+        }
+    }else if (orm == 'TypeORM'){
         if (!reg.test(req.query.id)){
             const typeRepository = typeorm.getConnection().getRepository(TypeORMTransportationtype);
             typeRepository.find().then(type => {
@@ -91,7 +115,7 @@ var getType = function(req, res){
                 res.send(data);
             });
         }
-    }else if (orm = 'Sequelize'){
+    }else if (orm == 'Sequelize'){
         if (!reg.test(req.query.id)){
             TransportationType.findAll({raw: true, nest: true}).then(type => {
                     // Send types to Client
@@ -118,7 +142,17 @@ var createType = function(req, res){
     }
     var orm = cookie.getOrm(req, res);
 
-    if (orm == 'TypeORM'){
+    if (orm == 'Knex'){
+        knex("transportationtype").insert({
+            Name: req.query.name
+        }).then(function(result){
+            req.session.message = "Record is created in database.";
+            res.redirect("show");
+        }).catch(function(err){
+            req.session.message = "Error when creating data.";
+            res.redirect("show");
+        });
+    }else if (orm == 'TypeORM'){
         const typeRepository = typeorm.getConnection().getRepository(TypeORMTransportationtype);
         let typeORMType = new TypeORMTransportationtype();
         typeORMType.name = req.query.name;
@@ -159,7 +193,17 @@ var editType = function(req, res){
     }
     var orm = cookie.getOrm(req, res);
 
-    if (orm == 'TypeORM'){
+    if (orm == 'Knex'){
+        knex("transportationtype").where("Id", req.query.id).update({
+            Name: req.query.name
+        }).then(function(result){
+            req.session.message = "Record is created in database.";
+            res.redirect("show");
+        }).catch(function(err){
+            req.session.message = "Error when creating data.";
+            res.redirect("show");
+        });
+    }else if (orm == 'TypeORM'){
         const typeRepository = typeorm.getConnection().getRepository(TypeORMTransportationtype);
         let typeORMType = new TypeORMTransportationtype();
         let id = parseInt(req.query.id);
@@ -208,7 +252,19 @@ var deleteType = function(req, res){
     var response = {};
     var orm = cookie.getOrm(req, res);
     
-    if (orm == 'TypeORM'){
+    if (orm == 'Knex'){
+        knex('transportationtype').where('Id', req.query.id).del().then(function(){
+            response.message = "Ok";
+            response.id = req.query.id;
+            res.send(response);
+        }).catch(function(err){
+            if (err.name == "SequelizeForeignKeyConstraintError")
+                response.message = "There are City Areas that are from this City, please delete them first!";
+            else
+                response.message = "Error when deleting data."
+            res.send(response);
+        });
+    }else if (orm == 'TypeORM'){
         const typeRepository = typeorm.getConnection().getRepository(TypeORMTransportationtype);
         typeRepository.delete(req.query.id).then(function(){
             response.message = "Ok";

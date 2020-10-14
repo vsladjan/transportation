@@ -1,15 +1,14 @@
 var cookieParser = require('cookie-parser');
 var express = require("express");
 const session = require('express-session');
+var knexDb = require("./knexdb.js").createConection();
 var bookshelfDb = require("./bookshelf.js").createConection();
 var router = require("./router/router.js");
 var db = require("./sequelize.js");
 const bodyParser = require("body-parser");
 require ("reflect-metadata");
-//import pkg from "typeorm";
 pkg = require('typeorm');
 const {createConnection} = pkg;
-var typeormCity = require ("./models/typeorm/entities/City.js").City;
 
 var app = express();
 var port = 3000;

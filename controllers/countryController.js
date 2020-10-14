@@ -4,6 +4,7 @@ var service = require("../helper/service.js");
 const db = require("../sequelize.js");
 const dbBookshelf = require("../models/bookshelf/model.js");
 const typeorm = require('typeorm');
+var knex = require("../knexdb.js").getConnection();
 var Country = db.country;
 var BookshelfCountry = dbBookshelf.Country;
 var TypeORMCountry = require("../models/typeorm/entities/Country.js").Country; 
@@ -14,7 +15,18 @@ var getShow = function(req, res){
     var text = "Message";
     var orm = cookie.getOrm(req, res);
     
-    if (orm == 'TypeORM'){
+    if (orm == "Knex"){
+        knex("country").then(function(data){
+            if (req.session.message){
+                text = req.session.message;
+                req.session.message = null;
+            }
+            var response = {};
+            response.country = data;
+            response.message = text;
+            res.render("country", {countries:response});
+        });
+    }else if (orm == 'TypeORM'){
         console.log("TypeORM");
         const countryRepository = typeorm.getConnection().getRepository(TypeORMCountry);
         countryRepository.find().then(country => {
@@ -60,7 +72,17 @@ var getCountry = function(req, res){
     var reg = new RegExp("[0-9]+");
     var orm = cookie.getOrm(req, res);
 
-    if (orm == 'TypeORM'){
+    if (orm == 'Knex'){
+        if (!reg.test(req.query.id)){
+            knex("country").then(function(data){
+                res.send(data);
+            });
+        }else{
+            knex("country").where('country.Id', req.query.id).select().then(function(data){
+                res.send(data[0]);
+            });
+        }
+    }else if (orm == 'TypeORM'){
         if (!reg.test(req.query.id)){
             const countryRepository = typeorm.getConnection().getRepository(TypeORMCountry);
             countryRepository.find().then(country => {
@@ -69,7 +91,7 @@ var getCountry = function(req, res){
             });
         }else{
             const countryRepository = typeorm.getConnection().getRepository(TypeORMCountry);
-            countryRepository.findOne(req.query.id).then(c => {
+            countryRepository.findOne(req.query.id).then(country => {
                 let data = service.capitalizeKeys(country);
                 res.send(data);
             });
@@ -89,7 +111,7 @@ var getCountry = function(req, res){
                     res.send(data);
                 });
         }
-    }else if (orm = 'Sequelize'){
+    }else if (orm == 'Sequelize'){
         if (!reg.test(req.query.id)){
                 Country.findAll({raw: true, nest: true}).then(country => {
                     // Send countries to Client
@@ -116,7 +138,21 @@ var createCountry = function(req, res){
     }
     var orm = cookie.getOrm(req, res);
 
-    if (orm == 'TypeORM'){
+    if (orm == 'Knex'){
+        knex("country").insert({
+            Name: req.query.name,
+            Code: req.query.countryCode,
+            Size: req.query.size,
+            Population: req.query.population,
+            Continent: req.query.continentSelect
+        }).then(function(result){
+            req.session.message = "Record is created in database.";
+            res.redirect("show");
+        }).catch(function(err){
+            req.session.message = "Error when creating data.";
+            res.redirect("show");
+        });
+    }else if (orm == 'TypeORM'){
         const countryRepository = typeorm.getConnection().getRepository(TypeORMCountry);
         let typeORMCountry = new TypeORMCountry();
         typeORMCountry.name = req.query.name;
@@ -170,7 +206,21 @@ var editCountry = function(req, res){
     }
     var orm = cookie.getOrm(req, res);
 
-    if (orm == 'TypeORM'){
+    if (orm == 'Knex'){
+        knex("country").where("Id", req.query.id).update({
+            Name: req.query.name,
+            Code: req.query.countryCode,
+            Size: req.query.size,
+            Population: req.query.population,
+            Continent: req.query.continentSelect
+        }).then(function(result){
+            req.session.message = "Record is created in database.";
+            res.redirect("show");
+        }).catch(function(err){
+            req.session.message = "Error when creating data.";
+            res.redirect("show");
+        });
+    }else if (orm == 'TypeORM'){
         let id = parseInt(req.query.id);
         typeORMCity.id = id;
         const countryRepository = typeorm.getConnection().getRepository(TypeORMCountry);
@@ -230,7 +280,19 @@ var deleteCountry = function(req, res){
     var response = {};
     var orm = cookie.getOrm(req, res);
     
-    if (orm == 'TypeORM'){
+    if (orm == 'Knex'){
+        knex('country').where('Id', req.query.id).del().then(function(){
+            response.message = "Ok";
+            response.id = req.query.id;
+            res.send(response);
+        }).catch(function(err){
+            if (err.name == "SequelizeForeignKeyConstraintError")
+                response.message = "There are City Areas that are from this City, please delete them first!";
+            else
+                response.message = "Error when deleting data."
+            res.send(response);
+        });
+    }else if (orm == 'TypeORM'){
         const countryRepository = typeorm.getConnection().getRepository(TypeORMCountry);
         countryRepository.delete(req.query.id).then(function(){
             response.message = "Ok";
