@@ -8,6 +8,8 @@ var knex = require("../knexdb.js").getConnection();
 var Country = db.country;
 var BookshelfCountry = dbBookshelf.Country;
 var TypeORMCountry = require("../models/typeorm/entities/Country.js").Country; 
+var ObjCountry = require("../models/objection/country.js").Country;
+
 
 
 // Show all countries
@@ -15,7 +17,18 @@ var getShow = function(req, res){
     var text = "Message";
     var orm = cookie.getOrm(req, res);
     
-    if (orm == "Knex"){
+    if (orm == "Objection"){
+        ObjCountry.query().then(function(data){
+            if (req.session.message){
+                text = req.session.message;
+                req.session.message = null;
+            }
+            var response = {};
+            response.country = data;
+            response.message = text;
+            res.render("country", {countries:response});
+        });
+    }else if (orm == "Knex"){
         knex("country").then(function(data){
             if (req.session.message){
                 text = req.session.message;
@@ -72,7 +85,17 @@ var getCountry = function(req, res){
     var reg = new RegExp("[0-9]+");
     var orm = cookie.getOrm(req, res);
 
-    if (orm == 'Knex'){
+    if (orm == 'Objection'){
+        if (!reg.test(req.query.id)){
+            ObjCountry.query().then(function(data){
+                res.send(data);
+            });
+        }else{
+            ObjCountry.query().findById(req.query.id).then(function(data){
+                res.send(data);
+            });
+        }
+    }else if (orm == 'Knex'){
         if (!reg.test(req.query.id)){
             knex("country").then(function(data){
                 res.send(data);
@@ -138,7 +161,21 @@ var createCountry = function(req, res){
     }
     var orm = cookie.getOrm(req, res);
 
-    if (orm == 'Knex'){
+    if (orm == 'Objection'){
+        ObjCountry.query().insert({
+            Name: req.query.name,
+            Code: req.query.countryCode,
+            Size: req.query.size,
+            Population: req.query.population,
+            Continent: req.query.continentSelect
+        }).then(function(result){
+            req.session.message = "Record is created in database.";
+            res.redirect("show");
+        }).catch(function(err){
+                req.session.message = "Error when creating data.";
+                res.redirect("show");
+        });
+    }if (orm == 'Knex'){
         knex("country").insert({
             Name: req.query.name,
             Code: req.query.countryCode,
@@ -206,7 +243,21 @@ var editCountry = function(req, res){
     }
     var orm = cookie.getOrm(req, res);
 
-    if (orm == 'Knex'){
+    if (orm == 'Objection'){
+        ObjCountry.query().update({
+            Name: req.query.name,
+            Code: req.query.countryCode,
+            Size: req.query.size,
+            Population: req.query.population,
+            Continent: req.query.continentSelect
+        }).where({Id: req.query.id}).then(function(result){
+            req.session.message = "Record is edited in database.";
+            res.redirect("show");
+        }).catch(function(err){
+            req.session.message = "Error when editing data.";
+            res.redirect("show");
+        });
+    }if (orm == 'Knex'){
         knex("country").where("Id", req.query.id).update({
             Name: req.query.name,
             Code: req.query.countryCode,
@@ -214,10 +265,10 @@ var editCountry = function(req, res){
             Population: req.query.population,
             Continent: req.query.continentSelect
         }).then(function(result){
-            req.session.message = "Record is created in database.";
+            req.session.message = "Record is edited in database.";
             res.redirect("show");
         }).catch(function(err){
-            req.session.message = "Error when creating data.";
+            req.session.message = "Error when editing data.";
             res.redirect("show");
         });
     }else if (orm == 'TypeORM'){
@@ -280,7 +331,19 @@ var deleteCountry = function(req, res){
     var response = {};
     var orm = cookie.getOrm(req, res);
     
-    if (orm == 'Knex'){
+    if (orm == 'Objection'){
+        ObjCountry.query().deleteById(req.query.id).then(function(){
+            response.message = "Ok";
+            response.id = req.query.id;
+            res.send(response);
+        }).catch(function(err){
+            if (err.name == "SequelizeForeignKeyConstraintError")
+                response.message = "There are City Areas that are from this City, please delete them first!";
+            else
+                response.message = "Error when deleting data."
+            res.send(response);
+        });
+    }if (orm == 'Knex'){
         knex('country').where('Id', req.query.id).del().then(function(){
             response.message = "Ok";
             response.id = req.query.id;

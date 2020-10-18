@@ -9,6 +9,7 @@ var City = db.city;
 var Country = db.country;
 var BookshelfCity = dbBookshelf.City;
 var TypeORMCity = require("../models/typeorm/entities/City.js").City;
+var ObjCity = require("../models/objection/city.js").City;
   
 
 var getShow = function(req, res){
@@ -16,7 +17,18 @@ var getShow = function(req, res){
     var orm = cookie.getOrm(req, res);
     console.log("getshow" + orm);
 
-    if (orm == 'Knex'){
+    if (orm == 'Objection'){
+        ObjCity.query().withGraphFetched('Country').then(function(data){
+            if (req.session.message){
+                text = req.session.message;
+                req.session.message = null;
+            }
+            var response = {};
+            response.city = data;
+            response.message = text;
+            res.render("city", {cities:response});
+        });
+    }else if (orm == 'Knex'){
         knex("city").join("country", "country.Id", "city.CountryId").select(
                 "city.Id", 
                 "city.Name", 
@@ -91,7 +103,17 @@ var getCity = function(req, res){
     var reg = new RegExp("[0-9]+");
     var orm = cookie.getOrm(req, res);
 
-    if (orm == 'Knex'){
+    if (orm == 'Objection'){
+        if (!reg.test(req.query.id)){
+            ObjCity.query().then(function(data){
+                res.send(data);
+            });
+        }else{
+            ObjCity.query().withGraphFetched('Country').findById(req.query.id).then(function(data){
+                res.send(data);
+            });
+        }
+    }else if (orm == 'Knex'){
         if (!reg.test(req.query.id)){
             knex("city").then(function(data){
                 res.send(data);
@@ -176,7 +198,20 @@ var createCity = function(req, res){
     var orm = cookie.getOrm(req, res);
    
 
-    if (orm == 'Knex'){
+    if (orm == 'Objection'){
+        ObjCity.query().insert({
+            Name: req.query.name,
+            Population: req.query.population,
+            Size: req.query.size,
+            CountryId: req.query.countrySelect
+        }).then(function(result){
+            req.session.message = "Record is created in database.";
+            res.redirect("show");
+        }).catch(function(err){
+            req.session.message = "Error when creating data.";
+            res.redirect("show");
+        });
+    }else if (orm == 'Knex'){
         knex("city").insert({
             Name: req.query.name,
             Population: req.query.population,
@@ -239,7 +274,20 @@ var editCity = function(req, res){
     }
     var orm = cookie.getOrm(req, res);
 
-    if (orm == 'Knex'){
+    if (orm == 'Objection'){
+        ObjCity.query().update({
+            Name: req.query.name,
+            Population: req.query.population,
+            Size: req.query.size,
+            CountryId: req.query.countrySelect
+        }).where({Id: req.query.id}).then(function(result){
+            req.session.message = "Record is edited in database.";
+            res.redirect("show");
+        }).catch(function(err){
+            req.session.message = "Error when editing data.";
+            res.redirect("show");
+        });;
+    }else if (orm == 'Knex'){
         knex("city").where("Id", req.query.id).update({
             Name: req.query.name,
             Population: req.query.population,
@@ -310,7 +358,19 @@ var deleteCity = function(req, res){
     var response = {};
     var orm = cookie.getOrm(req, res);
     
-    if (orm == 'Knex'){
+    if (orm == 'Objection'){
+        ObjCity.query().deleteById(req.query.id).then(function(){
+            response.message = "Ok";
+            response.id = req.query.id;
+            res.send(response);
+        }).catch(function(err){
+            if (err.name == "SequelizeForeignKeyConstraintError")
+                response.message = "There are City Areas that are from this City, please delete them first!";
+            else
+                response.message = "Error when deleting data."
+            res.send(response);
+        });
+    }else if (orm == 'Knex'){
         knex('city').where('Id', req.query.id).del().then(function(){
             response.message = "Ok";
             response.id = req.query.id;
