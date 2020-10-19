@@ -10,13 +10,29 @@ var Cityarea = db.cityarea;
 var BookshelfStation = dbBookshelf.Station;
 var TypeORMStation = require("../models/typeorm/entities/Station.js").Station;
 var ObjStation = require("../models/objection/station.js").Station;
+var prisma = require("../prismadb.js").getConnection();
 
 
 var getShow = function(req, res){
     var text = "Message";
     var orm = cookie.getOrm(req, res);
     
-    if (orm == 'Objection'){
+    if (orm == 'Prisma'){
+        prisma.station.findMany({
+            include:{
+                cityarea: true
+            }
+        }).then(function(data){
+            if (req.session.message){
+                text = req.session.message;
+                req.session.message = null;
+            }
+            var response = {};
+            response.station = service.capitalizeKeys(data);
+            response.message = text;
+            res.render("station", {stations:response});
+        });
+    }else if (orm == 'Objection'){
         ObjStation.query().withGraphFetched('Cityarea').then(function(data){
             if (req.session.message){
                 text = req.session.message;
@@ -101,8 +117,26 @@ var getShow = function(req, res){
 var getStation = function(req, res){
     var reg = new RegExp("[0-9]+");
     var orm = cookie.getOrm(req, res);
+    let id = parseInt(req.query.id);
 
-    if (orm == 'Objection'){
+    if (orm == 'Prisma'){
+        if (!reg.test(req.query.id)){
+            prisma.station.findMany().then(function(data){
+                res.send(data);
+            });
+        }else{
+            prisma.station.findOne({
+                where: {
+                    Id: id
+                },
+                include:{
+                    cityarea: true
+                }
+            }).then(function(data){
+                res.send(service.capitalizeKeys(data));
+            });
+        }
+    }else if (orm == 'Objection'){
         if (!reg.test(req.query.id)){
             ObjStation.query().then(function(data){
                 res.send(data);
@@ -192,10 +226,33 @@ var getStation = function(req, res){
 var createStation = function(req, res){
     if (req.query.name == ""){
           req.query.name = null;
+          req.session.message = "Error when creating data.";
+          res.redirect("show");
+          return;
     }
     var orm = cookie.getOrm(req, res);
+    let cityareaSelect = parseInt(req.query.cityareaSelect);
 
-    if (orm == 'Objection'){
+    if (orm == 'Prisma'){
+        prisma.station.create({
+            data:{
+                Name: req.query.name,
+                Description: req.query.description,
+                Location: req.query.location,
+                cityarea: {
+                    connect:{
+                        Id: cityareaSelect
+                    }
+                }
+            }
+        }).then(function(result){
+            req.session.message = "Record is created in database.";
+            res.redirect("show");
+        }).catch(function(err){
+            req.session.message = "Error when creating data.";
+            res.redirect("show");
+        });
+    }else if (orm == 'Objection'){
         ObjStation.query().insert({
             Name: req.query.name,
             Description: req.query.description,
@@ -268,10 +325,38 @@ var createStation = function(req, res){
 var editStation = function(req, res){
     if (req.query.name == ""){
         req.query.name = null;
+        req.session.message = "Error when editing data.";
+        res.redirect("show");
+        return;
     }
     var orm = cookie.getOrm(req, res);
 
-    if (orm == 'Objection'){
+    let id = parseInt(req.query.id);
+    let cityareaSelect = parseInt(req.query.cityareaSelect);
+
+    if (orm == 'Prisma'){
+        prisma.station.update({
+            where:{
+                Id: id
+            },
+            data:{
+                Name: req.query.name,
+                Description: req.query.description,
+                Location: req.query.location,
+                cityarea: {
+                    connect:{
+                        Id: cityareaSelect
+                    }
+                }
+            }
+        }).then(function(result){
+            req.session.message = "Record is edited in database.";
+            res.redirect("show");
+        }).catch(function(err){
+            req.session.message = "Error when editing data.";
+            res.redirect("show");
+        });
+    }else if (orm == 'Objection'){
         ObjStation.query().update({
             Name: req.query.name,
             Description: req.query.description,
@@ -355,7 +440,25 @@ var deleteStation = function(req, res){
     var response = {};
     var orm = cookie.getOrm(req, res);
  
-    if (orm == 'Objection'){
+    let id = parseInt(req.query.id);
+    
+    if (orm == 'Prisma'){
+        prisma.station.delete({
+            where:{
+                Id: id
+            }
+        }).then(function(){
+            response.message = "Ok";
+            response.id = req.query.id;
+            res.send(response);
+        }).catch(function(err){
+            if (err.name == "SequelizeForeignKeyConstraintError")
+                response.message = "There are City Areas that are from this City, please delete them first!";
+            else
+                response.message = "Error when deleting data."
+            res.send(response);
+        });
+    }else if (orm == 'Objection'){
         ObjStation.query().deleteById(req.query.id).then(function(){
             response.message = "Ok";
             response.id = req.query.id;

@@ -1,0 +1,109 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model city {
+  Name       String
+  Population Float
+  Size       Float
+  CountryId  Int
+  Id         Int        @id @default(autoincrement())
+  country    country    @relation(fields: [CountryId], references: [Id])
+  cityarea   cityarea[]
+
+  @@index([CountryId], name: "fk_City_Country_idx")
+}
+
+model cityarea {
+  Id          Int       @id @default(autoincrement())
+  Name        String
+  Size        String?
+  Description String?
+  CityId      Int
+  city        city      @relation(fields: [CityId], references: [Id])
+  station     station[]
+
+  @@index([CityId], name: "fk_CityArea_City1_idx")
+}
+
+model country {
+  Id         Int    @id @default(autoincrement())
+  Name       String
+  Code       String
+  Size       Float
+  Population Float
+  Continent  String
+  city       city[]
+}
+
+model route {
+  Id           Int            @id @default(autoincrement())
+  Name         String
+  Description  String?
+  routestation routestation[]
+}
+
+model routestation {
+  StationId               Int
+  RouteId                 Int
+  TransportationVehicleId Int
+  Time                    DateTime
+  Type                    String
+  route                   route                 @relation(fields: [RouteId], references: [Id])
+  station                 station               @relation(fields: [StationId], references: [Id])
+  transportationvehicle   transportationvehicle @relation(fields: [TransportationVehicleId], references: [Id])
+  stationroutes           stationroutes[]
+
+  @@id([StationId, RouteId, TransportationVehicleId, Time])
+  @@index([RouteId], name: "fk_RouteStation_Route1_idx")
+  @@index([StationId], name: "fk_RouteStation_Station1_idx")
+  @@index([TransportationVehicleId], name: "fk_RouteStation_TransportationVehicle1_idx")
+}
+
+model station {
+  Id           Int            @id @default(autoincrement())
+  Name         String
+  Description  String?
+  Location     String?
+  CityAreaId   Int
+  cityarea     cityarea       @relation(fields: [CityAreaId], references: [Id])
+  routestation routestation[]
+
+  @@index([CityAreaId], name: "fk_Station_CityArea1_idx")
+}
+
+model stationroutes {
+  routestationStationId   Int
+  TransportationVehicleId Int
+  transportationvehicle   transportationvehicle @relation(fields: [TransportationVehicleId], references: [Id])
+  routestation            routestation          @relation(fields: [routestationStationId], references: [StationId])
+
+  @@id([routestationStationId, TransportationVehicleId])
+  @@index([routestationStationId], name: "IDX_12862a005a9bec93d438fb90f8")
+  @@index([TransportationVehicleId], name: "IDX_e77cc2d4223ba10a8ded36cc88")
+}
+
+model transportationtype {
+  Id                    Int                     @id @default(autoincrement())
+  Name                  String
+  transportationvehicle transportationvehicle[]
+}
+
+model transportationvehicle {
+  Id                   Int                @id @default(autoincrement())
+  Name                 String
+  Description          String?
+  Color                String?
+  ProductionYear       Int?
+  TransportationTypeId Int
+  transportationtype   transportationtype @relation(fields: [TransportationTypeId], references: [Id])
+  routestation         routestation[]
+  stationroutes        stationroutes[]
+
+  @@index([TransportationTypeId], name: "TransportationTypeId")
+}

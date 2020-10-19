@@ -9,6 +9,7 @@ var Country = db.country;
 var BookshelfCountry = dbBookshelf.Country;
 var TypeORMCountry = require("../models/typeorm/entities/Country.js").Country; 
 var ObjCountry = require("../models/objection/country.js").Country;
+var prisma = require("../prismadb.js").getConnection();
 
 
 
@@ -17,7 +18,18 @@ var getShow = function(req, res){
     var text = "Message";
     var orm = cookie.getOrm(req, res);
     
-    if (orm == "Objection"){
+    if (orm == 'Prisma'){
+        prisma.country.findMany().then(function(data){
+            if (req.session.message){
+                text = req.session.message;
+                req.session.message = null;
+            }
+            var response = {};
+            response.country = data;
+            response.message = text;
+            res.render("country", {countries:response});
+        });
+    }else if (orm == "Objection"){
         ObjCountry.query().then(function(data){
             if (req.session.message){
                 text = req.session.message;
@@ -84,8 +96,23 @@ var getShow = function(req, res){
 var getCountry = function(req, res){
     var reg = new RegExp("[0-9]+");
     var orm = cookie.getOrm(req, res);
+    let id = parseInt(req.query.id);
 
-    if (orm == 'Objection'){
+    if (orm == 'Prisma'){
+        if (!reg.test(req.query.id)){
+            prisma.country.findMany().then(function(data){
+                res.send(data);
+            });
+        }else{
+            prisma.country.findOne({
+                where: {
+                    Id: id
+                }
+            }).then(function(data){
+                res.send(data);
+            });
+        }
+    }else if (orm == 'Objection'){
         if (!reg.test(req.query.id)){
             ObjCountry.query().then(function(data){
                 res.send(data);
@@ -158,10 +185,31 @@ var createCountry = function(req, res){
     var reg = new RegExp("[A-Z]{3}");
     if (!reg.test(req.query.countryCode) || req.query.name == "" || req.query.continentSelect == ""){
         req.query.countryCode = null;
+        req.session.message = "Error when creating data.";
+        res.redirect("show");
+        return;
     }
     var orm = cookie.getOrm(req, res);
+    let size = parseInt(req.query.size);
+    let population = parseInt(req.query.population);
 
-    if (orm == 'Objection'){
+    if (orm == 'Prisma'){
+        prisma.country.create({
+            data:{
+                Name: req.query.name,
+                Code: req.query.countryCode,
+                Size: size,
+                Population: population,
+                Continent: req.query.continentSelect
+            }
+        }).then(function(result){
+            req.session.message = "Record is created in database.";
+            res.redirect("show");
+        }).catch(function(err){
+            req.session.message = "Error when creating data.";
+            res.redirect("show");
+        });
+    }else if (orm == 'Objection'){
         ObjCountry.query().insert({
             Name: req.query.name,
             Code: req.query.countryCode,
@@ -240,10 +288,35 @@ var editCountry = function(req, res){
     var reg = new RegExp("[A-Z]{3}")
     if (!reg.test(req.query.countryCode) || req.query.name == "" || req.query.continentSelect == ""){
         req.query.countryCode = null;
+        req.session.message = "Error when editing data.";
+        res.redirect("show");
+        return;
     }
     var orm = cookie.getOrm(req, res);
+    let id = parseInt(req.query.id);
+    let size = parseInt(req.query.size);
+    let population = parseInt(req.query.population);
 
-    if (orm == 'Objection'){
+    if (orm == 'Prisma'){
+        prisma.country.update({
+            where:{
+                Id: id
+            },
+            data:{
+                Name: req.query.name,
+                Code: req.query.countryCode,
+                Size: size,
+                Population: population,
+                Continent: req.query.continentSelect
+            }
+        }).then(function(result){
+            req.session.message = "Record is edited in database.";
+            res.redirect("show");
+        }).catch(function(err){
+            req.session.message = "Error when editing data.";
+            res.redirect("show");
+        });
+    }else if (orm == 'Objection'){
         ObjCountry.query().update({
             Name: req.query.name,
             Code: req.query.countryCode,
@@ -330,8 +403,25 @@ var editCountry = function(req, res){
 var deleteCountry = function(req, res){
     var response = {};
     var orm = cookie.getOrm(req, res);
+    let id = parseInt(req.query.id);
     
-    if (orm == 'Objection'){
+    if (orm == 'Prisma'){
+        prisma.country.delete({
+            where:{
+                Id: id
+            }
+        }).then(function(){
+            response.message = "Ok";
+            response.id = req.query.id;
+            res.send(response);
+        }).catch(function(err){
+            if (err.name == "SequelizeForeignKeyConstraintError")
+                response.message = "There are City Areas that are from this City, please delete them first!";
+            else
+                response.message = "Error when deleting data."
+            res.send(response);
+        });
+    }else if (orm == 'Objection'){
         ObjCountry.query().deleteById(req.query.id).then(function(){
             response.message = "Ok";
             response.id = req.query.id;

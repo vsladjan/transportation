@@ -4,6 +4,7 @@ const session = require('express-session');
 var knexDb = require("./knexdb.js").createConection();
 var bookshelfDb = require("./bookshelf.js").createConection();
 var objectionDb = require("./objection.js").createConection();
+var prismaDb = require("./prismadb.js").createConection();
 var router = require("./router/router.js");
 var db = require("./sequelize.js");
 const bodyParser = require("body-parser");

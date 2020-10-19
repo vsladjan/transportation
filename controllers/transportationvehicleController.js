@@ -10,13 +10,29 @@ var Vehicle = db.transportationvehicle;
 var BookshelfVehicle = dbBookshelf.Transportationvehicle;
 var TypeORMVehicle = require("../models/typeorm/entities/Transportationvehicle.js").Transportationvehicle;
 var ObjVehicle = require("../models/objection/transportationvehicle").Transportationvehicle;
+var prisma = require("../prismadb.js").getConnection();
 
 
 var getShow = function(req, res){
     var text = "Message";
     var orm = cookie.getOrm(req, res);
     
-    if (orm == 'Objection'){
+    if (orm == 'Prisma'){
+        prisma.transportationvehicle.findMany({
+            include:{
+                transportationtype: true
+            }
+        }).then(function(data){
+            if (req.session.message){
+                text = req.session.message;
+                req.session.message = null;
+            }
+            var response = {};
+            response.vehicle = service.capitalizeKeys(data);
+            response.message = text;
+            res.render("vehicle", {vehicles:response});
+        });
+    }else if (orm == 'Objection'){
         ObjVehicle.query().withGraphFetched('Transportationtype').then(function(data){
             if (req.session.message){
                 text = req.session.message;
@@ -105,8 +121,25 @@ var getShow = function(req, res){
 var getVehicle = function(req, res){
     var reg = new RegExp("[0-9]+");
     var orm = cookie.getOrm(req, res);
-
-    if (orm == 'Objection'){
+    let id = parseInt(req.query.id);
+    if (orm == 'Prisma'){
+        if (!reg.test(req.query.id)){
+            prisma.transportationvehicle.findMany().then(function(data){
+                res.send(data);
+            });
+        }else{
+            prisma.transportationvehicle.findOne({
+                where: {
+                    Id: id
+                },
+                include:{
+                    transportationtype: true
+                }
+            }).then(function(data){
+                res.send(service.capitalizeKeys(data));
+            });
+        }
+    }else if (orm == 'Objection'){
         if (!reg.test(req.query.id)){
             ObjVehicle.query().then(function(data){
                 res.send(data);
@@ -200,12 +233,36 @@ var getVehicle = function(req, res){
 // Create vehicle
 var createVehicle = function(req, res){
     if (req.query.name == ""){
-          req.query.name = null;
+        req.query.name = null;
+        req.session.message = "Error when creating data.";
+        res.redirect("show");
+        return;
     }
     var orm = cookie.getOrm(req, res);
+    let typeSelect = parseInt(req.query.typeSelect);
+    let productionYear = parseInt(req.query.productionYear);
 
-
-    if (orm == 'Objection'){
+    if (orm == 'Prisma'){
+        prisma.transportationvehicle.create({
+            data:{
+                Name: req.query.name,
+                Description: req.query.description,
+                Color: req.query.color,
+                ProductionYear: productionYear,
+                transportationtype: {
+                    connect:{
+                        Id: typeSelect
+                    }
+                }
+            }
+        }).then(function(result){
+            req.session.message = "Record is created in database.";
+            res.redirect("show");
+        }).catch(function(err){
+            req.session.message = "Error when creating data.";
+            res.redirect("show");
+        });
+    }else if (orm == 'Objection'){
         ObjVehicle.query().insert({
             Name: req.query.name,
             Description: req.query.description,
@@ -283,10 +340,39 @@ var createVehicle = function(req, res){
 var editVehicle = function(req, res){
     if (req.query.name == ""){
         req.query.name = null;
+        req.session.message = "Error when editing data.";
+        res.redirect("show");
+        return;
     }
     var orm = cookie.getOrm(req, res);
+    let id = parseInt(req.query.id);
+    let typeSelect = parseInt(req.query.typeSelect);
+    let productionYear = parseInt(req.query.productionYear);
 
-    if (orm == 'Objection'){
+    if (orm == 'Prisma'){
+        prisma.transportationvehicle.update({
+            where:{
+                Id: id
+            },
+            data:{
+                Name: req.query.name,
+                Description: req.query.description,
+                Color: req.query.color,
+                ProductionYear: productionYear,
+                transportationtype: {
+                    connect:{
+                        Id: typeSelect
+                    }
+                }
+            }
+        }).then(function(result){
+            req.session.message = "Record is created in database.";
+            res.redirect("show");
+        }).catch(function(err){
+            req.session.message = "Error when creating data.";
+            res.redirect("show");
+        });
+    }else if (orm == 'Objection'){
         ObjVehicle.query().update({
             Name: req.query.name,
             Description: req.query.description,
@@ -375,7 +461,25 @@ var deleteVehicle = function(req, res){
   var response = {};
   var orm = cookie.getOrm(req, res);
     
-  if (orm == 'Objection'){
+  let id = parseInt(req.query.id);
+    
+    if (orm == 'Prisma'){
+        prisma.transportationvehicle.delete({
+            where:{
+                Id: id
+            }
+        }).then(function(){
+            response.message = "Ok";
+            response.id = req.query.id;
+            res.send(response);
+        }).catch(function(err){
+            if (err.name == "SequelizeForeignKeyConstraintError")
+                response.message = "There are City Areas that are from this City, please delete them first!";
+            else
+                response.message = "Error when deleting data."
+            res.send(response);
+        });
+    }else if (orm == 'Objection'){
     ObjVehicle.query().deleteById(req.query.id).then(function(){
         response.message = "Ok";
         response.id = req.query.id;
