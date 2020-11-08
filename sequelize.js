@@ -25,14 +25,14 @@ const sequelize = new Sequelize('transportation', config.db_username, config.db_
   db.sequelize = sequelize;
 
 //Models/tables
-db.country = require('./models/country.js')(sequelize, Sequelize)
-db.city = require('./models/city.js')(sequelize, Sequelize)
-db.cityarea = require('./models/cityarea.js')(sequelize, Sequelize)
-db.station = require('./models/station.js')(sequelize, Sequelize)
-db.transportationtype = require('./models/transportationtype.js')(sequelize, Sequelize)
-db.transportationvehicle = require('./models/transportationvehicle.js')(sequelize, Sequelize)
-db.route = require('./models/route.js')(sequelize, Sequelize)
-db.routestation = require('./models/routestation.js')(sequelize, Sequelize)
+db.country = require('./models/sequelize/country.js')(sequelize, Sequelize)
+db.city = require('./models/sequelize/city.js')(sequelize, Sequelize)
+db.cityarea = require('./models/sequelize/cityarea.js')(sequelize, Sequelize)
+db.station = require('./models/sequelize/station.js')(sequelize, Sequelize)
+db.transportationtype = require('./models/sequelize/transportationtype.js')(sequelize, Sequelize)
+db.transportationvehicle = require('./models/sequelize/transportationvehicle.js')(sequelize, Sequelize)
+db.route = require('./models/sequelize/route.js')(sequelize, Sequelize)
+db.routestation = require('./models/sequelize/routestation.js')(sequelize, Sequelize)
 db.city.belongsTo(db.country);
 db.cityarea.belongsTo(db.city);
 db.station.belongsTo(db.cityarea);
