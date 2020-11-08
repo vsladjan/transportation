@@ -9,13 +9,27 @@ var Route = db.route;
 var BookshelfRoute = dbBookshelf.Route;
 var TypeORMRoute = require("../models/typeorm/entities/Route.js").Route;
 var ObjRoute = require("../models/objection/route.js").Route;
+var mikroDI = require("../mikroormdb.js").DI;
+var MRoute = require('../models/mikroorm/entities/Route.js').Route;
 
 
 var getShow = function(req, res){
     var text = "Message";
     var orm = cookie.getOrm(req, res);
     
-    if (orm == 'Objection'){
+    if (orm == 'MikroORM'){
+        let routeRepository = mikroDI.em.fork().getRepository(MRoute);
+        routeRepository.findAll().then(function(data){
+            if (req.session.message){
+                text = req.session.message;
+                req.session.message = null;
+            }
+            var response = {};
+            response.route = data;
+            response.message = text;
+            res.render("route", {routes:response});
+        });
+    }else if (orm == 'Objection'){
         ObjRoute.query().then(function(data){
             if (req.session.message){
                 text = req.session.message;
@@ -82,7 +96,19 @@ var getRoute = function(req, res){
     var reg = new RegExp("[0-9]+");
     var orm = cookie.getOrm(req, res);
 
-    if (orm == 'Objection'){
+    if (orm == 'MikroORM'){
+        if (!reg.test(req.query.id)){
+            let routeRepository = mikroDI.em.fork().getRepository(MRoute);
+            routeRepository.findAll().then(function(data){
+                res.send(data);
+            });
+        }else{
+            let routeRepository = mikroDI.em.fork().getRepository(MRoute);
+            routeRepository.findOne(req.query.id).then(function(data){
+                res.send(data);
+            });
+        }
+    }else if (orm == 'Objection'){
         if (!reg.test(req.query.id)){
             ObjRoute.query().then(function(data){
                 res.send(data);
@@ -155,7 +181,20 @@ var createRoute = function(req, res){
     }
     var orm = cookie.getOrm(req, res);
 
-    if (orm == 'Objection'){
+    if (orm == 'MikroORM'){
+        let em = mikroDI.em.fork();
+        let mRoute = new MRoute(
+            req.query.name,
+            req.query.description
+        );
+        em.persistAndFlush(mRoute).then(function(result){
+            req.session.message = "Record is created in database.";
+            res.redirect("show");
+        }).catch(function(err){
+            req.session.message = "Error when creating data.";
+            res.redirect("show");
+        });
+    }else if (orm == 'Objection'){
         ObjRoute.query().insert({
             Name: req.query.name,
             Description: req.query.description 
@@ -215,13 +254,25 @@ var createRoute = function(req, res){
 }
 
 // Edit Route
-var editRoute = function(req, res){
+var editRoute = async function(req, res){
     if (req.query.name == ""){
         req.query.name = null;
     }
     var orm = cookie.getOrm(req, res);
 
-    if (orm == 'Objection'){
+    if (orm == 'MikroORM'){
+        let em = mikroDI.em.fork();
+        let mRoute = await em.findOne(MRoute, req.query.id);
+        mRoute.Name = req.query.name;
+        mRoute.Description = req.query.description;
+        em.flush(mRoute).then(function(result){
+            req.session.message = "Record is edited in database.";
+            res.redirect("show");
+        }).catch(function(err){
+            req.session.message = "Error when editing data.";
+            res.redirect("show");
+        });
+    }else if (orm == 'Objection'){
         ObjRoute.query().update({
             Name: req.query.name,
             Description: req.query.description
@@ -291,11 +342,25 @@ var editRoute = function(req, res){
 }
 
 // Delete Route
-var deleteRoute = function(req, res){
+var deleteRoute = async function(req, res){
     var response = {};
     var orm = cookie.getOrm(req, res);
     
-    if (orm == 'Objection'){
+    if (orm == 'MikroORM'){
+        let routeRepository = mikroDI.em.fork().getRepository(MRoute);
+        let record = await routeRepository.findOne(req.query.id);
+        routeRepository.removeAndFlush(record).then(function(){
+            response.message = "Ok";
+            response.id = req.query.id;
+            res.send(response);
+        }).catch(function(err){
+            if (err.name == "SequelizeForeignKeyConstraintError")
+                response.message = "There are City Areas that are from this City, please delete them first!";
+            else
+                response.message = "Error when deleting data."
+            res.send(response);
+        });
+    }else if (orm == 'Objection'){
         ObjRoute.query().deleteById(req.query.id).then(function(){
             response.message = "Ok";
             response.id = req.query.id;

@@ -15,6 +15,9 @@
     "ejs": "^3.0.1",
     "express": "^4.17.1",
     "express-session": "^1.17.0",
+    "@mikro-orm/core": "^4.2.3",
+    "@mikro-orm/mariadb": "^4.2.3",
+    "@mikro-orm/mysql": "^4.2.3",
     "knex": "^0.21.5",
     "mysql": "^2.18.1",
     "mysql2": "^2.1.0",
@@ -28,5 +31,10 @@
   },
   "devDependencies": {
     "@types/node": "^14.11.1"
+  },
+  "mikro-orm": {
+    "configPaths": [
+      "./mikro-orm.config.js"
+    ]
   }
 }

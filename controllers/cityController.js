@@ -10,14 +10,31 @@ var Country = db.country;
 var BookshelfCity = dbBookshelf.City;
 var TypeORMCity = require("../models/typeorm/entities/City.js").City;
 var ObjCity = require("../models/objection/city.js").City;
+var mikroDI = require("../mikroormdb.js").DI;
+var MCity = require('../models/mikroorm/entities/City.js').City;
+var MCountry = require('../models/mikroorm/entities/Country.js').Country;
   
 
-var getShow = function(req, res){
+var getShow = async function(req, res){
     var text = "Message";
     var orm = cookie.getOrm(req, res);
     console.log("getshow" + orm);
 
-    if (orm == 'Objection'){
+
+
+    if (orm == 'MikroORM'){
+        let cityRepository = mikroDI.em.fork().getRepository(MCity);
+        cityRepository.findAll(['Country']).then(function(data){
+            if (req.session.message){
+                text = req.session.message;
+                req.session.message = null;
+            }
+            var response = {};
+            response.city = data;
+            response.message = text;
+            res.render("city", {cities:response});
+        });
+    }else if (orm == 'Objection'){
         ObjCity.query().withGraphFetched('Country').then(function(data){
             if (req.session.message){
                 text = req.session.message;
@@ -103,7 +120,21 @@ var getCity = function(req, res){
     var reg = new RegExp("[0-9]+");
     var orm = cookie.getOrm(req, res);
 
-    if (orm == 'Objection'){
+    if (orm == 'MikroORM'){
+        if (!reg.test(req.query.id)){
+            let cityRepository = mikroDI.em.fork().getRepository(MCity);
+            cityRepository.findAll().then(function(data){
+                res.send(data);
+            });
+        }else{
+            let cityRepository = mikroDI.em.fork().getRepository(MCity);
+            cityRepository.findOne(req.query.id, ['Country']).then(function(data){
+                let jsonObj = data.toJSON();
+                jsonObj.CountryId = data.Country.Id;
+                res.send(jsonObj);
+            });
+        }
+    }else if (orm == 'Objection'){
         if (!reg.test(req.query.id)){
             ObjCity.query().then(function(data){
                 res.send(data);
@@ -191,14 +222,29 @@ var getCity = function(req, res){
 }
 
 // Create city
-var createCity = function(req, res){
+var createCity = async function(req, res){
     if (req.query.name == ""){
           req.query.name = null;
     }
     var orm = cookie.getOrm(req, res);
-   
 
-    if (orm == 'Objection'){
+    if (orm == 'MikroORM'){
+        let em = mikroDI.em.fork();
+        let mCountry =  await em.findOne(MCountry, req.query.countrySelect);
+        let mCity = new MCity(
+            req.query.name,
+            req.query.population,
+            req.query.size
+        );
+        mCity.Country = mCountry;
+        em.persistAndFlush(mCity).then(function(result){
+            req.session.message = "Record is created in database.";
+            res.redirect("show");
+        }).catch(function(err){
+            req.session.message = "Error when creating data.";
+            res.redirect("show");
+        });
+    }else if (orm == 'Objection'){
         ObjCity.query().insert({
             Name: req.query.name,
             Population: req.query.population,
@@ -268,13 +314,29 @@ var createCity = function(req, res){
 }
 
 // Edit City
-var editCity = function(req, res){
+var editCity = async function(req, res){
     if (req.query.name == ""){
         req.query.name = null;
     }
     var orm = cookie.getOrm(req, res);
 
-    if (orm == 'Objection'){
+    if (orm == 'MikroORM'){
+        let em = mikroDI.em.fork();
+        let mCity = await em.findOne(MCity, req.query.id);
+        let mCountry = await em.findOne(MCountry, req.query.countrySelect);
+        mCity.Name = req.query.name;
+        mCity.Population = req.query.population;
+        mCity.Size = req.query.size
+        mCity.CountryId = req.query.countrySelect;
+        mCity.Country = mCountry;
+        em.flush(mCity).then(function(result){
+            req.session.message = "Record is edited in database.";
+            res.redirect("show");
+        }).catch(function(err){
+            req.session.message = "Error when editing data.";
+            res.redirect("show");
+        });
+    }else if (orm == 'Objection'){
         ObjCity.query().update({
             Name: req.query.name,
             Population: req.query.population,
@@ -354,11 +416,25 @@ var editCity = function(req, res){
 }
 
 // Delete City
-var deleteCity = function(req, res){
+var deleteCity = async function(req, res){
     var response = {};
     var orm = cookie.getOrm(req, res);
     
-    if (orm == 'Objection'){
+    if (orm == 'MikroORM'){
+        let cityRepository = mikroDI.em.fork().getRepository(MCity);
+        let record = await cityRepository.findOne(req.query.id);
+        cityRepository.removeAndFlush(record).then(function(){
+            response.message = "Ok";
+            response.id = req.query.id;
+            res.send(response);
+        }).catch(function(err){
+            if (err.name == "SequelizeForeignKeyConstraintError")
+                response.message = "There are City Areas that are from this City, please delete them first!";
+            else
+                response.message = "Error when deleting data."
+            res.send(response);
+        });
+    }else if (orm == 'Objection'){
         ObjCity.query().deleteById(req.query.id).then(function(){
             response.message = "Ok";
             response.id = req.query.id;

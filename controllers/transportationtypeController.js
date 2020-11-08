@@ -9,6 +9,8 @@ var TransportationType = db.transportationtype;
 var BookshelfTransportationtype = dbBookshelf.Transportationtype;
 var TypeORMTransportationtype = require("../models/typeorm/entities/Transportationtype.js").Transportationtype;
 var ObjType = require("../models/objection/transportationtype.js").Transportationtype;
+var mikroDI = require("../mikroormdb.js").DI;
+var MType = require('../models/mikroorm/entities/Transportationtype.js').Transportationtype;
 
 
 // Show all types
@@ -16,7 +18,19 @@ var getShow = function(req, res){
     var text = "Message";
     var orm = cookie.getOrm(req, res);
     
-    if (orm == 'Objection'){
+    if (orm == 'MikroORM'){
+        let typeRepository = mikroDI.em.fork().getRepository(MType);
+        typeRepository.findAll().then(function(data){
+            if (req.session.message){
+                text = req.session.message;
+                req.session.message = null;
+            }
+            var response = {};
+            response.type = data;
+            response.message = text;
+            res.render("type", {types:response});
+        });
+    }else if (orm == 'Objection'){
         ObjType.query().then(function(data){
             if (req.session.message){
                 text = req.session.message;
@@ -86,7 +100,19 @@ var getType = function(req, res){
     var reg = new RegExp("[0-9]+");
     var orm = cookie.getOrm(req, res);
 
-    if (orm == 'Objection'){
+    if (orm == 'MikroORM'){
+        if (!reg.test(req.query.id)){
+            let typeRepository = mikroDI.em.fork().getRepository(MType);
+            typeRepository.findAll().then(function(data){
+                res.send(data);
+            });
+        }else{
+            let typeRepository = mikroDI.em.fork().getRepository(MType);
+            typeRepository.findOne(req.query.id).then(function(data){
+                res.send(data);
+            });
+        }
+    }else if (orm == 'Objection'){
         if (!reg.test(req.query.id)){
             ObjType.query().then(function(data){
                 res.send(data);
@@ -164,7 +190,19 @@ var createType = function(req, res){
     }
     var orm = cookie.getOrm(req, res);
 
-    if (orm == 'Objection'){
+    if (orm == 'MikroORM'){
+        let em = mikroDI.em.fork();
+        let mType = new MType(
+            req.query.name
+        );
+        em.persistAndFlush(mType).then(function(result){
+            req.session.message = "Record is created in database.";
+            res.redirect("show");
+        }).catch(function(err){
+            req.session.message = "Error when creating data.";
+            res.redirect("show");
+        });
+    }else if (orm == 'Objection'){
         ObjType.query().insert({
             Name: req.query.name,
         }).then(function(result){
@@ -219,13 +257,24 @@ var createType = function(req, res){
 }
 
 // Edit transportation type
-var editType = function(req, res){
+var editType = async function(req, res){
     if (req.query.name == ""){
         req.query.name = null;
     }
     var orm = cookie.getOrm(req, res);
 
-    if (orm == 'Objection'){
+    if (orm == 'MikroORM'){
+        let em = mikroDI.em.fork();
+        let mType = await em.findOne(MType, req.query.id);
+        mType.Name = req.query.name;
+        em.flush(mType).then(function(result){
+            req.session.message = "Record is edited in database.";
+            res.redirect("show");
+        }).catch(function(err){
+            req.session.message = "Error when editing data.";
+            res.redirect("show");
+        });
+    }else if (orm == 'Objection'){
         ObjType.query().update({
             Name: req.query.name
         }).where({Id: req.query.id}).then(function(result){
@@ -290,11 +339,25 @@ var editType = function(req, res){
 }
 
 // Delete type
-var deleteType = function(req, res){
+var deleteType = async function(req, res){
     var response = {};
     var orm = cookie.getOrm(req, res);
     
-    if (orm == 'Objection'){
+    if (orm == 'MikroORM'){
+        let typeRepository = mikroDI.em.fork().getRepository(MType);
+        let record = await typeRepository.findOne(req.query.id);
+        typeRepository.removeAndFlush(record).then(function(){
+            response.message = "Ok";
+            response.id = req.query.id;
+            res.send(response);
+        }).catch(function(err){
+            if (err.name == "SequelizeForeignKeyConstraintError")
+                response.message = "There are City Areas that are from this City, please delete them first!";
+            else
+                response.message = "Error when deleting data."
+            res.send(response);
+        });
+    }else if (orm == 'Objection'){
         ObjType.query().deleteById(req.query.id).then(function(){
             response.message = "Ok";
             response.id = req.query.id;
