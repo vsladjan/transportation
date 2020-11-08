@@ -58,11 +58,14 @@ $(document).ready(function(){
     });
 
     $("button[name='delete']").click(function(){
+        var datatable = $('#data').DataTable();
+        var datarow = $(this).parents('tr');
         $.ajax({
             type: "GET",
             contentType: "application/json",
             url: "/transportation/country/delete?id=" + this.id.substr(7),
             success: function(data){
+                datatable.row($(datarow)).remove().draw(false);
                 if (data.message == "Ok"){
                     $("#delete_" + data.id).parent().parent().remove();
                     $('#message').css('background-color', 'green');

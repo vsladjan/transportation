@@ -140,6 +140,8 @@ $(document).ready(function(){
     });
 
     $("button[name='delete']").click(function(){
+        var datatable = $('#data').DataTable();
+        var datarow = $(this).parents('tr');
         var values=[], i=0;
         $row = $(this).closest('tr');
         $row.find('td').each(function() {
@@ -157,7 +159,7 @@ $(document).ready(function(){
             },
             success: function(data){
                 if (data.message == "Ok"){
-                    $row.remove();
+                    datatable.row($(datarow)).remove().draw(false);
                     $('#message').css('background-color', 'green');
                     $("#message").show();
                     $("#messageText").text("Record is successfully deleted!");
