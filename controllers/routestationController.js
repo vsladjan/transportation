@@ -12,13 +12,38 @@ var Vehicle = db.transportationvehicle;
 var BookshelfRoutestation = dbBookshelf.Routestation;
 var TypeORMRoutestation = require("../models/typeorm/entities/Routestation.js").Routestation;
 var ObjRS = require("../models/objection/routestation.js").Routestation;
+var mikroDI = require("../mikroormdb.js").DI;
+var MRoutestation = require('../models/mikroorm/entities/Routestation.js').Routestation;
+var MRoute = require('../models/mikroorm/entities/Route.js').Route;
+var MStation = require('../models/mikroorm/entities/Station.js').Station;
+var MVehicle = require('../models/mikroorm/entities/Transportationvehicle.js').Transportationvehicle;
 
 
-var getShow = function(req, res){
+var getShow = async function(req, res){
     var text = "Message";
     var orm = cookie.getOrm(req, res);
+
     
-    if (orm == 'Objection'){
+    if (orm == 'MikroORM'){
+        let rsRepository = mikroDI.em.fork().getRepository(MRoutestation);
+        rsRepository.findAll(['Route', 'Station', 'Transportationvehicle']).then(function(data){
+            let jsonObj = [];
+            data.forEach(element => {
+                element.RouteId = element.Route.Id;
+                element.StationId = element.Station.Id;
+                element.TransportationVehicleId = element.Transportationvehicle.Id;
+                jsonObj.push(element);
+            });
+            if (req.session.message){
+                text = req.session.message;
+                req.session.message = null;
+            }
+            var response = {};
+            response.routestation = jsonObj;
+            response.message = text;
+            res.render("routestation", {routestations:response});
+        });
+    }else if (orm == 'Objection'){
         ObjRS.query().withGraphFetched(
                 'Station'
             ).withGraphFetched(
@@ -128,8 +153,29 @@ var getShow = function(req, res){
 var getRoutestation = function(req, res){
     var reg = new RegExp("[0-9]+");
     var orm = cookie.getOrm(req, res);
-
-    if (orm == 'Objection'){
+    console.log(orm);
+    if (orm == 'MikroORM'){
+        if (!reg.test(req.query.routeId)){
+            let routestationRepository = mikroDI.em.fork().getRepository(MRoutestation);
+            routestationRepository.findAll().then(function(data){
+                res.send(data);
+            });
+        }else{
+            let routestationRepository = mikroDI.em.fork().getRepository(MRoutestation);
+            routestationRepository.findOne({ $and:[
+                {'RouteId': req.query.routeId},
+                {'StationId': req.query.stationId},
+                {'TransportationVehicleId': req.query.vehicleId},
+                {'Time': req.query.time},
+            ]},['Route', 'Station', 'Transportationvehicle']).then(function(data){
+                let jsonObj = data.toJSON();
+                jsonObj.RouteId = data.Route.Id;
+                jsonObj.StationId = data.Station.Id;
+                jsonObj.TransportationVehicleId = data.Transportationvehicle.Id;
+                res.send(jsonObj);
+            });
+        }
+    }else if (orm == 'Objection'){
         if (!reg.test(req.query.routeId)){
             ObjRS.query().then(function(data){
                 res.send(data);
@@ -265,13 +311,32 @@ var getRoutestation = function(req, res){
 }
 
 // Create routestation
-var createRoutestation = function(req, res){
+var createRoutestation = async function(req, res){
     if (req.query.type == "" || req.query.time == ""){
           req.query.type = null;
     }
     var orm = cookie.getOrm(req, res);
 
-    if (orm == 'Objection'){
+    if (orm == 'MikroORM'){
+        let em = mikroDI.em.fork();
+        let mRoute =  await em.findOne(MRoute, req.query.routeSelect);
+        let mStation =  await em.findOne(MStation, req.query.stationSelect);
+        let mVehicle =  await em.findOne(MVehicle, req.query.vehicleSelect);
+        let mRoutestation = new MRoutestation();
+        mRoutestation.Route = mRoute;
+        mRoutestation.Station = mStation;
+        mRoutestation.Transportationvehicle = mVehicle;
+        mRoutestation.Time = req.query.time;
+        mRoutestation.Type = req.query.type;
+
+        em.persistAndFlush(mRoutestation).then(function(result){
+            req.session.message = "Record is created in database.";
+            res.redirect("show");
+        }).catch(function(err){
+            req.session.message = "Error when creating data.";
+            res.redirect("show");
+        });
+    }else if (orm == 'Objection'){
         ObjRS.query().insert({
             StationId: req.query.stationSelect,
             RouteId: req.query.routeSelect,
@@ -346,14 +411,46 @@ var createRoutestation = function(req, res){
 }
 
 // Edit Rotuestation
-var editRoutestation = function(req, res){
+var editRoutestation = async function(req, res){
     var response = {};
     if (req.query.type == "" || req.query.time == ""){
         req.query.type = null;
     }
     var orm = cookie.getOrm(req, res);
 
-    if (orm == 'Objection'){
+    if (orm == 'MikroORM'){
+        let em = mikroDI.em.fork();
+        let mRoute =  await em.findOne(MRoute, req.query.routeId);
+        let mStation =  await em.findOne(MStation, req.query.stationId);
+        let mVehicle =  await em.findOne(MVehicle, req.query.vehicleId);
+        let mRoutestation = await em.findOne(
+            MRoutestation,
+            { $and:[
+                {'RouteId': req.query.oldRouteId},
+                {'StationId': req.query.oldStationId},
+                {'TransportationVehicleId': req.query.oldVehicleId},
+                {'Time': req.query.oldTime},
+            ]},
+            ['Route', 'Station', 'Transportationvehicle']
+        );
+
+        await em.remove(mRoutestation);
+        mRoutestation = new MRoutestation();
+        mRoutestation.Route = mRoute;
+        mRoutestation.Station = mStation;
+        mRoutestation.Transportationvehicle = mVehicle;
+        mRoutestation.Time = req.query.time;
+        mRoutestation.Type = req.query.type;
+        await em.persist(mRoutestation);
+
+        em.flush().then(function(result){
+            response.message = "Record is edited in database.";
+            res.send(response);
+        }).catch(function(err){
+            response.message = "Error when editing data.";
+            res.send(response);
+        });
+    }else if (orm == 'Objection'){
         ObjRS.query().update({
             StationId: req.query.stationId,
             RouteId: req.query.routeId,
@@ -459,11 +556,36 @@ var editRoutestation = function(req, res){
 }
 
 // Delete Routestation
-var deleteRoutestation = function(req, res){
+var deleteRoutestation = async function(req, res){
     var response = {};
     var orm = cookie.getOrm(req, res);
     
-    if (orm == 'Objection'){
+    if (orm == 'MikroORM'){
+        let em = mikroDI.em.fork();
+        let mRoutestation = await em.findOne(
+            MRoutestation,
+            { $and:[
+                {'RouteId': req.query.routeId},
+                {'StationId': req.query.stationId},
+                {'TransportationVehicleId': req.query.vehicleId},
+                {'Time': req.query.time},
+            ]},
+            ['Route', 'Station', 'Transportationvehicle']
+        );
+
+        em.remove(mRoutestation);
+        em.flush().then(function(){
+            response.message = "Ok";
+            response.id = req.query.id;
+            res.send(response);
+        }).catch(function(err){
+            if (err.name == "SequelizeForeignKeyConstraintError")
+                response.message = "There are City Areas that are from this City, please delete them first!";
+            else
+                response.message = "Error when deleting data."
+            res.send(response);
+        });
+    }else if (orm == 'Objection'){
         ObjRS.query().deleteById([
             req.query.stationId,
             req.query.routeId,
