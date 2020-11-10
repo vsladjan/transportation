@@ -185,15 +185,15 @@ var getType = function(req, res){
 
 // Create transportation type
 var createType = function(req, res){
-    if (req.query.name == ""){
-        req.query.name = null;
+    if (req.body.name == ""){
+        req.body.name = null;
     }
     var orm = cookie.getOrm(req, res);
 
     if (orm == 'MikroORM'){
         let em = mikroDI.em.fork();
         let mType = new MType(
-            req.query.name
+            req.body.name
         );
         em.persistAndFlush(mType).then(function(result){
             req.session.message = "Record is created in database.";
@@ -204,7 +204,7 @@ var createType = function(req, res){
         });
     }else if (orm == 'Objection'){
         ObjType.query().insert({
-            Name: req.query.name,
+            Name: req.body.name,
         }).then(function(result){
             req.session.message = "Record is created in database.";
             res.redirect("show");
@@ -214,7 +214,7 @@ var createType = function(req, res){
         });
     }else if (orm == 'Knex'){
         knex("transportationtype").insert({
-            Name: req.query.name
+            Name: req.body.name
         }).then(function(result){
             req.session.message = "Record is created in database.";
             res.redirect("show");
@@ -225,7 +225,7 @@ var createType = function(req, res){
     }else if (orm == 'TypeORM'){
         const typeRepository = typeorm.getConnection().getRepository(TypeORMTransportationtype);
         let typeORMType = new TypeORMTransportationtype();
-        typeORMType.name = req.query.name;
+        typeORMType.name = req.body.name;
         typeRepository.save(typeORMType).then(function(result){
             req.session.message = "Record is created in database.";
             res.redirect("show");
@@ -235,7 +235,7 @@ var createType = function(req, res){
         });
     }else if (orm == 'Bookshelf'){
         BookshelfTransportationtype.forge({
-            Name: req.query.name
+            Name: req.body.name
         }).save().then(function(result){
             req.session.message = "Record is created in database.";
             res.redirect("show");
@@ -245,7 +245,7 @@ var createType = function(req, res){
         });
     }else if (orm == 'Sequelize'){
         TransportationType.create({
-            Name: req.query.name
+            Name: req.body.name
         }).then(function(result){
             req.session.message = "Record is created in database.";
             res.redirect("show");
@@ -258,15 +258,15 @@ var createType = function(req, res){
 
 // Edit transportation type
 var editType = async function(req, res){
-    if (req.query.name == ""){
-        req.query.name = null;
+    if (req.body.name == ""){
+        req.body.name = null;
     }
     var orm = cookie.getOrm(req, res);
 
     if (orm == 'MikroORM'){
         let em = mikroDI.em.fork();
-        let mType = await em.findOne(MType, req.query.id);
-        mType.Name = req.query.name;
+        let mType = await em.findOne(MType, req.body.id);
+        mType.Name = req.body.name;
         em.flush(mType).then(function(result){
             req.session.message = "Record is edited in database.";
             res.redirect("show");
@@ -276,8 +276,8 @@ var editType = async function(req, res){
         });
     }else if (orm == 'Objection'){
         ObjType.query().update({
-            Name: req.query.name
-        }).where({Id: req.query.id}).then(function(result){
+            Name: req.body.name
+        }).where({Id: req.body.id}).then(function(result){
             req.session.message = "Record is edited in database.";
             res.redirect("show");
         }).catch(function(err){
@@ -285,8 +285,8 @@ var editType = async function(req, res){
             res.redirect("show");
         });;
     }else if (orm == 'Knex'){
-        knex("transportationtype").where("Id", req.query.id).update({
-            Name: req.query.name
+        knex("transportationtype").where("Id", req.body.id).update({
+            Name: req.body.name
         }).then(function(result){
             req.session.message = "Record is created in database.";
             res.redirect("show");
@@ -297,9 +297,9 @@ var editType = async function(req, res){
     }else if (orm == 'TypeORM'){
         const typeRepository = typeorm.getConnection().getRepository(TypeORMTransportationtype);
         let typeORMType = new TypeORMTransportationtype();
-        let id = parseInt(req.query.id);
+        let id = parseInt(req.body.id);
         typeORMType.id = id;
-        typeORMType.name = req.query.name;
+        typeORMType.name = req.body.name;
         typeRepository.save(typeORMType).then(function(result){
             req.session.message = "Record is created in database.";
             res.redirect("show");
@@ -309,9 +309,9 @@ var editType = async function(req, res){
         });
     }else if (orm == 'Bookshelf'){
         BookshelfTransportationtype.where({
-            Id: req.query.id
+            Id: req.body.id
         }).save({
-            Name: req.query.name
+            Name: req.body.name
         },{
             method: 'update',
             patch:true
@@ -324,10 +324,10 @@ var editType = async function(req, res){
         });
     }else if (orm == 'Sequelize'){
         TransportationType.update({
-            Name: req.query.name
+            Name: req.body.name
         },
         {
-        where: {Id: req.query.id}
+        where: {Id: req.body.id}
         }).then(function(result){
             req.session.message = "Record is edited in database.";
             res.redirect("show");

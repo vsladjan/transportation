@@ -312,22 +312,22 @@ var getRoutestation = function(req, res){
 
 // Create routestation
 var createRoutestation = async function(req, res){
-    if (req.query.type == "" || req.query.time == ""){
-          req.query.type = null;
+    if (req.body.type == "" || req.body.time == ""){
+          req.body.type = null;
     }
     var orm = cookie.getOrm(req, res);
 
     if (orm == 'MikroORM'){
         let em = mikroDI.em.fork();
-        let mRoute =  await em.findOne(MRoute, req.query.routeSelect);
-        let mStation =  await em.findOne(MStation, req.query.stationSelect);
-        let mVehicle =  await em.findOne(MVehicle, req.query.vehicleSelect);
+        let mRoute =  await em.findOne(MRoute, req.body.routeSelect);
+        let mStation =  await em.findOne(MStation, req.body.stationSelect);
+        let mVehicle =  await em.findOne(MVehicle, req.body.vehicleSelect);
         let mRoutestation = new MRoutestation();
         mRoutestation.Route = mRoute;
         mRoutestation.Station = mStation;
         mRoutestation.Transportationvehicle = mVehicle;
-        mRoutestation.Time = req.query.time;
-        mRoutestation.Type = req.query.type;
+        mRoutestation.Time = req.body.time;
+        mRoutestation.Type = req.body.type;
 
         em.persistAndFlush(mRoutestation).then(function(result){
             req.session.message = "Record is created in database.";
@@ -338,11 +338,11 @@ var createRoutestation = async function(req, res){
         });
     }else if (orm == 'Objection'){
         ObjRS.query().insert({
-            StationId: req.query.stationSelect,
-            RouteId: req.query.routeSelect,
-            TransportationVehicleId: req.query.vehicleSelect,
-            Time: req.query.time,
-            Type: req.query.type
+            StationId: req.body.stationSelect,
+            RouteId: req.body.routeSelect,
+            TransportationVehicleId: req.body.vehicleSelect,
+            Time: req.body.time,
+            Type: req.body.type
         }).then(function(result){
             req.session.message = "Record is created in database.";
             res.redirect("show");
@@ -352,11 +352,11 @@ var createRoutestation = async function(req, res){
         });
     }else if (orm == 'Knex'){
         knex("routestation").insert({
-            StationId: req.query.stationSelect,
-            RouteId: req.query.routeSelect,
-            TransportationVehicleId: req.query.vehicleSelect,
-            Time: req.query.time,
-            Type: req.query.type 
+            StationId: req.body.stationSelect,
+            RouteId: req.body.routeSelect,
+            TransportationVehicleId: req.body.vehicleSelect,
+            Time: req.body.time,
+            Type: req.body.type 
         }).then(function(result){
             req.session.message = "Record is created in database.";
             res.redirect("show");
@@ -367,11 +367,11 @@ var createRoutestation = async function(req, res){
     }else if (orm == 'TypeORM'){
         const rsRepository = typeorm.getConnection().getRepository(TypeORMRoutestation);
         let typeORMrs = new TypeORMRoutestation();
-        typeORMrs.stationId = req.query.stationSelect;
-        typeORMrs.routeId = req.query.routeSelect;
-        typeORMrs.transportationVehicleId = req.query.vehicleSelect;
-        typeORMrs.time = req.query.time;
-        typeORMrs.type = req.query.type ;
+        typeORMrs.stationId = req.body.stationSelect;
+        typeORMrs.routeId = req.body.routeSelect;
+        typeORMrs.transportationVehicleId = req.body.vehicleSelect;
+        typeORMrs.time = req.body.time;
+        typeORMrs.type = req.body.type ;
         rsRepository.insert(typeORMrs).then(function(result){
             req.session.message = "Record is created in database.";
             res.redirect("show");
@@ -381,11 +381,11 @@ var createRoutestation = async function(req, res){
         });
     }else if (orm == 'Bookshelf'){
         BookshelfRoutestation.forge({
-            StationId: req.query.stationSelect,
-            RouteId: req.query.routeSelect,
-            TransportationVehicleId: req.query.vehicleSelect,
-            Time: req.query.time,
-            Type: req.query.type 
+            StationId: req.body.stationSelect,
+            RouteId: req.body.routeSelect,
+            TransportationVehicleId: req.body.vehicleSelect,
+            Time: req.body.time,
+            Type: req.body.type 
         }).save(null, {method: "insert"}).then(function(result){
             req.session.message = "Record is created in database.";
             res.redirect("show");
@@ -395,11 +395,11 @@ var createRoutestation = async function(req, res){
         });
     }else if (orm == 'Sequelize'){
         Routestation.create({
-            StationId: req.query.stationSelect,
-            RouteId: req.query.routeSelect,
-            TransportationVehicleId: req.query.vehicleSelect,
-            Time: req.query.time,
-            Type: req.query.type
+            StationId: req.body.stationSelect,
+            RouteId: req.body.routeSelect,
+            TransportationVehicleId: req.body.vehicleSelect,
+            Time: req.body.time,
+            Type: req.body.type
         }).then(function(result){
             req.session.message = "Record is created in database.";
             res.redirect("show");
@@ -413,23 +413,23 @@ var createRoutestation = async function(req, res){
 // Edit Rotuestation
 var editRoutestation = async function(req, res){
     var response = {};
-    if (req.query.type == "" || req.query.time == ""){
-        req.query.type = null;
+    if (req.body.type == "" || req.body.time == ""){
+        req.body.type = null;
     }
     var orm = cookie.getOrm(req, res);
 
     if (orm == 'MikroORM'){
         let em = mikroDI.em.fork();
-        let mRoute =  await em.findOne(MRoute, req.query.routeId);
-        let mStation =  await em.findOne(MStation, req.query.stationId);
-        let mVehicle =  await em.findOne(MVehicle, req.query.vehicleId);
+        let mRoute =  await em.findOne(MRoute, req.body.routeId);
+        let mStation =  await em.findOne(MStation, req.body.stationId);
+        let mVehicle =  await em.findOne(MVehicle, req.body.vehicleId);
         let mRoutestation = await em.findOne(
             MRoutestation,
             { $and:[
-                {'RouteId': req.query.oldRouteId},
-                {'StationId': req.query.oldStationId},
-                {'TransportationVehicleId': req.query.oldVehicleId},
-                {'Time': req.query.oldTime},
+                {'RouteId': req.body.oldRouteId},
+                {'StationId': req.body.oldStationId},
+                {'TransportationVehicleId': req.body.oldVehicleId},
+                {'Time': req.body.oldTime},
             ]},
             ['Route', 'Station', 'Transportationvehicle']
         );
@@ -439,8 +439,8 @@ var editRoutestation = async function(req, res){
         mRoutestation.Route = mRoute;
         mRoutestation.Station = mStation;
         mRoutestation.Transportationvehicle = mVehicle;
-        mRoutestation.Time = req.query.time;
-        mRoutestation.Type = req.query.type;
+        mRoutestation.Time = req.body.time;
+        mRoutestation.Type = req.body.type;
         await em.persist(mRoutestation);
 
         em.flush().then(function(result){
@@ -452,16 +452,16 @@ var editRoutestation = async function(req, res){
         });
     }else if (orm == 'Objection'){
         ObjRS.query().update({
-            StationId: req.query.stationId,
-            RouteId: req.query.routeId,
-            TransportationVehicleId: req.query.vehicleId,
-            Time: req.query.time,
-            Type: req.query.type
+            StationId: req.body.stationId,
+            RouteId: req.body.routeId,
+            TransportationVehicleId: req.body.vehicleId,
+            Time: req.body.time,
+            Type: req.body.type
         }).where({
-            RouteId : req.query.oldRouteId,
-            StationId : req.query.oldStationId,
-            TransportationVehicleId : req.query.oldVehicleId,
-            Time: req.query.oldTime
+            RouteId : req.body.oldRouteId,
+            StationId : req.body.oldStationId,
+            TransportationVehicleId : req.body.oldVehicleId,
+            Time: req.body.oldTime
         }).then(function(result){
             response.message = "Record is edited in database.";
             res.send(response);
@@ -471,16 +471,16 @@ var editRoutestation = async function(req, res){
         });;
     }else if (orm == 'Knex'){
         knex("routestation").where({
-            RouteId : req.query.oldRouteId,
-            StationId : req.query.oldStationId,
-            TransportationVehicleId : req.query.oldVehicleId,
-            Time: req.query.oldTime
+            RouteId : req.body.oldRouteId,
+            StationId : req.body.oldStationId,
+            TransportationVehicleId : req.body.oldVehicleId,
+            Time: req.body.oldTime
         }).update({
-            StationId: req.query.stationId,
-            RouteId: req.query.routeId,
-            TransportationVehicleId: req.query.vehicleId,
-            Time: req.query.time,
-            Type: req.query.type
+            StationId: req.body.stationId,
+            RouteId: req.body.routeId,
+            TransportationVehicleId: req.body.vehicleId,
+            Time: req.body.time,
+            Type: req.body.type
         }).then(function(result){
             response.message = "Record is edited in database.";
             res.send(response);
@@ -491,16 +491,16 @@ var editRoutestation = async function(req, res){
     }else if (orm == 'TypeORM'){
         const rsRepository = typeorm.getConnection().getRepository(TypeORMRoutestation);
         let typeORMrs = new TypeORMRoutestation();
-        typeORMrs.stationId = req.query.stationId;
-        typeORMrs.routeId = req.query.routeId;
-        typeORMrs.transportationVehicleId = req.query.vehicleId;
-        typeORMrs.time = req.query.time;
-        typeORMrs.type = req.query.type;
+        typeORMrs.stationId = req.body.stationId;
+        typeORMrs.routeId = req.body.routeId;
+        typeORMrs.transportationVehicleId = req.body.vehicleId;
+        typeORMrs.time = req.body.time;
+        typeORMrs.type = req.body.type;
         rsRepository.update({
-            routeId : req.query.oldRouteId,
-            stationId : req.query.oldStationId,
-            transportationVehicleId : req.query.oldVehicleId,
-            time: req.query.oldTime
+            routeId : req.body.oldRouteId,
+            stationId : req.body.oldStationId,
+            transportationVehicleId : req.body.oldVehicleId,
+            time: req.body.oldTime
         }, typeORMrs).then(function(result){
             response.message = "Record is edited in database.";
             res.send(response);
@@ -510,16 +510,16 @@ var editRoutestation = async function(req, res){
         });
     }else if (orm == 'Bookshelf'){
         BookshelfRoutestation.where({
-            RouteId : req.query.oldRouteId,
-            StationId : req.query.oldStationId,
-            TransportationVehicleId : req.query.oldVehicleId,
-            Time: req.query.oldTime
+            RouteId : req.body.oldRouteId,
+            StationId : req.body.oldStationId,
+            TransportationVehicleId : req.body.oldVehicleId,
+            Time: req.body.oldTime
         }).save({
-            StationId: req.query.stationId,
-            RouteId: req.query.routeId,
-            TransportationVehicleId: req.query.vehicleId,
-            Time: req.query.time,
-            Type: req.query.type
+            StationId: req.body.stationId,
+            RouteId: req.body.routeId,
+            TransportationVehicleId: req.body.vehicleId,
+            Time: req.body.time,
+            Type: req.body.type
         },{
             method: 'update',
             patch:true
@@ -532,18 +532,18 @@ var editRoutestation = async function(req, res){
         });
     }else if (orm == 'Sequelize'){
         Routestation.update({
-            StationId: req.query.stationId,
-            RouteId: req.query.routeId,
-            TransportationVehicleId: req.query.vehicleId,
-            Time: req.query.time,
-            Type: req.query.type
+            StationId: req.body.stationId,
+            RouteId: req.body.routeId,
+            TransportationVehicleId: req.body.vehicleId,
+            Time: req.body.time,
+            Type: req.body.type
         },
         {
             where: {
-                RouteId : req.query.oldRouteId,
-                StationId : req.query.oldStationId,
-                TransportationVehicleId : req.query.oldVehicleId,
-                Time: req.query.oldTime
+                RouteId : req.body.oldRouteId,
+                StationId : req.body.oldStationId,
+                TransportationVehicleId : req.body.oldVehicleId,
+                Time: req.body.oldTime
             },
         }).then(function(result){
             response.message = "Record is edited in database.";

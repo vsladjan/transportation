@@ -227,20 +227,20 @@ var getVehicle = function(req, res){
 
 // Create vehicle
 var createVehicle = async function(req, res){
-    if (req.query.name == ""){
-          req.query.name = null;
+    if (req.body.name == ""){
+          req.body.name = null;
     }
     var orm = cookie.getOrm(req, res);
 
 
     if (orm == 'MikroORM'){
         let em = mikroDI.em.fork();
-        let mType =  await em.findOne(MType, req.query.typeSelect);
+        let mType =  await em.findOne(MType, req.body.typeSelect);
         let mVehicle = new MVehicle(
-            req.query.name,
-            req.query.description,
-            req.query.color,
-            req.query.productionYear
+            req.body.name,
+            req.body.description,
+            req.body.color,
+            req.body.productionYear
         );
         mVehicle.Transportationtype = mType;
         em.persistAndFlush(mVehicle).then(function(result){
@@ -252,11 +252,11 @@ var createVehicle = async function(req, res){
         });
     }else if (orm == 'Objection'){
         ObjVehicle.query().insert({
-            Name: req.query.name,
-            Description: req.query.description,
-            Color: req.query.color,
-            ProductionYear: req.query.productionYear,
-            TransportationTypeId: req.query.typeSelect
+            Name: req.body.name,
+            Description: req.body.description,
+            Color: req.body.color,
+            ProductionYear: req.body.productionYear,
+            TransportationTypeId: req.body.typeSelect
         }).then(function(result){
             req.session.message = "Record is created in database.";
             res.redirect("show");
@@ -266,11 +266,11 @@ var createVehicle = async function(req, res){
         });
     }else if (orm == 'Knex'){
         knex("transportationvehicle").insert({
-            Name: req.query.name,
-            Description: req.query.description,
-            Color: req.query.color,
-            ProductionYear: req.query.productionYear,
-            TransportationTypeId: req.query.typeSelect
+            Name: req.body.name,
+            Description: req.body.description,
+            Color: req.body.color,
+            ProductionYear: req.body.productionYear,
+            TransportationTypeId: req.body.typeSelect
         }).then(function(result){
             req.session.message = "Record is created in database.";
             res.redirect("show");
@@ -281,11 +281,11 @@ var createVehicle = async function(req, res){
     }else if (orm == 'TypeORM'){
         const vehicleRepository = typeorm.getConnection().getRepository(TypeORMVehicle);
         let typeORMVehicle = new TypeORMVehicle();
-        typeORMVehicle.name = req.query.name;
-        typeORMVehicle.description = req.query.description;
-        typeORMVehicle.color = req.query.color;
-        typeORMVehicle.productionYear = req.query.productionYear;
-        typeORMVehicle.transportationTypeId = req.query.typeSelect;
+        typeORMVehicle.name = req.body.name;
+        typeORMVehicle.description = req.body.description;
+        typeORMVehicle.color = req.body.color;
+        typeORMVehicle.productionYear = req.body.productionYear;
+        typeORMVehicle.transportationTypeId = req.body.typeSelect;
         vehicleRepository.save(typeORMVehicle).then(function(result){
             req.session.message = "Record is created in database.";
             res.redirect("show");
@@ -295,11 +295,11 @@ var createVehicle = async function(req, res){
         });
     }else if (orm == 'Bookshelf'){
         BookshelfVehicle.forge({
-            Name: req.query.name,
-            Description: req.query.description,
-            Color: req.query.color,
-            ProductionYear: req.query.productionYear,
-            TransportationTypeId: req.query.typeSelect
+            Name: req.body.name,
+            Description: req.body.description,
+            Color: req.body.color,
+            ProductionYear: req.body.productionYear,
+            TransportationTypeId: req.body.typeSelect
         }).save().then(function(result){
             req.session.message = "Record is created in database.";
             res.redirect("show");
@@ -309,11 +309,11 @@ var createVehicle = async function(req, res){
         });
     }else if (orm == 'Sequelize'){
         Vehicle.create({
-            Name: req.query.name,
-            Description: req.query.description,
-            Color: req.query.color,
-            ProductionYear: req.query.productionYear,
-            TransportationTypeId: req.query.typeSelect
+            Name: req.body.name,
+            Description: req.body.description,
+            Color: req.body.color,
+            ProductionYear: req.body.productionYear,
+            TransportationTypeId: req.body.typeSelect
         }).then(function(result){
             req.session.message = "Record is created in database.";
             res.redirect("show");
@@ -326,19 +326,19 @@ var createVehicle = async function(req, res){
 
 // Edit Vehicle
 var editVehicle = async function(req, res){
-    if (req.query.name == ""){
-        req.query.name = null;
+    if (req.body.name == ""){
+        req.body.name = null;
     }
     var orm = cookie.getOrm(req, res);
 
     if (orm == 'MikroORM'){
         let em = mikroDI.em.fork();
-        let mVehicle = await em.findOne(MVehicle, req.query.id);
-        let mType = await em.findOne(MType, req.query.typeSelect);
-        mVehicle.Name = req.query.name;
-        mVehicle.Description = req.query.description;
-        mVehicle.Color = req.query.color
-        mVehicle.ProductionYear = req.query.productionYear;
+        let mVehicle = await em.findOne(MVehicle, req.body.id);
+        let mType = await em.findOne(MType, req.body.typeSelect);
+        mVehicle.Name = req.body.name;
+        mVehicle.Description = req.body.description;
+        mVehicle.Color = req.body.color
+        mVehicle.ProductionYear = req.body.productionYear;
         mVehicle.Transportationtype = mType;
         em.flush(mVehicle).then(function(result){
             req.session.message = "Record is edited in database.";
@@ -349,12 +349,12 @@ var editVehicle = async function(req, res){
         });
     }else if (orm == 'Objection'){
         ObjVehicle.query().update({
-            Name: req.query.name,
-            Description: req.query.description,
-            Color: req.query.color,
-            ProductionYear: req.query.productionYear,
-            TransportationTypeId: req.query.typeSelect
-        }).where({Id: req.query.id}).then(function(result){
+            Name: req.body.name,
+            Description: req.body.description,
+            Color: req.body.color,
+            ProductionYear: req.body.productionYear,
+            TransportationTypeId: req.body.typeSelect
+        }).where({Id: req.body.id}).then(function(result){
             req.session.message = "Record is edited in database.";
             res.redirect("show");
         }).catch(function(err){
@@ -362,12 +362,12 @@ var editVehicle = async function(req, res){
             res.redirect("show");
         });;
     }else if (orm == 'Knex'){
-        knex("transportationvehicle").where("Id", req.query.id).update({
-            Name: req.query.name,
-            Description: req.query.description,
-            Color: req.query.color,
-            ProductionYear: req.query.productionYear,
-            TransportationTypeId: req.query.typeSelect
+        knex("transportationvehicle").where("Id", req.body.id).update({
+            Name: req.body.name,
+            Description: req.body.description,
+            Color: req.body.color,
+            ProductionYear: req.body.productionYear,
+            TransportationTypeId: req.body.typeSelect
         }).then(function(result){
             req.session.message = "Record is created in database.";
             res.redirect("show");
@@ -378,13 +378,13 @@ var editVehicle = async function(req, res){
     }else if (orm == 'TypeORM'){
         const vehicleRepository = typeorm.getConnection().getRepository(TypeORMVehicle);
         let typeORMVehicle = new TypeORMVehicle();
-        let id = parseInt(req.query.id);
+        let id = parseInt(req.body.id);
         typeORMVehicle.id = id;
-        typeORMVehicle.name = req.query.name;
-        typeORMVehicle.description = req.query.description;
-        typeORMVehicle.color = req.query.color;
-        typeORMVehicle.productionYear = req.query.productionYear;
-        typeORMVehicle.transportationTypeId = req.query.typeSelect;
+        typeORMVehicle.name = req.body.name;
+        typeORMVehicle.description = req.body.description;
+        typeORMVehicle.color = req.body.color;
+        typeORMVehicle.productionYear = req.body.productionYear;
+        typeORMVehicle.transportationTypeId = req.body.typeSelect;
         vehicleRepository.save(typeORMVehicle).then(function(result){
             req.session.message = "Record is created in database.";
             res.redirect("show");
@@ -394,13 +394,13 @@ var editVehicle = async function(req, res){
         });
     }else if (orm == 'Bookshelf'){
         BookshelfVehicle.where({
-            Id: req.query.id
+            Id: req.body.id
         }).save({
-            Name: req.query.name,
-            Description: req.query.description,
-            Color: req.query.color,
-            ProductionYear: req.query.productionYear,
-            TransportationTypeId: req.query.typeSelect
+            Name: req.body.name,
+            Description: req.body.description,
+            Color: req.body.color,
+            ProductionYear: req.body.productionYear,
+            TransportationTypeId: req.body.typeSelect
         },{
             method: 'update',
             patch:true
@@ -413,14 +413,14 @@ var editVehicle = async function(req, res){
         });
     }else if (orm == 'Sequelize'){
         Vehicle.update({
-            Name: req.query.name,
-            Description: req.query.description,
-            Color: req.query.color,
-            ProductionYear: req.query.productionYear,
-            TransportationTypeId: req.query.typeSelect
+            Name: req.body.name,
+            Description: req.body.description,
+            Color: req.body.color,
+            ProductionYear: req.body.productionYear,
+            TransportationTypeId: req.body.typeSelect
         },
         {
-            where: {Id: req.query.id}
+            where: {Id: req.body.id}
         }).then(function(result){
             req.session.message = "Record is edited in database.";
             res.redirect("show");

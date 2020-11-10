@@ -182,18 +182,18 @@ var getCountry = function(req, res){
 // Create country
 var createCountry = function(req, res){
     var reg = new RegExp("[A-Z]{3}");
-    if (!reg.test(req.query.countryCode) || req.query.name == "" || req.query.continentSelect == ""){
-        req.query.countryCode = null;
+    if (!reg.test(req.body.countryCode) || req.body.name == "" || req.body.continentSelect == ""){
+        req.body.countryCode = null;
     }
     var orm = cookie.getOrm(req, res);
 
     if (orm == 'MikroORM'){
         let record = new MCountry(
-            req.query.name,
-            req.query.countryCode,
-            req.query.size,
-            req.query.population,
-            req.query.continentSelect
+            req.body.name,
+            req.body.countryCode,
+            req.body.size,
+            req.body.population,
+            req.body.continentSelect
         );
         mikroDI.em.fork().persistAndFlush(record).then(function(result){
             req.session.message = "Record is created in database.";
@@ -204,11 +204,11 @@ var createCountry = function(req, res){
         });
     }else if (orm == 'Objection'){
         ObjCountry.query().insert({
-            Name: req.query.name,
-            Code: req.query.countryCode,
-            Size: req.query.size,
-            Population: req.query.population,
-            Continent: req.query.continentSelect
+            Name: req.body.name,
+            Code: req.body.countryCode,
+            Size: req.body.size,
+            Population: req.body.population,
+            Continent: req.body.continentSelect
         }).then(function(result){
             req.session.message = "Record is created in database.";
             res.redirect("show");
@@ -218,11 +218,11 @@ var createCountry = function(req, res){
         });
     }if (orm == 'Knex'){
         knex("country").insert({
-            Name: req.query.name,
-            Code: req.query.countryCode,
-            Size: req.query.size,
-            Population: req.query.population,
-            Continent: req.query.continentSelect
+            Name: req.body.name,
+            Code: req.body.countryCode,
+            Size: req.body.size,
+            Population: req.body.population,
+            Continent: req.body.continentSelect
         }).then(function(result){
             req.session.message = "Record is created in database.";
             res.redirect("show");
@@ -233,11 +233,11 @@ var createCountry = function(req, res){
     }else if (orm == 'TypeORM'){
         const countryRepository = typeorm.getConnection().getRepository(TypeORMCountry);
         let typeORMCountry = new TypeORMCountry();
-        typeORMCountry.name = req.query.name;
-        typeORMCountry.code = req.query.countryCode;
-        typeORMCountry.size = req.query.size;
-        typeORMCountry.population = req.query.population;
-        typeORMCountry.continent = req.query.continentSelect;
+        typeORMCountry.name = req.body.name;
+        typeORMCountry.code = req.body.countryCode;
+        typeORMCountry.size = req.body.size;
+        typeORMCountry.population = req.body.population;
+        typeORMCountry.continent = req.body.continentSelect;
         countryRepository.save(typeORMCountry).then(function(result){
             req.session.message = "Record is created in database.";
             res.redirect("show");
@@ -247,11 +247,11 @@ var createCountry = function(req, res){
         });
     }else if (orm == 'Bookshelf'){
         BookshelfCountry.forge({
-                Name: req.query.name,
-                Code: req.query.countryCode,
-                Size: req.query.size,
-                Population: req.query.population,
-                Continent: req.query.continentSelect 
+                Name: req.body.name,
+                Code: req.body.countryCode,
+                Size: req.body.size,
+                Population: req.body.population,
+                Continent: req.body.continentSelect 
         }).save().then(function(result){
                 req.session.message = "Record is created in database.";
                 res.redirect("show");
@@ -261,11 +261,11 @@ var createCountry = function(req, res){
         });
     }else if (orm == 'Sequelize'){
         Country.create({
-                Name: req.query.name,
-                Code: req.query.countryCode,
-                Size: req.query.size,
-                Population: req.query.population,
-                Continent: req.query.continentSelect
+                Name: req.body.name,
+                Code: req.body.countryCode,
+                Size: req.body.size,
+                Population: req.body.population,
+                Continent: req.body.continentSelect
         }).then(function(result){
                 req.session.message = "Record is created in database.";
                 res.redirect("show");
@@ -279,19 +279,19 @@ var createCountry = function(req, res){
 // Edit Country
 var editCountry = async function(req, res){
     var reg = new RegExp("[A-Z]{3}")
-    if (!reg.test(req.query.countryCode) || req.query.name == "" || req.query.continentSelect == ""){
-        req.query.countryCode = null;
+    if (!reg.test(req.body.countryCode) || req.body.name == "" || req.body.continentSelect == ""){
+        req.body.countryCode = null;
     }
     var orm = cookie.getOrm(req, res);
 
     if (orm == 'MikroORM'){
         let countryRepository = mikroDI.em.fork().getRepository(MCountry);
-        let record = await countryRepository.findOne(req.query.id);
-        record.Name = req.query.name;
-        record.Code = req.query.countryCode;
-        record.Size = req.query.size;
-        record.Population = req.query.population;
-        record.Continent = req.query.continentSelect;
+        let record = await countryRepository.findOne(req.body.id);
+        record.Name = req.body.name;
+        record.Code = req.body.countryCode;
+        record.Size = req.body.size;
+        record.Population = req.body.population;
+        record.Continent = req.body.continentSelect;
         countryRepository.flush(record).then(function(result){
             req.session.message = "Record is edited in database.";
             res.redirect("show");
@@ -301,12 +301,12 @@ var editCountry = async function(req, res){
         });
     }else if (orm == 'Objection'){
         ObjCountry.query().update({
-            Name: req.query.name,
-            Code: req.query.countryCode,
-            Size: req.query.size,
-            Population: req.query.population,
-            Continent: req.query.continentSelect
-        }).where({Id: req.query.id}).then(function(result){
+            Name: req.body.name,
+            Code: req.body.countryCode,
+            Size: req.body.size,
+            Population: req.body.population,
+            Continent: req.body.continentSelect
+        }).where({Id: req.body.id}).then(function(result){
             req.session.message = "Record is edited in database.";
             res.redirect("show");
         }).catch(function(err){
@@ -314,12 +314,12 @@ var editCountry = async function(req, res){
             res.redirect("show");
         });
     }if (orm == 'Knex'){
-        knex("country").where("Id", req.query.id).update({
-            Name: req.query.name,
-            Code: req.query.countryCode,
-            Size: req.query.size,
-            Population: req.query.population,
-            Continent: req.query.continentSelect
+        knex("country").where("Id", req.body.id).update({
+            Name: req.body.name,
+            Code: req.body.countryCode,
+            Size: req.body.size,
+            Population: req.body.population,
+            Continent: req.body.continentSelect
         }).then(function(result){
             req.session.message = "Record is edited in database.";
             res.redirect("show");
@@ -328,15 +328,15 @@ var editCountry = async function(req, res){
             res.redirect("show");
         });
     }else if (orm == 'TypeORM'){
-        let id = parseInt(req.query.id);
+        let id = parseInt(req.body.id);
         const countryRepository = typeorm.getConnection().getRepository(TypeORMCountry);
         let typeORMCountry = new TypeORMCountry();
         typeORMCountry.id = id;
-        typeORMCountry.name = req.query.name;
-        typeORMCountry.code = req.query.countryCode;
-        typeORMCountry.size = req.query.size;
-        typeORMCountry.population = req.query.population;
-        typeORMCountry.continent = req.query.continentSelect;
+        typeORMCountry.name = req.body.name;
+        typeORMCountry.code = req.body.countryCode;
+        typeORMCountry.size = req.body.size;
+        typeORMCountry.population = req.body.population;
+        typeORMCountry.continent = req.body.continentSelect;
         countryRepository.save(typeORMCountry).then(function(result){
             req.session.message = "Record is created in database.";
             res.redirect("show");
@@ -346,13 +346,13 @@ var editCountry = async function(req, res){
         });
     }else if (orm == 'Bookshelf'){
             BookshelfCountry.where({
-                  Id: req.query.id
+                  Id: req.body.id
             }).save({
-                  Name: req.query.name,
-                  Code: req.query.countryCode,
-                  Size: req.query.size,
-                  Population: req.query.population,
-                  Continent: req.query.continentSelect
+                  Name: req.body.name,
+                  Code: req.body.countryCode,
+                  Size: req.body.size,
+                  Population: req.body.population,
+                  Continent: req.body.continentSelect
             },{
                   method: 'update',
                   patch:true
@@ -365,13 +365,13 @@ var editCountry = async function(req, res){
             });
     }else if (orm == 'Sequelize'){
             Country.update({
-                  Name: req.query.name,
-                  Code: req.query.countryCode,
-                  Size: req.query.size,
-                  Population: req.query.population,
-                  Continent: req.query.continentSelect
+                  Name: req.body.name,
+                  Code: req.body.countryCode,
+                  Size: req.body.size,
+                  Population: req.body.population,
+                  Continent: req.body.continentSelect
             },{
-                  where: {Id: req.query.id}
+                  where: {Id: req.body.id}
             }).then(function(result){
                   req.session.message = "Record is edited in database.";
                   res.redirect("show");

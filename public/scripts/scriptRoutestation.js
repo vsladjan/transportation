@@ -148,15 +148,11 @@ $(document).ready(function(){
             values[i++] = $(this).attr('name');
         });
         $.ajax({
-            type: "GET",
+            type: "DELETE",
             contentType: "application/json",
-            url: "/transportation/routestation/delete",
-            data: {
-                routeId: values[0].substr(3),
-                stationId: values[1].substr(3),
-                vehicleId: values[2].substr(3),
-                time: values[3]
-            },
+            url: "/transportation/routestation/delete?routeId=" + values[0].substr(3) + 
+                    "&stationId=" + values[1].substr(3) + "&vehicleId=" + values[2].substr(3) +
+                         "&time=" + values[3],
             success: function(data){
                 if (data.message == "Ok"){
                     datatable.row($(datarow)).remove().draw(false);
@@ -189,21 +185,22 @@ $(document).ready(function(){
         setCookie('stationId', '', -1);
         setCookie('vehicleId', '', -1);
         setCookie('timeRS', '', -1);
+        var data = {};
+        data.oldRouteId = routeId;
+        data.oldStationId = stationId;
+        data.oldVehicleId = vehicleId;
+        data.oldTime = timeRS;
+        data.routeId = $("#routeSelectEdit").val();
+        data.stationId = $("#stationSelectEdit").val();
+        data.vehicleId = $("#vehicleSelectEdit").val();
+        data.time = $("#timeEdit").val(),
+        data.type = $("#typeEdit").val()
         $.ajax({
-            type: "GET",
+            type: "POST",
             contentType: "application/json",
             url: "/transportation/routestation/edit",
-            data: {
-                oldRouteId: routeId,
-                oldStationId: stationId,
-                oldVehicleId: vehicleId,
-                oldTime: timeRS,
-                routeId:  $("#routeSelectEdit").val(),
-                stationId: $("#stationSelectEdit").val(),
-                vehicleId: $("#vehicleSelectEdit").val(),
-                time: $("#timeEdit").val(),
-                type: $("#typeEdit").val()
-            },
+            data: JSON.stringify(data),
+            contentType: 'application/json',
             success: function(data){
                 var msg = data.message;
                 if (msg.includes("Error"))

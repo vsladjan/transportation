@@ -85,7 +85,7 @@ $(document).ready(function(){
         var datatable = $('#data').DataTable();
         var datarow = $(this).parents('tr');
         $.ajax({
-            type: "GET",
+            type: "DELETE",
             contentType: "application/json",
             url: "/transportation/station/delete?id=" + this.id.substr(7),
             success: function(data){

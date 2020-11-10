@@ -219,18 +219,18 @@ var getStation = function(req, res){
 
 // Create station
 var createStation = async function(req, res){
-    if (req.query.name == ""){
-          req.query.name = null;
+    if (req.body.name == ""){
+          req.body.name = null;
     }
     var orm = cookie.getOrm(req, res);
 
     if (orm == 'MikroORM'){
         let em = mikroDI.em.fork();
-        let mCityarea =  await em.findOne(MCityarea, req.query.cityareaSelect);
+        let mCityarea =  await em.findOne(MCityarea, req.body.cityareaSelect);
         let mStation = new MStation(
-            req.query.name,
-            req.query.description,
-            req.query.location
+            req.body.name,
+            req.body.description,
+            req.body.location
         );
         mStation.Cityarea = mCityarea;
         em.persistAndFlush(mStation).then(function(result){
@@ -242,10 +242,10 @@ var createStation = async function(req, res){
         });
     }else if (orm == 'Objection'){
         ObjStation.query().insert({
-            Name: req.query.name,
-            Description: req.query.description,
-            Location: req.query.location,
-            CityAreaId: req.query.cityareaSelect 
+            Name: req.body.name,
+            Description: req.body.description,
+            Location: req.body.location,
+            CityAreaId: req.body.cityareaSelect 
         }).then(function(result){
             req.session.message = "Record is created in database.";
             res.redirect("show");
@@ -255,10 +255,10 @@ var createStation = async function(req, res){
         });
     }else if (orm == 'Knex'){
         knex("station").insert({
-            Name: req.query.name,
-            Description: req.query.description,
-            Location: req.query.location,
-            CityAreaId: req.query.cityareaSelect 
+            Name: req.body.name,
+            Description: req.body.description,
+            Location: req.body.location,
+            CityAreaId: req.body.cityareaSelect 
         }).then(function(result){
             req.session.message = "Record is created in database.";
             res.redirect("show");
@@ -269,10 +269,10 @@ var createStation = async function(req, res){
     }else if (orm == 'TypeORM'){
         const stationRepository = typeorm.getConnection().getRepository(TypeORMStation);
         let typeORMStation = new TypeORMStation();
-        typeORMStation.name = req.query.name;
-        typeORMStation.description = req.query.description;
-        typeORMStation.location = req.query.location;
-        typeORMStation.cityAreaId = req.query.cityareaSelect;
+        typeORMStation.name = req.body.name;
+        typeORMStation.description = req.body.description;
+        typeORMStation.location = req.body.location;
+        typeORMStation.cityAreaId = req.body.cityareaSelect;
         stationRepository.save(typeORMStation).then(function(result){
             req.session.message = "Record is created in database.";
             res.redirect("show");
@@ -282,10 +282,10 @@ var createStation = async function(req, res){
         });
     }else if (orm == 'Bookshelf'){
         BookshelfStation.forge({
-            Name: req.query.name,
-            Description: req.query.description,
-            Location: req.query.location,
-            CityAreaId: req.query.cityareaSelect 
+            Name: req.body.name,
+            Description: req.body.description,
+            Location: req.body.location,
+            CityAreaId: req.body.cityareaSelect 
         }).save().then(function(result){
             req.session.message = "Record is created in database.";
             res.redirect("show");
@@ -295,10 +295,10 @@ var createStation = async function(req, res){
         });
     }else if (orm == 'Sequelize'){
         Station.create({
-            Name: req.query.name,
-            Description: req.query.description,
-            Location: req.query.location,
-            CityAreaId: req.query.cityareaSelect
+            Name: req.body.name,
+            Description: req.body.description,
+            Location: req.body.location,
+            CityAreaId: req.body.cityareaSelect
         }).then(function(result){
             req.session.message = "Record is created in database.";
             res.redirect("show");
@@ -311,19 +311,19 @@ var createStation = async function(req, res){
 
 // Edit station
 var editStation = async function(req, res){
-    if (req.query.name == ""){
-        req.query.name = null;
+    if (req.body.name == ""){
+        req.body.name = null;
     }
     var orm = cookie.getOrm(req, res);
 
     if (orm == 'MikroORM'){
         let em = mikroDI.em.fork();
-        let mStation = await em.findOne(MStation, req.query.id);
-        let mCityarea = await em.findOne(MCityarea, req.query.cityareaSelect);
-        mStation.Name = req.query.name;
-        mStation.Description = req.query.description;
-        mStation.Location = req.query.location
-        mStation.CityareId = req.query.cityareaSelect;
+        let mStation = await em.findOne(MStation, req.body.id);
+        let mCityarea = await em.findOne(MCityarea, req.body.cityareaSelect);
+        mStation.Name = req.body.name;
+        mStation.Description = req.body.description;
+        mStation.Location = req.body.location
+        mStation.CityareId = req.body.cityareaSelect;
         mStation.Cityarea = mCityarea;
         em.flush(mStation).then(function(result){
             req.session.message = "Record is edited in database.";
@@ -334,11 +334,11 @@ var editStation = async function(req, res){
         });
     }else if (orm == 'Objection'){
         ObjStation.query().update({
-            Name: req.query.name,
-            Description: req.query.description,
-            Location: req.query.location,
-            CityAreaId: req.query.cityareaSelect
-        }).where({Id: req.query.id}).then(function(result){
+            Name: req.body.name,
+            Description: req.body.description,
+            Location: req.body.location,
+            CityAreaId: req.body.cityareaSelect
+        }).where({Id: req.body.id}).then(function(result){
             req.session.message = "Record is edited in database.";
             res.redirect("show");
         }).catch(function(err){
@@ -346,11 +346,11 @@ var editStation = async function(req, res){
             res.redirect("show");
         });;
     }else if (orm == 'Knex'){
-        knex("station").where("Id", req.query.id).update({
-            Name: req.query.name,
-            Description: req.query.description,
-            Location: req.query.location,
-            CityAreaId: req.query.cityareaSelect
+        knex("station").where("Id", req.body.id).update({
+            Name: req.body.name,
+            Description: req.body.description,
+            Location: req.body.location,
+            CityAreaId: req.body.cityareaSelect
         }).then(function(result){
             req.session.message = "Record is created in database.";
             res.redirect("show");
@@ -361,12 +361,12 @@ var editStation = async function(req, res){
     }else if (orm == 'TypeORM'){
         const stationRepository = typeorm.getConnection().getRepository(TypeORMStation);
         let typeORMStation = new TypeORMStation();
-        let id = parseInt(req.query.id);
+        let id = parseInt(req.body.id);
         typeORMStation.id = id;
-        typeORMStation.name = req.query.name;
-        typeORMStation.description = req.query.description;
-        typeORMStation.location = req.query.location;
-        typeORMStation.cityAreaId = req.query.cityareaSelect;
+        typeORMStation.name = req.body.name;
+        typeORMStation.description = req.body.description;
+        typeORMStation.location = req.body.location;
+        typeORMStation.cityAreaId = req.body.cityareaSelect;
         stationRepository.save(typeORMStation).then(function(result){
             req.session.message = "Record is created in database.";
             res.redirect("show");
@@ -376,12 +376,12 @@ var editStation = async function(req, res){
         });
     }else if (orm == 'Bookshelf'){
         BookshelfStation.where({
-            Id: req.query.id
+            Id: req.body.id
         }).save({
-            Name: req.query.name,
-            Description: req.query.description,
-            Location: req.query.location,
-            CityAreaId: req.query.cityareaSelect
+            Name: req.body.name,
+            Description: req.body.description,
+            Location: req.body.location,
+            CityAreaId: req.body.cityareaSelect
         },{
             method: 'update',
             patch:true
@@ -394,13 +394,13 @@ var editStation = async function(req, res){
         });
     }else if (orm == 'Sequelize'){
         Station.update({
-            Name: req.query.name,
-            Description: req.query.description,
-            Location: req.query.location,
-            CityAreaId: req.query.cityareaSelect
+            Name: req.body.name,
+            Description: req.body.description,
+            Location: req.body.location,
+            CityAreaId: req.body.cityareaSelect
         },
         {
-            where: {Id: req.query.id}
+            where: {Id: req.body.id}
         }).then(function(result){
             req.session.message = "Record is edited in database.";
             res.redirect("show");

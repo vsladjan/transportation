@@ -176,16 +176,16 @@ var getRoute = function(req, res){
 
 // Create route
 var createRoute = function(req, res){
-    if (req.query.name == ""){
-          req.query.name = null;
+    if (req.body.name == ""){
+          req.body.name = null;
     }
     var orm = cookie.getOrm(req, res);
 
     if (orm == 'MikroORM'){
         let em = mikroDI.em.fork();
         let mRoute = new MRoute(
-            req.query.name,
-            req.query.description
+            req.body.name,
+            req.body.description
         );
         em.persistAndFlush(mRoute).then(function(result){
             req.session.message = "Record is created in database.";
@@ -196,8 +196,8 @@ var createRoute = function(req, res){
         });
     }else if (orm == 'Objection'){
         ObjRoute.query().insert({
-            Name: req.query.name,
-            Description: req.query.description 
+            Name: req.body.name,
+            Description: req.body.description 
         }).then(function(result){
             req.session.message = "Record is created in database.";
             res.redirect("show");
@@ -207,8 +207,8 @@ var createRoute = function(req, res){
         });
     }else if (orm == 'Knex'){
         knex("route").insert({
-            Name: req.query.name,
-            Description: req.query.description 
+            Name: req.body.name,
+            Description: req.body.description 
         }).then(function(result){
             req.session.message = "Record is created in database.";
             res.redirect("show");
@@ -219,8 +219,8 @@ var createRoute = function(req, res){
     }else if (orm == 'TypeORM'){
         const routeRepository = typeorm.getConnection().getRepository(TypeORMRoute);
         let typeORMRoute = new TypeORMRoute();
-        typeORMRoute.name = req.query.name;
-        typeORMRoute.description = req.query.description;
+        typeORMRoute.name = req.body.name;
+        typeORMRoute.description = req.body.description;
         routeRepository.save(typeORMRoute).then(function(result){
             req.session.message = "Record is created in database.";
             res.redirect("show");
@@ -230,8 +230,8 @@ var createRoute = function(req, res){
         });
     }else if (orm == 'Bookshelf'){
         BookshelfRoute.forge({
-            Name: req.query.name,
-            Description: req.query.description 
+            Name: req.body.name,
+            Description: req.body.description 
         }).save().then(function(result){
             req.session.message = "Record is created in database.";
             res.redirect("show");
@@ -241,8 +241,8 @@ var createRoute = function(req, res){
         });
     }else if (orm == 'Sequelize'){
         Route.create({
-            Name: req.query.name,
-            Description: req.query.description
+            Name: req.body.name,
+            Description: req.body.description
         }).then(function(result){
             req.session.message = "Record is created in database.";
             res.redirect("show");
@@ -255,16 +255,16 @@ var createRoute = function(req, res){
 
 // Edit Route
 var editRoute = async function(req, res){
-    if (req.query.name == ""){
-        req.query.name = null;
+    if (req.body.name == ""){
+        req.body.name = null;
     }
     var orm = cookie.getOrm(req, res);
 
     if (orm == 'MikroORM'){
         let em = mikroDI.em.fork();
-        let mRoute = await em.findOne(MRoute, req.query.id);
-        mRoute.Name = req.query.name;
-        mRoute.Description = req.query.description;
+        let mRoute = await em.findOne(MRoute, req.body.id);
+        mRoute.Name = req.body.name;
+        mRoute.Description = req.body.description;
         em.flush(mRoute).then(function(result){
             req.session.message = "Record is edited in database.";
             res.redirect("show");
@@ -274,9 +274,9 @@ var editRoute = async function(req, res){
         });
     }else if (orm == 'Objection'){
         ObjRoute.query().update({
-            Name: req.query.name,
-            Description: req.query.description
-        }).where({Id: req.query.id}).then(function(result){
+            Name: req.body.name,
+            Description: req.body.description
+        }).where({Id: req.body.id}).then(function(result){
             req.session.message = "Record is edited in database.";
             res.redirect("show");
         }).catch(function(err){
@@ -284,9 +284,9 @@ var editRoute = async function(req, res){
             res.redirect("show");
         });;
     }else if (orm == 'Knex'){
-        knex("route").where("Id", req.query.id).update({
-            Name: req.query.name,
-            Description: req.query.description
+        knex("route").where("Id", req.body.id).update({
+            Name: req.body.name,
+            Description: req.body.description
         }).then(function(result){
             req.session.message = "Record is created in database.";
             res.redirect("show");
@@ -296,11 +296,11 @@ var editRoute = async function(req, res){
         });
     }else if (orm == 'TypeORM'){
         const routeRepository = typeorm.getConnection().getRepository(TypeORMRoute);
-        let id = parseInt(req.query.id);
+        let id = parseInt(req.body.id);
         let typeORMRoute = new TypeORMRoute();
         typeORMRoute.id = id;
-        typeORMRoute.name = req.query.name;
-        typeORMRoute.description = req.query.description;
+        typeORMRoute.name = req.body.name;
+        typeORMRoute.description = req.body.description;
         routeRepository.save(typeORMRoute).then(function(result){
             req.session.message = "Record is created in database.";
             res.redirect("show");
@@ -310,10 +310,10 @@ var editRoute = async function(req, res){
         });
     }else if (orm == 'Bookshelf'){
         BookshelfRoute.where({
-            Id: req.query.id
+            Id: req.body.id
         }).save({
-            Name: req.query.name,
-            Description: req.query.description
+            Name: req.body.name,
+            Description: req.body.description
         },{
             method: 'update',
             patch:true
@@ -326,11 +326,11 @@ var editRoute = async function(req, res){
         });
     }else if (orm == 'Sequelize'){
         Route.update({
-            Name: req.query.name,
-            Description: req.query.description
+            Name: req.body.name,
+            Description: req.body.description
         },
         {
-            where: {Id: req.query.id}
+            where: {Id: req.body.id}
         }).then(function(result){
             req.session.message = "Record is edited in database.";
             res.redirect("show");

@@ -223,18 +223,18 @@ var getCity = function(req, res){
 
 // Create city
 var createCity = async function(req, res){
-    if (req.query.name == ""){
-          req.query.name = null;
+    if (req.body.name == ""){
+          req.body.name = null;
     }
     var orm = cookie.getOrm(req, res);
 
     if (orm == 'MikroORM'){
         let em = mikroDI.em.fork();
-        let mCountry =  await em.findOne(MCountry, req.query.countrySelect);
+        let mCountry =  await em.findOne(MCountry, req.body.countrySelect);
         let mCity = new MCity(
-            req.query.name,
-            req.query.population,
-            req.query.size
+            req.body.name,
+            req.body.population,
+            req.body.size
         );
         mCity.Country = mCountry;
         em.persistAndFlush(mCity).then(function(result){
@@ -246,10 +246,10 @@ var createCity = async function(req, res){
         });
     }else if (orm == 'Objection'){
         ObjCity.query().insert({
-            Name: req.query.name,
-            Population: req.query.population,
-            Size: req.query.size,
-            CountryId: req.query.countrySelect
+            Name: req.body.name,
+            Population: req.body.population,
+            Size: req.body.size,
+            CountryId: req.body.countrySelect
         }).then(function(result){
             req.session.message = "Record is created in database.";
             res.redirect("show");
@@ -259,10 +259,10 @@ var createCity = async function(req, res){
         });
     }else if (orm == 'Knex'){
         knex("city").insert({
-            Name: req.query.name,
-            Population: req.query.population,
-            Size: req.query.size,
-            CountryId: req.query.countrySelect
+            Name: req.body.name,
+            Population: req.body.population,
+            Size: req.body.size,
+            CountryId: req.body.countrySelect
         }).then(function(result){
             req.session.message = "Record is created in database.";
             res.redirect("show");
@@ -273,10 +273,10 @@ var createCity = async function(req, res){
     }else if (orm == 'TypeORM'){
         const cityRepository = typeorm.getConnection().getRepository(TypeORMCity);
         let typeORMCity = new TypeORMCity();
-        typeORMCity.name = req.query.name;
-        typeORMCity.population = req.query.population;
-        typeORMCity.size = req.query.size;
-        typeORMCity.countryId = req.query.countrySelect;
+        typeORMCity.name = req.body.name;
+        typeORMCity.population = req.body.population;
+        typeORMCity.size = req.body.size;
+        typeORMCity.countryId = req.body.countrySelect;
         cityRepository.save(typeORMCity).then(function(result){
             req.session.message = "Record is created in database.";
             res.redirect("show");
@@ -286,10 +286,10 @@ var createCity = async function(req, res){
         });
     }else if (orm == 'Bookshelf'){
         BookshelfCity.forge({
-            Name: req.query.name,
-            Population: req.query.population,
-            Size: req.query.size,
-            CountryId: req.query.countrySelect 
+            Name: req.body.name,
+            Population: req.body.population,
+            Size: req.body.size,
+            CountryId: req.body.countrySelect 
         }).save().then(function(result){
             req.session.message = "Record is created in database.";
             res.redirect("show");
@@ -299,10 +299,10 @@ var createCity = async function(req, res){
         });
     }else if (orm == 'Sequelize'){
         City.create({
-            Name: req.query.name,
-            Population: req.query.population,
-            Size: req.query.size,
-            CountryId: req.query.countrySelect
+            Name: req.body.name,
+            Population: req.body.population,
+            Size: req.body.size,
+            CountryId: req.body.countrySelect
         }).then(function(result){
             req.session.message = "Record is created in database.";
             res.redirect("show");
@@ -315,19 +315,19 @@ var createCity = async function(req, res){
 
 // Edit City
 var editCity = async function(req, res){
-    if (req.query.name == ""){
-        req.query.name = null;
+    if (req.body.name == ""){
+        req.body.name = null;
     }
     var orm = cookie.getOrm(req, res);
 
     if (orm == 'MikroORM'){
         let em = mikroDI.em.fork();
-        let mCity = await em.findOne(MCity, req.query.id);
-        let mCountry = await em.findOne(MCountry, req.query.countrySelect);
-        mCity.Name = req.query.name;
-        mCity.Population = req.query.population;
-        mCity.Size = req.query.size
-        mCity.CountryId = req.query.countrySelect;
+        let mCity = await em.findOne(MCity, req.body.id);
+        let mCountry = await em.findOne(MCountry, req.body.countrySelect);
+        mCity.Name = req.body.name;
+        mCity.Population = req.body.population;
+        mCity.Size = req.body.size
+        mCity.CountryId = req.body.countrySelect;
         mCity.Country = mCountry;
         em.flush(mCity).then(function(result){
             req.session.message = "Record is edited in database.";
@@ -338,11 +338,11 @@ var editCity = async function(req, res){
         });
     }else if (orm == 'Objection'){
         ObjCity.query().update({
-            Name: req.query.name,
-            Population: req.query.population,
-            Size: req.query.size,
-            CountryId: req.query.countrySelect
-        }).where({Id: req.query.id}).then(function(result){
+            Name: req.body.name,
+            Population: req.body.population,
+            Size: req.body.size,
+            CountryId: req.body.countrySelect
+        }).where({Id: req.body.id}).then(function(result){
             req.session.message = "Record is edited in database.";
             res.redirect("show");
         }).catch(function(err){
@@ -350,11 +350,11 @@ var editCity = async function(req, res){
             res.redirect("show");
         });;
     }else if (orm == 'Knex'){
-        knex("city").where("Id", req.query.id).update({
-            Name: req.query.name,
-            Population: req.query.population,
-            Size: req.query.size,
-            CountryId: req.query.countrySelect
+        knex("city").where("Id", req.body.id).update({
+            Name: req.body.name,
+            Population: req.body.population,
+            Size: req.body.size,
+            CountryId: req.body.countrySelect
         }).then(function(result){
             req.session.message = "Record is created in database.";
             res.redirect("show");
@@ -365,12 +365,12 @@ var editCity = async function(req, res){
     }else if (orm == 'TypeORM'){
         const cityRepository = typeorm.getConnection().getRepository(TypeORMCity);
         let typeORMCity = new TypeORMCity();
-        let id = parseInt(req.query.id);
+        let id = parseInt(req.body.id);
         typeORMCity.id = id;
-        typeORMCity.name = req.query.name;
-        typeORMCity.population = req.query.population;
-        typeORMCity.size = req.query.size;
-        typeORMCity.countryId = req.query.countrySelect;
+        typeORMCity.name = req.body.name;
+        typeORMCity.population = req.body.population;
+        typeORMCity.size = req.body.size;
+        typeORMCity.countryId = req.body.countrySelect;
         cityRepository.save(typeORMCity).then(function(result){
             req.session.message = "Record is edited in database.";
             res.redirect("show");
@@ -380,12 +380,12 @@ var editCity = async function(req, res){
         });
     }if (orm == 'Bookshelf'){
         BookshelfCity.where({
-            Id: req.query.id
+            Id: req.body.id
         }).save({
-            Name: req.query.name,
-            Population: req.query.population,
-            Size: req.query.size,
-            CountryId: req.query.countrySelect
+            Name: req.body.name,
+            Population: req.body.population,
+            Size: req.body.size,
+            CountryId: req.body.countrySelect
         },{
             method: 'update',
             patch:true
@@ -398,13 +398,13 @@ var editCity = async function(req, res){
         });
     }else if (orm == 'Sequelize'){
         City.update({
-            Name: req.query.name,
-            Population: req.query.population,
-            Size: req.query.size,
-            CountryId: req.query.countrySelect
+            Name: req.body.name,
+            Population: req.body.population,
+            Size: req.body.size,
+            CountryId: req.body.countrySelect
         },
         {
-            where: {Id: req.query.id}
+            where: {Id: req.body.id}
         }).then(function(result){
             req.session.message = "Record is edited in database.";
             res.redirect("show");

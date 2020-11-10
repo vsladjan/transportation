@@ -220,18 +220,18 @@ var getCityarea = function(req, res){
 
 // Create city area
 var createCityarea = async function(req, res){
-    if (req.query.name == ""){
-          req.query.name = null;
+    if (req.body.name == ""){
+          req.body.name = null;
     }
     var orm = cookie.getOrm(req, res);
 
     if (orm == 'MikroORM'){
         let em = mikroDI.em.fork();
-        let mCity =  await em.findOne(MCity, req.query.citySelect);
+        let mCity =  await em.findOne(MCity, req.body.citySelect);
         let mCityarea = new MCityarea(
-            req.query.name,
-            req.query.size,
-            req.query.description
+            req.body.name,
+            req.body.size,
+            req.body.description
         );
         mCityarea.City = mCity;
         em.persistAndFlush(mCityarea).then(function(result){
@@ -243,10 +243,10 @@ var createCityarea = async function(req, res){
         });
     }else if (orm == 'Objection'){
         ObjCityarea.query().insert({
-            Name: req.query.name,
-            Size: req.query.size,
-            Description: req.query.description,
-            CityId: req.query.citySelect
+            Name: req.body.name,
+            Size: req.body.size,
+            Description: req.body.description,
+            CityId: req.body.citySelect
         }).then(function(result){
             req.session.message = "Record is created in database.";
             res.redirect("show");
@@ -256,10 +256,10 @@ var createCityarea = async function(req, res){
         });
     }else if (orm == 'Knex'){
         knex("cityarea").insert({
-            Name: req.query.name,
-            Size: req.query.size,
-            Description: req.query.description,
-            CityId: req.query.citySelect
+            Name: req.body.name,
+            Size: req.body.size,
+            Description: req.body.description,
+            CityId: req.body.citySelect
         }).then(function(result){
             req.session.message = "Record is created in database.";
             res.redirect("show");
@@ -270,10 +270,10 @@ var createCityarea = async function(req, res){
     }else if (orm == 'TypeORM'){
         const cityareaRepository = typeorm.getConnection().getRepository(TypeORMCityarea);
         let typeORMCityarea = new TypeORMCityarea();
-        typeORMCityarea.name = req.query.name;
-        typeORMCityarea.size = req.query.size;
-        typeORMCityarea.description = req.query.description;
-        typeORMCityarea.cityId = req.query.citySelect;
+        typeORMCityarea.name = req.body.name;
+        typeORMCityarea.size = req.body.size;
+        typeORMCityarea.description = req.body.description;
+        typeORMCityarea.cityId = req.body.citySelect;
         cityareaRepository.save(typeORMCityarea).then(function(result){
             req.session.message = "Record is created in database.";
             res.redirect("show");
@@ -283,10 +283,10 @@ var createCityarea = async function(req, res){
         });
     }else if (orm == 'Bookshelf'){
         BookshelfCityarea.forge({
-            Name: req.query.name,
-            Size: req.query.size,
-            Description: req.query.description,
-            CityId: req.query.citySelect
+            Name: req.body.name,
+            Size: req.body.size,
+            Description: req.body.description,
+            CityId: req.body.citySelect
         }).save().then(function(result){
             req.session.message = "Record is created in database.";
             res.redirect("show");
@@ -296,10 +296,10 @@ var createCityarea = async function(req, res){
         });
     }else if (orm == 'Sequelize'){
         Cityarea.create({
-            Name: req.query.name,
-            Size: req.query.size,
-            Description: req.query.description,
-            CityId: req.query.citySelect
+            Name: req.body.name,
+            Size: req.body.size,
+            Description: req.body.description,
+            CityId: req.body.citySelect
         }).then(function(result){
             req.session.message = "Record is created in database.";
             res.redirect("show");
@@ -312,19 +312,19 @@ var createCityarea = async function(req, res){
 
 // Edit Cityarea
 var editCityarea = async function(req, res){
-    if (req.query.name == ""){
-        req.query.name = null;
+    if (req.body.name == ""){
+        req.body.name = null;
     }
     var orm = cookie.getOrm(req, res);
 
     if (orm == 'MikroORM'){
         let em = mikroDI.em.fork();
-        let mCityarea = await em.findOne(MCityarea, req.query.id);
+        let mCityarea = await em.findOne(MCityarea, req.body.id);
         let mCity = await em.findOne(MCity, req.query.citySelect);
-        mCityarea.Name = req.query.name;
-        mCityarea.Size = req.query.size
-        mCityarea.Description = req.query.description;
-        mCityarea.CityId = req.query.citySelect;
+        mCityarea.Name = req.body.name;
+        mCityarea.Size = req.body.size
+        mCityarea.Description = req.body.description;
+        mCityarea.CityId = req.body.citySelect;
         mCityarea.Country = mCity;
         em.flush(mCityarea).then(function(result){
             req.session.message = "Record is edited in database.";
@@ -335,11 +335,11 @@ var editCityarea = async function(req, res){
         });
     }else if (orm == 'Objection'){
         ObjCityarea.query().update({
-            Name: req.query.name,
-            Size: req.query.size,
-            Description: req.query.description,
-            CityId: req.query.citySelect
-        }).where({Id: req.query.id}).then(function(result){
+            Name: req.body.name,
+            Size: req.body.size,
+            Description: req.body.description,
+            CityId: req.body.citySelect
+        }).where({Id: req.body.id}).then(function(result){
             req.session.message = "Record is edited in database.";
             res.redirect("show");
         }).catch(function(err){
@@ -347,11 +347,11 @@ var editCityarea = async function(req, res){
             res.redirect("show");
         });;
     }else if (orm == 'Knex'){
-        knex("cityarea").where("Id", req.query.id).update({
-            Name: req.query.name,
-            Size: req.query.size,
-            Description: req.query.description,
-            CityId: req.query.citySelect
+        knex("cityarea").where("Id", req.body.id).update({
+            Name: req.body.name,
+            Size: req.body.size,
+            Description: req.body.description,
+            CityId: req.body.citySelect
         }).then(function(result){
             req.session.message = "Record is created in database.";
             res.redirect("show");
@@ -362,12 +362,12 @@ var editCityarea = async function(req, res){
     }else if (orm == 'TypeORM'){
         const cityareaRepository = typeorm.getConnection().getRepository(TypeORMCityarea);
         let typeORMCityarea = new TypeORMCityarea();
-        let id = parseInt(req.query.id);
+        let id = parseInt(req.body.id);
         typeORMCityarea.id = id;
-        typeORMCityarea.name = req.query.name;
-        typeORMCityarea.size = req.query.size;
-        typeORMCityarea.description = req.query.description;
-        typeORMCityarea.cityId = req.query.citySelect;
+        typeORMCityarea.name = req.body.name;
+        typeORMCityarea.size = req.body.size;
+        typeORMCityarea.description = req.body.description;
+        typeORMCityarea.cityId = req.body.citySelect;
         cityareaRepository.save(typeORMCityarea).then(function(result){
             req.session.message = "Record is created in database.";
             res.redirect("show");
@@ -377,12 +377,12 @@ var editCityarea = async function(req, res){
         });
     }else if (orm == 'Bookshelf'){
         BookshelfCityarea.where({
-            Id: req.query.id
+            Id: req.body.id
         }).save({
-            Name: req.query.name,
-            Size: req.query.size,
-            Description: req.query.description,
-            CityId: req.query.citySelect
+            Name: req.body.name,
+            Size: req.body.size,
+            Description: req.body.description,
+            CityId: req.body.citySelect
         },{
             method: 'update',
             patch:true
@@ -395,13 +395,13 @@ var editCityarea = async function(req, res){
         });
     }else if (orm == 'Sequelize'){
         Cityarea.update({
-            Name: req.query.name,
-            Size: req.query.size,
-            Description: req.query.description,
-            CityId: req.query.citySelect
+            Name: req.body.name,
+            Size: req.body.size,
+            Description: req.body.description,
+            CityId: req.body.citySelect
         },
         {
-            where: {Id: req.query.id}
+            where: {Id: req.body.id}
         }).then(function(result){
             req.session.message = "Record is edited in database.";
             res.redirect("show");

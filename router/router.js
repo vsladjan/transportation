@@ -21,16 +21,16 @@ router.get("/city/get/", function(req, res){
 });
 
 // City create router handler
-router.get("/city/create/", function(req, res){
+router.post("/city/create/", function(req, res){
     cityController.createCity(req, res);
  });
 
 // City edit router handler
-router.get("/city/edit/", function(req, res){
+router.post("/city/edit/", function(req, res){
     cityController.editCity(req, res);
  });
 // City delete router handler
-router.get("/city/delete/", function(req, res){
+router.delete("/city/delete/", function(req, res){
     cityController.deleteCity(req, res);
  });
 
@@ -45,17 +45,17 @@ router.get("/country/get/", function(req, res){
 });
 
 // Country create router handler
-router.get("/country/create/", function(req, res){
+router.post("/country/create/", function(req, res){
     countryController.createCountry(req, res);
  });
 
  // Country edit router handler
-router.get("/country/edit/", function(req, res){
+router.post("/country/edit/", function(req, res){
     countryController.editCountry(req, res);
  });
 
  // Country delete router handler
- router.get("/country/delete/", function(req, res){
+ router.delete("/country/delete/", function(req, res){
     countryController.deleteCountry(req, res);
 });
 
@@ -70,17 +70,17 @@ router.get("/cityarea/get/", function(req, res){
 });
 
 // Cityarea create router handler
-router.get("/cityarea/create/", function(req, res){
+router.post("/cityarea/create/", function(req, res){
     cityareaController.createCityarea(req, res);
  });
 
 // Cityarea edit router handler
-router.get("/cityarea/edit/", function(req, res){
+router.post("/cityarea/edit/", function(req, res){
     cityareaController.editCityarea(req, res);
  });
  
 // Cityarea delete router handler
-router.get("/cityarea/delete/", function(req, res){
+router.delete("/cityarea/delete/", function(req, res){
     cityareaController.deleteCityarea(req, res);
  });
 
@@ -95,17 +95,17 @@ router.get("/station/get/", function(req, res){
 });
 
 // Station create router handler
-router.get("/station/create/", function(req, res){
+router.post("/station/create/", function(req, res){
     stationController.createStation(req, res);
  });
 
 // Station edit router handler
-router.get("/station/edit/", function(req, res){
+router.post("/station/edit/", function(req, res){
     stationController.editStation(req, res);
  });
  
 // Station delete router handler
-router.get("/station/delete/", function(req, res){
+router.delete("/station/delete/", function(req, res){
     stationController.deleteStation(req, res);
  });
 
@@ -120,17 +120,17 @@ router.get("/type/get/", function(req, res){
 });
 
 // Transportation type create router handler
-router.get("/type/create/", function(req, res){
+router.post("/type/create/", function(req, res){
     transportationtypeController.createType(req, res);
  });
 
 // Transportation type edit router handler
-router.get("/type/edit/", function(req, res){
+router.post("/type/edit/", function(req, res){
     transportationtypeController.editType(req, res);
  });
  
 // Transportation type delete router handler
-router.get("/type/delete/", function(req, res){
+router.delete("/type/delete/", function(req, res){
     transportationtypeController.deleteType(req, res);
  });
 
@@ -145,17 +145,17 @@ router.get("/vehicle/get/", function(req, res){
 });
 
 // Transportation vehicle create router handler
-router.get("/vehicle/create/", function(req, res){
+router.post("/vehicle/create/", function(req, res){
     transportationvehicleController.createVehicle(req, res);
  });
 
 // Transportation vehicle edit router handler
-router.get("/vehicle/edit/", function(req, res){
+router.post("/vehicle/edit/", function(req, res){
     transportationvehicleController.editVehicle(req, res);
  });
  
 // Transportation vehicle delete router handler
-router.get("/vehicle/delete/", function(req, res){
+router.delete("/vehicle/delete/", function(req, res){
     transportationvehicleController.deleteVehicle(req, res);
  });
 
@@ -170,17 +170,17 @@ router.get("/route/get/", function(req, res){
 });
 
 // Route create router handler
-router.get("/route/create/", function(req, res){
+router.post("/route/create/", function(req, res){
     routeController.createRoute(req, res);
  });
  
 // Route edit router handler
-router.get("/route/edit/", function(req, res){
+router.post("/route/edit/", function(req, res){
     routeController.editRoute(req, res);
  });
 
  // Route delete router handler
-router.get("/route/delete/", function(req, res){
+router.delete("/route/delete/", function(req, res){
     routeController.deleteRoute(req, res);
  });
 
@@ -195,17 +195,17 @@ router.get("/routestation/get/", function(req, res){
 });
 
 // Routestation create router handler
-router.get("/routestation/create/", function(req, res){
+router.post("/routestation/create/", function(req, res){
     routestationController.createRoutestation(req, res);
  });
  
 // Routestation edit router handler
-router.get("/routestation/edit/", function(req, res){
+router.post("/routestation/edit/", function(req, res){
     routestationController.editRoutestation(req, res);
  });
 
  // Routestation delete router handler
-router.get("/routestation/delete/", function(req, res){
+router.delete("/routestation/delete/", function(req, res){
     routestationController.deleteRoutestation(req, res);
  });
 
