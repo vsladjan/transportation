@@ -232,96 +232,70 @@ var createVehicle = async function(req, res){
     }
     var orm = cookie.getOrm(req, res);
 
-
-    if (orm == 'MikroORM'){
-        let em = mikroDI.em.fork();
-        let mType =  await em.findOne(MType, req.body.typeSelect);
-        let mVehicle = new MVehicle(
-            req.body.name,
-            req.body.description,
-            req.body.color,
-            req.body.productionYear
-        );
-        mVehicle.Transportationtype = mType;
-        em.persistAndFlush(mVehicle).then(function(result){
-            req.session.message = "Record is created in database.";
-            res.redirect("show");
-        }).catch(function(err){
-            req.session.message = "Error when creating data.";
-            res.redirect("show");
-        });
-    }else if (orm == 'Objection'){
-        ObjVehicle.query().insert({
-            Name: req.body.name,
-            Description: req.body.description,
-            Color: req.body.color,
-            ProductionYear: req.body.productionYear,
-            TransportationTypeId: req.body.typeSelect
-        }).then(function(result){
-            req.session.message = "Record is created in database.";
-            res.redirect("show");
-        }).catch(function(err){
-            req.session.message = "Error when creating data.";
-            res.redirect("show");
-        });
-    }else if (orm == 'Knex'){
-        knex("transportationvehicle").insert({
-            Name: req.body.name,
-            Description: req.body.description,
-            Color: req.body.color,
-            ProductionYear: req.body.productionYear,
-            TransportationTypeId: req.body.typeSelect
-        }).then(function(result){
-            req.session.message = "Record is created in database.";
-            res.redirect("show");
-        }).catch(function(err){
-            req.session.message = "Error when creating data.";
-            res.redirect("show");
-        });
-    }else if (orm == 'TypeORM'){
-        const vehicleRepository = typeorm.getConnection().getRepository(TypeORMVehicle);
-        let typeORMVehicle = new TypeORMVehicle();
-        typeORMVehicle.name = req.body.name;
-        typeORMVehicle.description = req.body.description;
-        typeORMVehicle.color = req.body.color;
-        typeORMVehicle.productionYear = req.body.productionYear;
-        typeORMVehicle.transportationTypeId = req.body.typeSelect;
-        vehicleRepository.save(typeORMVehicle).then(function(result){
-            req.session.message = "Record is created in database.";
-            res.redirect("show");
-        }).catch(function(err){
-            req.session.message = "Error when creating data.";
-            res.redirect("show");
-        });
-    }else if (orm == 'Bookshelf'){
-        BookshelfVehicle.forge({
-            Name: req.body.name,
-            Description: req.body.description,
-            Color: req.body.color,
-            ProductionYear: req.body.productionYear,
-            TransportationTypeId: req.body.typeSelect
-        }).save().then(function(result){
-            req.session.message = "Record is created in database.";
-            res.redirect("show");
-        }).catch(function(err){
-            req.session.message = "Error when creating data.";
-            res.redirect("show");
-        });
-    }else if (orm == 'Sequelize'){
-        Vehicle.create({
-            Name: req.body.name,
-            Description: req.body.description,
-            Color: req.body.color,
-            ProductionYear: req.body.productionYear,
-            TransportationTypeId: req.body.typeSelect
-        }).then(function(result){
-            req.session.message = "Record is created in database.";
-            res.redirect("show");
-        }).catch(function(err){
-            req.session.message = "Error when creating data.";
-            res.redirect("show");
-        });
+    try{
+        if (orm == 'MikroORM'){
+            let em = mikroDI.em.fork();
+            let mType =  await em.findOne(MType, req.body.typeSelect);
+            let mVehicle = new MVehicle(
+                req.body.name,
+                req.body.description,
+                req.body.color,
+                req.body.productionYear
+            );
+            mVehicle.Transportationtype = mType;
+            await em.persistAndFlush(mVehicle);
+            req.session.message = "Record is created in database (MikroORM).";
+        }else if (orm == 'Objection'){
+            await ObjVehicle.query().insert({
+                Name: req.body.name,
+                Description: req.body.description,
+                Color: req.body.color,
+                ProductionYear: req.body.productionYear,
+                TransportationTypeId: req.body.typeSelect
+            });
+            req.session.message = "Record is created in database (Objection).";
+        }else if (orm == 'Knex'){
+            await knex("transportationvehicle").insert({
+                Name: req.body.name,
+                Description: req.body.description,
+                Color: req.body.color,
+                ProductionYear: req.body.productionYear,
+                TransportationTypeId: req.body.typeSelect
+            });
+            req.session.message = "Record is created in database (Knex).";
+        }else if (orm == 'TypeORM'){
+            const vehicleRepository = typeorm.getConnection().getRepository(TypeORMVehicle);
+            let typeORMVehicle = new TypeORMVehicle();
+            typeORMVehicle.name = req.body.name;
+            typeORMVehicle.description = req.body.description;
+            typeORMVehicle.color = req.body.color;
+            typeORMVehicle.productionYear = req.body.productionYear;
+            typeORMVehicle.transportationTypeId = req.body.typeSelect;
+            await vehicleRepository.save(typeORMVehicle);
+            req.session.message = "Record is created in database (TypeORM).";
+        }else if (orm == 'Bookshelf'){
+            await BookshelfVehicle.forge({
+                Name: req.body.name,
+                Description: req.body.description,
+                Color: req.body.color,
+                ProductionYear: req.body.productionYear,
+                TransportationTypeId: req.body.typeSelect
+            }).save();
+            req.session.message = "Record is created in database (Bookshelf).";
+        }else if (orm == 'Sequelize'){
+            await Vehicle.create({
+                Name: req.body.name,
+                Description: req.body.description,
+                Color: req.body.color,
+                ProductionYear: req.body.productionYear,
+                TransportationTypeId: req.body.typeSelect
+            });
+            req.session.message = "Record is created in database (Sequelize).";
+        }
+    }catch(err){
+        req.session.message = "Error when creating data.";
     }
+    res.redirect("show");
 }
 
 // Edit Vehicle
@@ -331,193 +305,128 @@ var editVehicle = async function(req, res){
     }
     var orm = cookie.getOrm(req, res);
 
-    if (orm == 'MikroORM'){
-        let em = mikroDI.em.fork();
-        let mVehicle = await em.findOne(MVehicle, req.body.id);
-        let mType = await em.findOne(MType, req.body.typeSelect);
-        mVehicle.Name = req.body.name;
-        mVehicle.Description = req.body.description;
-        mVehicle.Color = req.body.color
-        mVehicle.ProductionYear = req.body.productionYear;
-        mVehicle.Transportationtype = mType;
-        em.flush(mVehicle).then(function(result){
-            req.session.message = "Record is edited in database.";
-            res.redirect("show");
-        }).catch(function(err){
-            req.session.message = "Error when editing data.";
-            res.redirect("show");
-        });
-    }else if (orm == 'Objection'){
-        ObjVehicle.query().update({
-            Name: req.body.name,
-            Description: req.body.description,
-            Color: req.body.color,
-            ProductionYear: req.body.productionYear,
-            TransportationTypeId: req.body.typeSelect
-        }).where({Id: req.body.id}).then(function(result){
-            req.session.message = "Record is edited in database.";
-            res.redirect("show");
-        }).catch(function(err){
-            req.session.message = "Error when editing data.";
-            res.redirect("show");
-        });;
-    }else if (orm == 'Knex'){
-        knex("transportationvehicle").where("Id", req.body.id).update({
-            Name: req.body.name,
-            Description: req.body.description,
-            Color: req.body.color,
-            ProductionYear: req.body.productionYear,
-            TransportationTypeId: req.body.typeSelect
-        }).then(function(result){
-            req.session.message = "Record is created in database.";
-            res.redirect("show");
-        }).catch(function(err){
-            req.session.message = "Error when creating data.";
-            res.redirect("show");
-        });
-    }else if (orm == 'TypeORM'){
-        const vehicleRepository = typeorm.getConnection().getRepository(TypeORMVehicle);
-        let typeORMVehicle = new TypeORMVehicle();
-        let id = parseInt(req.body.id);
-        typeORMVehicle.id = id;
-        typeORMVehicle.name = req.body.name;
-        typeORMVehicle.description = req.body.description;
-        typeORMVehicle.color = req.body.color;
-        typeORMVehicle.productionYear = req.body.productionYear;
-        typeORMVehicle.transportationTypeId = req.body.typeSelect;
-        vehicleRepository.save(typeORMVehicle).then(function(result){
-            req.session.message = "Record is created in database.";
-            res.redirect("show");
-        }).catch(function(err){
-            req.session.message = "Error when creating data.";
-            res.redirect("show");
-        });
-    }else if (orm == 'Bookshelf'){
-        BookshelfVehicle.where({
-            Id: req.body.id
-        }).save({
-            Name: req.body.name,
-            Description: req.body.description,
-            Color: req.body.color,
-            ProductionYear: req.body.productionYear,
-            TransportationTypeId: req.body.typeSelect
-        },{
-            method: 'update',
-            patch:true
-        }).then(function(result){
-            req.session.message = "Record is edited in database.";
-            res.redirect("show");
-        }).catch(function(err){
-            req.session.message = "Error when editing data.";
-            res.redirect("show");
-        });
-    }else if (orm == 'Sequelize'){
-        Vehicle.update({
-            Name: req.body.name,
-            Description: req.body.description,
-            Color: req.body.color,
-            ProductionYear: req.body.productionYear,
-            TransportationTypeId: req.body.typeSelect
-        },
-        {
-            where: {Id: req.body.id}
-        }).then(function(result){
-            req.session.message = "Record is edited in database.";
-            res.redirect("show");
-        }).catch(function(err){
-            req.session.message = "Error when editing data.";
-            res.redirect("show");
-        });
+    try{
+        if (orm == 'MikroORM'){
+            let em = mikroDI.em.fork();
+            let mVehicle = await em.findOne(MVehicle, req.body.id);
+            let mType = await em.findOne(MType, req.body.typeSelect);
+            mVehicle.Name = req.body.name;
+            mVehicle.Description = req.body.description;
+            mVehicle.Color = req.body.color
+            mVehicle.ProductionYear = req.body.productionYear;
+            mVehicle.Transportationtype = mType;
+            await em.flush(mVehicle);
+            req.session.message = "Record is edited in database (MikroORM).";
+        }else if (orm == 'Objection'){
+            await ObjVehicle.query().update({
+                Name: req.body.name,
+                Description: req.body.description,
+                Color: req.body.color,
+                ProductionYear: req.body.productionYear,
+                TransportationTypeId: req.body.typeSelect
+            }).where({Id: req.body.id});
+            req.session.message = "Record is edited in database (Objection).";
+        }else if (orm == 'Knex'){
+            await knex("transportationvehicle").where("Id", req.body.id).update({
+                Name: req.body.name,
+                Description: req.body.description,
+                Color: req.body.color,
+                ProductionYear: req.body.productionYear,
+                TransportationTypeId: req.body.typeSelect
+            });
+            req.session.message = "Record is edited in database (Knex).";
+        }else if (orm == 'TypeORM'){
+            const vehicleRepository = typeorm.getConnection().getRepository(TypeORMVehicle);
+            let typeORMVehicle = new TypeORMVehicle();
+            let id = parseInt(req.body.id);
+            typeORMVehicle.id = id;
+            typeORMVehicle.name = req.body.name;
+            typeORMVehicle.description = req.body.description;
+            typeORMVehicle.color = req.body.color;
+            typeORMVehicle.productionYear = req.body.productionYear;
+            typeORMVehicle.transportationTypeId = req.body.typeSelect;
+            await vehicleRepository.save(typeORMVehicle);
+            req.session.message = "Record is edited in database (TypeORM).";
+        }else if (orm == 'Bookshelf'){
+            await BookshelfVehicle.where({
+                Id: req.body.id
+            }).save({
+                Name: req.body.name,
+                Description: req.body.description,
+                Color: req.body.color,
+                ProductionYear: req.body.productionYear,
+                TransportationTypeId: req.body.typeSelect
+            },{
+                method: 'update',
+                patch:true
+            });
+            req.session.message = "Record is edited in database (Bookshelf).";
+        }else if (orm == 'Sequelize'){
+            await Vehicle.update({
+                Name: req.body.name,
+                Description: req.body.description,
+                Color: req.body.color,
+                ProductionYear: req.body.productionYear,
+                TransportationTypeId: req.body.typeSelect
+            },
+            {
+                where: {Id: req.body.id}
+            });
+            req.session.message = "Record is edited in database (Sequelize).";
+        }
+    }catch(err){
+        req.session.message = "Error when editing data.";
     }
+    res.redirect("show");
 }
 
 // Delete Vehicle
 var deleteVehicle = async function(req, res){
-  var response = {};
-  var orm = cookie.getOrm(req, res);
+    var response = {};
+    var orm = cookie.getOrm(req, res);
     
-    if (orm == 'MikroORM'){
-        let vehicleRepository = mikroDI.em.fork().getRepository(MVehicle);
-        let record = await vehicleRepository.findOne(req.query.id);
-        vehicleRepository.removeAndFlush(record).then(function(){
+    try{
+        if (orm == 'MikroORM'){
+            let vehicleRepository = mikroDI.em.fork().getRepository(MVehicle);
+            let record = await vehicleRepository.findOne(req.query.id);
+            await vehicleRepository.removeAndFlush(record);
             response.message = "Ok";
             response.id = req.query.id;
-            res.send(response);
-        }).catch(function(err){
-            if (err.name == "SequelizeForeignKeyConstraintError")
-                response.message = "There are City Areas that are from this City, please delete them first!";
-            else
-                response.message = "Error when deleting data."
-            res.send(response);
-        });
-    }else if (orm == 'Objection'){
-        ObjVehicle.query().deleteById(req.query.id).then(function(){
+        }else if (orm == 'Objection'){
+            await ObjVehicle.query().deleteById(req.query.id);
             response.message = "Ok";
             response.id = req.query.id;
-            res.send(response);
-        }).catch(function(err){
-            if (err.name == "SequelizeForeignKeyConstraintError")
-                response.message = "There are City Areas that are from this City, please delete them first!";
-            else
-                response.message = "Error when deleting data."
-            res.send(response);
-        });
-    }else if (orm == 'Knex'){
-        knex('transportationvehicle').where('Id', req.query.id).del().then(function(){
+        }else if (orm == 'Knex'){
+            await knex('transportationvehicle').where('Id', req.query.id).del();
             response.message = "Ok";
             response.id = req.query.id;
-            res.send(response);
-        }).catch(function(err){
-            if (err.name == "SequelizeForeignKeyConstraintError")
-                response.message = "There are City Areas that are from this City, please delete them first!";
-            else
-                response.message = "Error when deleting data."
-            res.send(response);
-        });
-    }else if (orm == 'TypeORM'){
-        const vehicleRepository = typeorm.getConnection().getRepository(TypeORMVehicle);
-        vehicleRepository.delete(req.query.id).then(function(){
+        }else if (orm == 'TypeORM'){
+            const vehicleRepository = typeorm.getConnection().getRepository(TypeORMVehicle);
+            await vehicleRepository.delete(req.query.id);
             response.message = "Ok";
             response.id = req.query.id;
-            res.send(response);
-        }).catch(function(err){
-            if (err.name == "SequelizeForeignKeyConstraintError")
-                response.message = "There are City Areas that are from this City, please delete them first!";
-            else
-                response.message = "Error when deleting data."
-            res.send(response);
-        });
-    }else if (orm == 'Bookshelf'){
-        BookshelfVehicle.where({
-            Id: req.query.id
-        }).destroy().then(function(){
+        }else if (orm == 'Bookshelf'){
+            await BookshelfVehicle.where({
+                Id: req.query.id
+            }).destroy();
             response.message = "Ok";
             response.id = req.query.id;
-            res.send(response);
-        }).catch(function(err){
-            if (err.name == "SequelizeForeignKeyConstraintError")
-                response.message = "There are City Areas that are from this City, please delete them first!";
-            else
-                response.message = "Error when deleting data."
-            res.send(response);
-        });
-    }else if (orm == 'Sequelize'){
-        Vehicle.destroy({
-                where: {
-                    Id : req.query.id
-                }
-        }).then(function(){
-                response.message = "Ok";
-                response.id = req.query.id;
-                res.send(response);
-        }).catch(function(err){
-                if (err.name == "SequelizeForeignKeyConstraintError")
-                    response.message = "There are Routes that have this Vehicle, please delete them first!";
-                else
-                    response.message = "Error when deleting data."
-                res.send(response);
-        });
+        }else if (orm == 'Sequelize'){
+            await Vehicle.destroy({
+                    where: {
+                        Id : req.query.id
+                    }
+            });
+            response.message = "Ok";
+            response.id = req.query.id;
+        }
+    }catch(err){
+        if (err.errno == 1451 || err.name.includes('Foreign'))
+            response.message = "There are Routestations that have this Vehicle included, please delete them first!";
+        else
+            response.message = "Error when deleting data."
     }
+    res.send(response);
 }
 
 module.exports.getShow = getShow;

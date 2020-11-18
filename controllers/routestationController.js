@@ -317,97 +317,72 @@ var createRoutestation = async function(req, res){
     }
     var orm = cookie.getOrm(req, res);
 
-    if (orm == 'MikroORM'){
-        let em = mikroDI.em.fork();
-        let mRoute =  await em.findOne(MRoute, req.body.routeSelect);
-        let mStation =  await em.findOne(MStation, req.body.stationSelect);
-        let mVehicle =  await em.findOne(MVehicle, req.body.vehicleSelect);
-        let mRoutestation = new MRoutestation();
-        mRoutestation.Route = mRoute;
-        mRoutestation.Station = mStation;
-        mRoutestation.Transportationvehicle = mVehicle;
-        mRoutestation.Time = req.body.time;
-        mRoutestation.Type = req.body.type;
+    try{
+        if (orm == 'MikroORM'){
+            let em = mikroDI.em.fork();
+            let mRoute =  await em.findOne(MRoute, req.body.routeSelect);
+            let mStation =  await em.findOne(MStation, req.body.stationSelect);
+            let mVehicle =  await em.findOne(MVehicle, req.body.vehicleSelect);
+            let mRoutestation = new MRoutestation();
+            mRoutestation.Route = mRoute;
+            mRoutestation.Station = mStation;
+            mRoutestation.Transportationvehicle = mVehicle;
+            mRoutestation.Time = req.body.time;
+            mRoutestation.Type = req.body.type;
 
-        em.persistAndFlush(mRoutestation).then(function(result){
-            req.session.message = "Record is created in database.";
-            res.redirect("show");
-        }).catch(function(err){
-            req.session.message = "Error when creating data.";
-            res.redirect("show");
-        });
-    }else if (orm == 'Objection'){
-        ObjRS.query().insert({
-            StationId: req.body.stationSelect,
-            RouteId: req.body.routeSelect,
-            TransportationVehicleId: req.body.vehicleSelect,
-            Time: req.body.time,
-            Type: req.body.type
-        }).then(function(result){
-            req.session.message = "Record is created in database.";
-            res.redirect("show");
-        }).catch(function(err){
-            req.session.message = "Error when creating data.";
-            res.redirect("show");
-        });
-    }else if (orm == 'Knex'){
-        knex("routestation").insert({
-            StationId: req.body.stationSelect,
-            RouteId: req.body.routeSelect,
-            TransportationVehicleId: req.body.vehicleSelect,
-            Time: req.body.time,
-            Type: req.body.type 
-        }).then(function(result){
-            req.session.message = "Record is created in database.";
-            res.redirect("show");
-        }).catch(function(err){
-            req.session.message = "Error when creating data.";
-            res.redirect("show");
-        });
-    }else if (orm == 'TypeORM'){
-        const rsRepository = typeorm.getConnection().getRepository(TypeORMRoutestation);
-        let typeORMrs = new TypeORMRoutestation();
-        typeORMrs.stationId = req.body.stationSelect;
-        typeORMrs.routeId = req.body.routeSelect;
-        typeORMrs.transportationVehicleId = req.body.vehicleSelect;
-        typeORMrs.time = req.body.time;
-        typeORMrs.type = req.body.type ;
-        rsRepository.insert(typeORMrs).then(function(result){
-            req.session.message = "Record is created in database.";
-            res.redirect("show");
-        }).catch(function(err){
-            req.session.message = "Error when creating data.";
-            res.redirect("show");
-        });
-    }else if (orm == 'Bookshelf'){
-        BookshelfRoutestation.forge({
-            StationId: req.body.stationSelect,
-            RouteId: req.body.routeSelect,
-            TransportationVehicleId: req.body.vehicleSelect,
-            Time: req.body.time,
-            Type: req.body.type 
-        }).save(null, {method: "insert"}).then(function(result){
-            req.session.message = "Record is created in database.";
-            res.redirect("show");
-        }).catch(function(err){
-            req.session.message = "Error when creating data.";
-            res.redirect("show");
-        });
-    }else if (orm == 'Sequelize'){
-        Routestation.create({
-            StationId: req.body.stationSelect,
-            RouteId: req.body.routeSelect,
-            TransportationVehicleId: req.body.vehicleSelect,
-            Time: req.body.time,
-            Type: req.body.type
-        }).then(function(result){
-            req.session.message = "Record is created in database.";
-            res.redirect("show");
-        }).catch(function(err){
-            req.session.message = "Error when creating data.";
-            res.redirect("show");
-        });
+            await em.persistAndFlush(mRoutestation);
+            req.session.message = "Record is created in database (MikroORM).";
+        }else if (orm == 'Objection'){
+            await ObjRS.query().insert({
+                StationId: req.body.stationSelect,
+                RouteId: req.body.routeSelect,
+                TransportationVehicleId: req.body.vehicleSelect,
+                Time: req.body.time,
+                Type: req.body.type
+            });
+            req.session.message = "Record is created in database (Objection).";
+        }else if (orm == 'Knex'){
+            await knex("routestation").insert({
+                StationId: req.body.stationSelect,
+                RouteId: req.body.routeSelect,
+                TransportationVehicleId: req.body.vehicleSelect,
+                Time: req.body.time,
+                Type: req.body.type 
+            });
+            req.session.message = "Record is created in database (Knex).";
+        }else if (orm == 'TypeORM'){
+            const rsRepository = typeorm.getConnection().getRepository(TypeORMRoutestation);
+            let typeORMrs = new TypeORMRoutestation();
+            typeORMrs.stationId = req.body.stationSelect;
+            typeORMrs.routeId = req.body.routeSelect;
+            typeORMrs.transportationVehicleId = req.body.vehicleSelect;
+            typeORMrs.time = req.body.time;
+            typeORMrs.type = req.body.type ;
+            await rsRepository.insert(typeORMrs);
+            req.session.message = "Record is created in database (TypeORM).";
+        }else if (orm == 'Bookshelf'){
+            await BookshelfRoutestation.forge({
+                StationId: req.body.stationSelect,
+                RouteId: req.body.routeSelect,
+                TransportationVehicleId: req.body.vehicleSelect,
+                Time: req.body.time,
+                Type: req.body.type 
+            }).save(null, {method: "insert"});
+            req.session.message = "Record is created in database (Bookshelf).";
+        }else if (orm == 'Sequelize'){
+            await Routestation.create({
+                StationId: req.body.stationSelect,
+                RouteId: req.body.routeSelect,
+                TransportationVehicleId: req.body.vehicleSelect,
+                Time: req.body.time,
+                Type: req.body.type
+            });
+            req.session.message = "Record is created in database (Sequelize).";
+        }
+    }catch(err){
+        req.session.message = "Error when creating data.";
     }
+    res.redirect("show");
 }
 
 // Edit Rotuestation
@@ -418,141 +393,116 @@ var editRoutestation = async function(req, res){
     }
     var orm = cookie.getOrm(req, res);
 
-    if (orm == 'MikroORM'){
-        let em = mikroDI.em.fork();
-        let mRoute =  await em.findOne(MRoute, req.body.routeId);
-        let mStation =  await em.findOne(MStation, req.body.stationId);
-        let mVehicle =  await em.findOne(MVehicle, req.body.vehicleId);
-        let mRoutestation = await em.findOne(
-            MRoutestation,
-            { $and:[
-                {'RouteId': req.body.oldRouteId},
-                {'StationId': req.body.oldStationId},
-                {'TransportationVehicleId': req.body.oldVehicleId},
-                {'Time': req.body.oldTime},
-            ]},
-            ['Route', 'Station', 'Transportationvehicle']
-        );
+    try{
+        if (orm == 'MikroORM'){
+            let em = mikroDI.em.fork();
+            let mRoute =  await em.findOne(MRoute, req.body.routeId);
+            let mStation =  await em.findOne(MStation, req.body.stationId);
+            let mVehicle =  await em.findOne(MVehicle, req.body.vehicleId);
+            let mRoutestation = await em.findOne(
+                MRoutestation,
+                { $and:[
+                    {'RouteId': req.body.oldRouteId},
+                    {'StationId': req.body.oldStationId},
+                    {'TransportationVehicleId': req.body.oldVehicleId},
+                    {'Time': req.body.oldTime},
+                ]},
+                ['Route', 'Station', 'Transportationvehicle']
+            );
 
-        await em.remove(mRoutestation);
-        mRoutestation = new MRoutestation();
-        mRoutestation.Route = mRoute;
-        mRoutestation.Station = mStation;
-        mRoutestation.Transportationvehicle = mVehicle;
-        mRoutestation.Time = req.body.time;
-        mRoutestation.Type = req.body.type;
-        await em.persist(mRoutestation);
+            await em.remove(mRoutestation);
+            mRoutestation = new MRoutestation();
+            mRoutestation.Route = mRoute;
+            mRoutestation.Station = mStation;
+            mRoutestation.Transportationvehicle = mVehicle;
+            mRoutestation.Time = req.body.time;
+            mRoutestation.Type = req.body.type;
+            await em.persist(mRoutestation);
 
-        em.flush().then(function(result){
-            response.message = "Record is edited in database.";
-            res.send(response);
-        }).catch(function(err){
-            response.message = "Error when editing data.";
-            res.send(response);
-        });
-    }else if (orm == 'Objection'){
-        ObjRS.query().update({
-            StationId: req.body.stationId,
-            RouteId: req.body.routeId,
-            TransportationVehicleId: req.body.vehicleId,
-            Time: req.body.time,
-            Type: req.body.type
-        }).where({
-            RouteId : req.body.oldRouteId,
-            StationId : req.body.oldStationId,
-            TransportationVehicleId : req.body.oldVehicleId,
-            Time: req.body.oldTime
-        }).then(function(result){
-            response.message = "Record is edited in database.";
-            res.send(response);
-        }).catch(function(err){
-            response.message = "Error when editing data.";
-            res.send(response);
-        });;
-    }else if (orm == 'Knex'){
-        knex("routestation").where({
-            RouteId : req.body.oldRouteId,
-            StationId : req.body.oldStationId,
-            TransportationVehicleId : req.body.oldVehicleId,
-            Time: req.body.oldTime
-        }).update({
-            StationId: req.body.stationId,
-            RouteId: req.body.routeId,
-            TransportationVehicleId: req.body.vehicleId,
-            Time: req.body.time,
-            Type: req.body.type
-        }).then(function(result){
-            response.message = "Record is edited in database.";
-            res.send(response);
-        }).catch(function(err){
-            response.message = "Error when editing data.";
-            res.send(response);
-        });
-    }else if (orm == 'TypeORM'){
-        const rsRepository = typeorm.getConnection().getRepository(TypeORMRoutestation);
-        let typeORMrs = new TypeORMRoutestation();
-        typeORMrs.stationId = req.body.stationId;
-        typeORMrs.routeId = req.body.routeId;
-        typeORMrs.transportationVehicleId = req.body.vehicleId;
-        typeORMrs.time = req.body.time;
-        typeORMrs.type = req.body.type;
-        rsRepository.update({
-            routeId : req.body.oldRouteId,
-            stationId : req.body.oldStationId,
-            transportationVehicleId : req.body.oldVehicleId,
-            time: req.body.oldTime
-        }, typeORMrs).then(function(result){
-            response.message = "Record is edited in database.";
-            res.send(response);
-        }).catch(function(err){
-            response.message = "Error when editing data.";
-            res.send(response);
-        });
-    }else if (orm == 'Bookshelf'){
-        BookshelfRoutestation.where({
-            RouteId : req.body.oldRouteId,
-            StationId : req.body.oldStationId,
-            TransportationVehicleId : req.body.oldVehicleId,
-            Time: req.body.oldTime
-        }).save({
-            StationId: req.body.stationId,
-            RouteId: req.body.routeId,
-            TransportationVehicleId: req.body.vehicleId,
-            Time: req.body.time,
-            Type: req.body.type
-        },{
-            method: 'update',
-            patch:true
-        }).then(function(result){
-            response.message = "Record is edited in database.";
-            res.send(response);
-        }).catch(function(err){
-            response.message = "Error when editing data.";
-            res.send(response);
-        });
-    }else if (orm == 'Sequelize'){
-        Routestation.update({
-            StationId: req.body.stationId,
-            RouteId: req.body.routeId,
-            TransportationVehicleId: req.body.vehicleId,
-            Time: req.body.time,
-            Type: req.body.type
-        },
-        {
-            where: {
+            await em.flush();
+            response.message = "Record is edited in database (MikroORM).";
+        }else if (orm == 'Objection'){
+            await ObjRS.query().update({
+                StationId: req.body.stationId,
+                RouteId: req.body.routeId,
+                TransportationVehicleId: req.body.vehicleId,
+                Time: req.body.time,
+                Type: req.body.type
+            }).where({
                 RouteId : req.body.oldRouteId,
                 StationId : req.body.oldStationId,
                 TransportationVehicleId : req.body.oldVehicleId,
                 Time: req.body.oldTime
+            });
+            response.message = "Record is edited in database (Objection).";
+        }else if (orm == 'Knex'){
+            await knex("routestation").where({
+                RouteId : req.body.oldRouteId,
+                StationId : req.body.oldStationId,
+                TransportationVehicleId : req.body.oldVehicleId,
+                Time: req.body.oldTime
+            }).update({
+                StationId: req.body.stationId,
+                RouteId: req.body.routeId,
+                TransportationVehicleId: req.body.vehicleId,
+                Time: req.body.time,
+                Type: req.body.type
+            });
+            response.message = "Record is edited in database (Knex).";
+        }else if (orm == 'TypeORM'){
+            const rsRepository = typeorm.getConnection().getRepository(TypeORMRoutestation);
+            let typeORMrs = new TypeORMRoutestation();
+            typeORMrs.stationId = req.body.stationId;
+            typeORMrs.routeId = req.body.routeId;
+            typeORMrs.transportationVehicleId = req.body.vehicleId;
+            typeORMrs.time = req.body.time;
+            typeORMrs.type = req.body.type;
+            await rsRepository.update({
+                routeId : req.body.oldRouteId,
+                stationId : req.body.oldStationId,
+                transportationVehicleId : req.body.oldVehicleId,
+                time: req.body.oldTime
+            }, typeORMrs);
+            response.message = "Record is edited in database (TypeORM).";
+        }else if (orm == 'Bookshelf'){
+            await BookshelfRoutestation.where({
+                RouteId : req.body.oldRouteId,
+                StationId : req.body.oldStationId,
+                TransportationVehicleId : req.body.oldVehicleId,
+                Time: req.body.oldTime
+            }).save({
+                StationId: req.body.stationId,
+                RouteId: req.body.routeId,
+                TransportationVehicleId: req.body.vehicleId,
+                Time: req.body.time,
+                Type: req.body.type
+            },{
+                method: 'update',
+                patch:true
+            });
+            response.message = "Record is edited in database (Bookshelf).";
+        }else if (orm == 'Sequelize'){
+            await Routestation.update({
+                StationId: req.body.stationId,
+                RouteId: req.body.routeId,
+                TransportationVehicleId: req.body.vehicleId,
+                Time: req.body.time,
+                Type: req.body.type
             },
-        }).then(function(result){
-            response.message = "Record is edited in database.";
-            res.send(response);
-        }).catch(function(err){
-            response.message = "Error when editing data.";
-            res.send(response);
-        });
+            {
+                where: {
+                    RouteId : req.body.oldRouteId,
+                    StationId : req.body.oldStationId,
+                    TransportationVehicleId : req.body.oldVehicleId,
+                    Time: req.body.oldTime
+                },
+            });
+            response.message = "Record is edited in database (Sequelize).";
+        }
+    }catch(err){
+        response.message = "Error when editing data.";
     }
+    res.send(response);
 }
 
 // Delete Routestation
@@ -560,120 +510,71 @@ var deleteRoutestation = async function(req, res){
     var response = {};
     var orm = cookie.getOrm(req, res);
     
-    if (orm == 'MikroORM'){
-        let em = mikroDI.em.fork();
-        let mRoutestation = await em.findOne(
-            MRoutestation,
-            { $and:[
-                {'RouteId': req.query.routeId},
-                {'StationId': req.query.stationId},
-                {'TransportationVehicleId': req.query.vehicleId},
-                {'Time': req.query.time},
-            ]},
-            ['Route', 'Station', 'Transportationvehicle']
-        );
+    try{
+        if (orm == 'MikroORM'){
+            let em = mikroDI.em.fork();
+            let mRoutestation = await em.findOne(
+                MRoutestation,
+                { $and:[
+                    {'RouteId': req.query.routeId},
+                    {'StationId': req.query.stationId},
+                    {'TransportationVehicleId': req.query.vehicleId},
+                    {'Time': req.query.time},
+                ]},
+                ['Route', 'Station', 'Transportationvehicle']
+            );
 
-        em.remove(mRoutestation);
-        em.flush().then(function(){
+            em.remove(mRoutestation);
+            await em.flush();
             response.message = "Ok";
-            response.id = req.query.id;
-            res.send(response);
-        }).catch(function(err){
-            if (err.name == "SequelizeForeignKeyConstraintError")
-                response.message = "There are City Areas that are from this City, please delete them first!";
-            else
-                response.message = "Error when deleting data."
-            res.send(response);
-        });
-    }else if (orm == 'Objection'){
-        ObjRS.query().deleteById([
-            req.query.stationId,
-            req.query.routeId,
-            req.query.vehicleId,
-            req.query.time
-        ]).then(function(){
+        }else if (orm == 'Objection'){
+            await ObjRS.query().deleteById([
+                req.query.stationId,
+                req.query.routeId,
+                req.query.vehicleId,
+                req.query.time
+            ]);
             response.message = "Ok";
-            response.id = req.query.id;
-            res.send(response);
-        }).catch(function(err){
-            if (err.name == "SequelizeForeignKeyConstraintError")
-                response.message = "There are City Areas that are from this City, please delete them first!";
-            else
-                response.message = "Error when deleting data."
-            res.send(response);
-        });
-    }else if (orm == 'Knex'){
-        knex('routestation').where({
-            RouteId : req.query.routeId,
-            StationId : req.query.stationId,
-            TransportationVehicleId : req.query.vehicleId,
-            Time: req.query.time
-        }).del().then(function(){
+        }else if (orm == 'Knex'){
+            await knex('routestation').where({
+                RouteId : req.query.routeId,
+                StationId : req.query.stationId,
+                TransportationVehicleId : req.query.vehicleId,
+                Time: req.query.time
+            }).del();
             response.message = "Ok";
-            response.id = req.query.id;
-            res.send(response);
-        }).catch(function(err){
-            if (err.name == "SequelizeForeignKeyConstraintError")
-                response.message = "There are City Areas that are from this City, please delete them first!";
-            else
-                response.message = "Error when deleting data."
-            res.send(response);
-        });
-    }else if (orm == 'TypeORM'){
-        const rsRepository = typeorm.getConnection().getRepository(TypeORMRoutestation);
-        rsRepository.delete({
-                routeId : req.query.routeId,
-                stationId : req.query.stationId,
-                transportationVehicleId : req.query.vehicleId,
-                time: req.query.time 
-            }).then(function(){
+        }else if (orm == 'TypeORM'){
+            const rsRepository = typeorm.getConnection().getRepository(TypeORMRoutestation);
+            await rsRepository.delete({
+                    routeId : req.query.routeId,
+                    stationId : req.query.stationId,
+                    transportationVehicleId : req.query.vehicleId,
+                    time: req.query.time 
+            });
             response.message = "Ok";
-            response.id = req.query.id;
-            res.send(response);
-        }).catch(function(err){
-            if (err.name == "SequelizeForeignKeyConstraintError")
-                response.message = "There are City Areas that are from this City, please delete them first!";
-            else
-                response.message = "Error when deleting data."
-            res.send(response);
-        });
-    }else if (orm == 'Bookshelf'){
-        BookshelfRoutestation.where({
-            RouteId : req.query.routeId,
-            StationId : req.query.stationId,
-            TransportationVehicleId : req.query.vehicleId,
-            Time: req.query.time
-        }).destroy().then(function(){
+        }else if (orm == 'Bookshelf'){
+            await BookshelfRoutestation.where({
+                RouteId : req.query.routeId,
+                StationId : req.query.stationId,
+                TransportationVehicleId : req.query.vehicleId,
+                Time: req.query.time
+            }).destroy();
             response.message = "Ok";
-            response.id = req.query.id;
-            res.send(response);
-        }).catch(function(err){
-            if (err.name == "SequelizeForeignKeyConstraintError")
-                response.message = "There are City Areas that are from this City, please delete them first!";
-            else
-                response.message = "Error when deleting data."
-            res.send(response);
-        });
-    }else if (orm == 'Sequelize'){
-        Routestation.destroy({
-            where: {
-                    RouteId : req.query.routeId,
-                    StationId : req.query.stationId,
-                    TransportationVehicleId : req.query.vehicleId,
-                    Time: req.query.time
-            }
-        }).then(function(){
+        }else if (orm == 'Sequelize'){
+            await Routestation.destroy({
+                where: {
+                        RouteId : req.query.routeId,
+                        StationId : req.query.stationId,
+                        TransportationVehicleId : req.query.vehicleId,
+                        Time: req.query.time
+                }
+            });
             response.message = "Ok";
-            response.id = req.query.id;
-            res.send(response);
-        }).catch(function(err){
-            if (err.name == "SequelizeForeignKeyConstraintError")
-                    response.message = "Error"; // TODO change comment maybe?
-            else
-                    response.message = "Error when deleting data."
-            res.send(response);
-        });
+        }
+    }catch(err){
+        response.message = "Error when deleting data."
     }
+    res.send(response);
 }
 
 module.exports.getShow = getShow;

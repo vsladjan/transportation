@@ -228,89 +228,64 @@ var createCity = async function(req, res){
     }
     var orm = cookie.getOrm(req, res);
 
-    if (orm == 'MikroORM'){
-        let em = mikroDI.em.fork();
-        let mCountry =  await em.findOne(MCountry, req.body.countrySelect);
-        let mCity = new MCity(
-            req.body.name,
-            req.body.population,
-            req.body.size
-        );
-        mCity.Country = mCountry;
-        em.persistAndFlush(mCity).then(function(result){
-            req.session.message = "Record is created in database.";
-            res.redirect("show");
-        }).catch(function(err){
-            req.session.message = "Error when creating data.";
-            res.redirect("show");
-        });
-    }else if (orm == 'Objection'){
-        ObjCity.query().insert({
-            Name: req.body.name,
-            Population: req.body.population,
-            Size: req.body.size,
-            CountryId: req.body.countrySelect
-        }).then(function(result){
-            req.session.message = "Record is created in database.";
-            res.redirect("show");
-        }).catch(function(err){
-            req.session.message = "Error when creating data.";
-            res.redirect("show");
-        });
-    }else if (orm == 'Knex'){
-        knex("city").insert({
-            Name: req.body.name,
-            Population: req.body.population,
-            Size: req.body.size,
-            CountryId: req.body.countrySelect
-        }).then(function(result){
-            req.session.message = "Record is created in database.";
-            res.redirect("show");
-        }).catch(function(err){
-            req.session.message = "Error when creating data.";
-            res.redirect("show");
-        });
-    }else if (orm == 'TypeORM'){
-        const cityRepository = typeorm.getConnection().getRepository(TypeORMCity);
-        let typeORMCity = new TypeORMCity();
-        typeORMCity.name = req.body.name;
-        typeORMCity.population = req.body.population;
-        typeORMCity.size = req.body.size;
-        typeORMCity.countryId = req.body.countrySelect;
-        cityRepository.save(typeORMCity).then(function(result){
-            req.session.message = "Record is created in database.";
-            res.redirect("show");
-        }).catch(function(err){
-            req.session.message = "Error when creating data.";
-            res.redirect("show");
-        });
-    }else if (orm == 'Bookshelf'){
-        BookshelfCity.forge({
-            Name: req.body.name,
-            Population: req.body.population,
-            Size: req.body.size,
-            CountryId: req.body.countrySelect 
-        }).save().then(function(result){
-            req.session.message = "Record is created in database.";
-            res.redirect("show");
-        }).catch(function(err){
-            req.session.message = "Error when creating data.";
-            res.redirect("show");
-        });
-    }else if (orm == 'Sequelize'){
-        City.create({
-            Name: req.body.name,
-            Population: req.body.population,
-            Size: req.body.size,
-            CountryId: req.body.countrySelect
-        }).then(function(result){
-            req.session.message = "Record is created in database.";
-            res.redirect("show");
-        }).catch(function(err){
-            req.session.message = "Error when creating data.";
-            res.redirect("show");
-        });
+    try{
+        if (orm == 'MikroORM'){
+            let em = mikroDI.em.fork();
+            let mCountry =  await em.findOne(MCountry, req.body.countrySelect);
+            let mCity = new MCity(
+                req.body.name,
+                req.body.population,
+                req.body.size
+            );
+            mCity.Country = mCountry;
+            await em.persistAndFlush(mCity);
+            req.session.message = "Record is created in database (MikroORM).";
+        }else if (orm == 'Objection'){
+            await ObjCity.query().insert({
+                Name: req.body.name,
+                Population: req.body.population,
+                Size: req.body.size,
+                CountryId: req.body.countrySelect
+            });
+            req.session.message = "Record is created in database (Objection).";
+        }else if (orm == 'Knex'){
+            await knex("city").insert({
+                Name: req.body.name,
+                Population: req.body.population,
+                Size: req.body.size,
+                CountryId: req.body.countrySelect
+            });
+            req.session.message = "Record is created in database (Knex).";
+        }else if (orm == 'TypeORM'){
+            const cityRepository = typeorm.getConnection().getRepository(TypeORMCity);
+            let typeORMCity = new TypeORMCity();
+            typeORMCity.name = req.body.name;
+            typeORMCity.population = req.body.population;
+            typeORMCity.size = req.body.size;
+            typeORMCity.countryId = req.body.countrySelect;
+            await cityRepository.save(typeORMCity);
+            req.session.message = "Record is created in database (TypeORM).";
+        }else if (orm == 'Bookshelf'){
+            await BookshelfCity.forge({
+                Name: req.body.name,
+                Population: req.body.population,
+                Size: req.body.size,
+                CountryId: req.body.countrySelect 
+            }).save();
+            req.session.message = "Record is created in database (Bookshelf).";
+        }else if (orm == 'Sequelize'){
+            await City.create({
+                Name: req.body.name,
+                Population: req.body.population,
+                Size: req.body.size,
+                CountryId: req.body.countrySelect
+            });
+            req.session.message = "Record is created in database (Sequelize).";
+        }
+    }catch(err){
+        req.session.message = "Error when creating data.";
     }
+    res.redirect("show");
 }
 
 // Edit City
@@ -320,99 +295,75 @@ var editCity = async function(req, res){
     }
     var orm = cookie.getOrm(req, res);
 
-    if (orm == 'MikroORM'){
-        let em = mikroDI.em.fork();
-        let mCity = await em.findOne(MCity, req.body.id);
-        let mCountry = await em.findOne(MCountry, req.body.countrySelect);
-        mCity.Name = req.body.name;
-        mCity.Population = req.body.population;
-        mCity.Size = req.body.size
-        mCity.CountryId = req.body.countrySelect;
-        mCity.Country = mCountry;
-        em.flush(mCity).then(function(result){
-            req.session.message = "Record is edited in database.";
-            res.redirect("show");
-        }).catch(function(err){
-            req.session.message = "Error when editing data.";
-            res.redirect("show");
-        });
-    }else if (orm == 'Objection'){
-        ObjCity.query().update({
-            Name: req.body.name,
-            Population: req.body.population,
-            Size: req.body.size,
-            CountryId: req.body.countrySelect
-        }).where({Id: req.body.id}).then(function(result){
-            req.session.message = "Record is edited in database.";
-            res.redirect("show");
-        }).catch(function(err){
-            req.session.message = "Error when editing data.";
-            res.redirect("show");
-        });;
-    }else if (orm == 'Knex'){
-        knex("city").where("Id", req.body.id).update({
-            Name: req.body.name,
-            Population: req.body.population,
-            Size: req.body.size,
-            CountryId: req.body.countrySelect
-        }).then(function(result){
-            req.session.message = "Record is created in database.";
-            res.redirect("show");
-        }).catch(function(err){
-            req.session.message = "Error when creating data.";
-            res.redirect("show");
-        });
-    }else if (orm == 'TypeORM'){
-        const cityRepository = typeorm.getConnection().getRepository(TypeORMCity);
-        let typeORMCity = new TypeORMCity();
-        let id = parseInt(req.body.id);
-        typeORMCity.id = id;
-        typeORMCity.name = req.body.name;
-        typeORMCity.population = req.body.population;
-        typeORMCity.size = req.body.size;
-        typeORMCity.countryId = req.body.countrySelect;
-        cityRepository.save(typeORMCity).then(function(result){
-            req.session.message = "Record is edited in database.";
-            res.redirect("show");
-        }).catch(function(err){
-            req.session.message = "Error when editing data.";
-            res.redirect("show");
-        });
-    }if (orm == 'Bookshelf'){
-        BookshelfCity.where({
-            Id: req.body.id
-        }).save({
-            Name: req.body.name,
-            Population: req.body.population,
-            Size: req.body.size,
-            CountryId: req.body.countrySelect
-        },{
-            method: 'update',
-            patch:true
-        }).then(function(result){
-            req.session.message = "Record is edited in database.";
-            res.redirect("show");
-        }).catch(function(err){
-            req.session.message = "Error when editing data.";
-            res.redirect("show");
-        });
-    }else if (orm == 'Sequelize'){
-        City.update({
-            Name: req.body.name,
-            Population: req.body.population,
-            Size: req.body.size,
-            CountryId: req.body.countrySelect
-        },
-        {
-            where: {Id: req.body.id}
-        }).then(function(result){
-            req.session.message = "Record is edited in database.";
-            res.redirect("show");
-        }).catch(function(err){
-            req.session.message = "Error when editing data.";
-            res.redirect("show");
-        });
+    try{
+        if (orm == 'MikroORM'){
+            let em = mikroDI.em.fork();
+            let mCity = await em.findOne(MCity, req.body.id);
+            let mCountry = await em.findOne(MCountry, req.body.countrySelect);
+            mCity.Name = req.body.name;
+            mCity.Population = req.body.population;
+            mCity.Size = req.body.size
+            mCity.CountryId = req.body.countrySelect;
+            mCity.Country = mCountry;
+            await em.flush(mCity);
+            req.session.message = "Record is edited in database (MikroORM).";
+        }else if (orm == 'Objection'){
+            await ObjCity.query().update({
+                Name: req.body.name,
+                Population: req.body.population,
+                Size: req.body.size,
+                CountryId: req.body.countrySelect
+            }).where({Id: req.body.id});
+            req.session.message = "Record is edited in database (Objection).";
+        }else if (orm == 'Knex'){
+            await knex("city").where("Id", req.body.id).update({
+                Name: req.body.name,
+                Population: req.body.population,
+                Size: req.body.size,
+                CountryId: req.body.countrySelect
+            });
+            req.session.message = "Record is edited in database (Knex).";
+        }else if (orm == 'TypeORM'){
+            const cityRepository = typeorm.getConnection().getRepository(TypeORMCity);
+            let typeORMCity = new TypeORMCity();
+            let id = parseInt(req.body.id);
+            typeORMCity.id = id;
+            typeORMCity.name = req.body.name;
+            typeORMCity.population = req.body.population;
+            typeORMCity.size = req.body.size;
+            typeORMCity.countryId = req.body.countrySelect;
+            await cityRepository.save(typeORMCity);
+            req.session.message = "Record is edited in database (TypeORM).";
+        }if (orm == 'Bookshelf'){
+            await BookshelfCity.where({
+                Id: req.body.id
+            }).save({
+                Name: req.body.name,
+                Population: req.body.population,
+                Size: req.body.size,
+                CountryId: req.body.countrySelect
+            },{
+                method: 'update',
+                patch:true
+            });
+            req.session.message = "Record is edited in database (Bookshelf).";
+        }else if (orm == 'Sequelize'){
+            await City.update({
+                Name: req.body.name,
+                Population: req.body.population,
+                Size: req.body.size,
+                CountryId: req.body.countrySelect
+            },
+            {
+                where: {Id: req.body.id}
+            });
+            req.session.message = "Record is edited in database (Sequelize).";
+        }
+    }catch(err){
+        req.session.message = "Error when editing data.";
     }
+    res.redirect("show");
+    
 }
 
 // Delete City
@@ -420,88 +371,48 @@ var deleteCity = async function(req, res){
     var response = {};
     var orm = cookie.getOrm(req, res);
     
-    if (orm == 'MikroORM'){
-        let cityRepository = mikroDI.em.fork().getRepository(MCity);
-        let record = await cityRepository.findOne(req.query.id);
-        cityRepository.removeAndFlush(record).then(function(){
+    try{
+        if (orm == 'MikroORM'){
+            let cityRepository = mikroDI.em.fork().getRepository(MCity);
+            let record = await cityRepository.findOne(req.query.id);
+            await cityRepository.removeAndFlush(record);
             response.message = "Ok";
             response.id = req.query.id;
-            res.send(response);
-        }).catch(function(err){
-            if (err.name == "SequelizeForeignKeyConstraintError")
-                response.message = "There are City Areas that are from this City, please delete them first!";
-            else
-                response.message = "Error when deleting data."
-            res.send(response);
-        });
-    }else if (orm == 'Objection'){
-        ObjCity.query().deleteById(req.query.id).then(function(){
+        }else if (orm == 'Objection'){
+            await ObjCity.query().deleteById(req.query.id);
             response.message = "Ok";
             response.id = req.query.id;
-            res.send(response);
-        }).catch(function(err){
-            if (err.name == "SequelizeForeignKeyConstraintError")
-                response.message = "There are City Areas that are from this City, please delete them first!";
-            else
-                response.message = "Error when deleting data."
-            res.send(response);
-        });
-    }else if (orm == 'Knex'){
-        knex('city').where('Id', req.query.id).del().then(function(){
+        }else if (orm == 'Knex'){
+            await knex('city').where('Id', req.query.id).del();
             response.message = "Ok";
             response.id = req.query.id;
-            res.send(response);
-        }).catch(function(err){
-            if (err.name == "SequelizeForeignKeyConstraintError")
-                response.message = "There are City Areas that are from this City, please delete them first!";
-            else
-                response.message = "Error when deleting data."
-            res.send(response);
-        });
-    }else if (orm == 'TypeORM'){
-        const cityRepository = typeorm.getConnection().getRepository(TypeORMCity);
-        cityRepository.delete(req.query.id).then(function(){
+        }else if (orm == 'TypeORM'){
+            const cityRepository = typeorm.getConnection().getRepository(TypeORMCity);
+            await cityRepository.delete(req.query.id);
             response.message = "Ok";
             response.id = req.query.id;
-            res.send(response);
-        }).catch(function(err){
-            if (err.name == "SequelizeForeignKeyConstraintError")
-                response.message = "There are City Areas that are from this City, please delete them first!";
-            else
-                response.message = "Error when deleting data."
-            res.send(response);
-        });
-    }else if (orm == 'Bookshelf'){
-        BookshelfCity.where({
-            Id: req.query.id
-        }).destroy().then(function(){
+        }else if (orm == 'Bookshelf'){
+            await BookshelfCity.where({
+                Id: req.query.id
+            }).destroy();
             response.message = "Ok";
             response.id = req.query.id;
-            res.send(response);
-        }).catch(function(err){
-            if (err.name == "SequelizeForeignKeyConstraintError")
-                response.message = "There are City Areas that are from this City, please delete them first!";
-            else
-                response.message = "Error when deleting data."
-            res.send(response);
-        });
-    }else if (orm == 'Sequelize'){
-        City.destroy({
-                where: {
-                    Id : req.query.id
-                }
-        }).then(function(){
-                response.message = "Ok";
-                response.id = req.query.id;
-                res.send(response);
-        }).catch(function(err){
-                if (err.name == "SequelizeForeignKeyConstraintError")
-                    response.message = "There are City Areas that are from this City, please delete them first!";
-                else
-                    response.message = "Error when deleting data."
-                res.send(response);
-        });
+        }else if (orm == 'Sequelize'){
+            await City.destroy({
+                    where: {
+                        Id : req.query.id
+                    }
+            });
+            response.message = "Ok";
+            response.id = req.query.id;
+        }
+    }catch(err){
+        if (err.errno == 1451 || err.name.includes('Foreign'))
+            response.message = "There are City Areas that are from this City, please delete them first!";
+        else
+            response.message = "Error when deleting data."
     }
+    res.send(response);
 }
 
 module.exports.getShow = getShow;

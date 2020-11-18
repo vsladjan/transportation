@@ -65,9 +65,8 @@ $(document).ready(function(){
             contentType: "application/json",
             url: "/transportation/country/delete?id=" + this.id.substr(7),
             success: function(data){
-                datatable.row($(datarow)).remove().draw(false);
                 if (data.message == "Ok"){
-                    $("#delete_" + data.id).parent().parent().remove();
+                    datatable.row($(datarow)).remove().draw(false);
                     $('#message').css('background-color', 'green');
                     $("#message").show();
                     $("#messageText").text("Record is successfully deleted!");
