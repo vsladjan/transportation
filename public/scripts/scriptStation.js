@@ -59,6 +59,7 @@ $(document).ready(function(){
             contentType: "application/json",
             url: "/transportation/cityarea/get",
             success: function(data){
+                $('#cityareaSelectEdit').empty();
                 $.each(data, function(i, value) {
                     $('#cityareaSelectEdit').append($('<option>').text(value.Name).attr('value', value.Id));
                 });

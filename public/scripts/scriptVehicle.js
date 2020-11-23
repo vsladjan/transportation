@@ -58,6 +58,7 @@ $(document).ready(function(){
             contentType: "application/json",
             url: "/transportation/type/get",
             success: function(data){
+                $('#typeSelectEdit').empty();
                 $.each(data, function(i, value) {
                     $('#typeSelectEdit').append($('<option>').text(value.Name).attr('value', value.Id));
                 });

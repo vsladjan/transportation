@@ -60,6 +60,7 @@ $(document).ready(function(){
             contentType: "application/json",
             url: "/transportation/city/get",
             success: function(data){
+                $('#citySelectEdit').empty();
                 $.each(data, function(i, value) {
                     $('#citySelectEdit').append($('<option>').text(value.Name).attr('value', value.Id));
                 });

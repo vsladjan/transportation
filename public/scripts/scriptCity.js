@@ -59,6 +59,7 @@ $(document).ready(function(){
             contentType: "application/json",
             url: "/transportation/country/get",
             success: function(data){
+                $('#countrySelectEdit').empty();
                 $.each(data, function(i, value) {
                     $('#countrySelectEdit').append($('<option>').text(value.Name).attr('value', value.Id));
                 });
