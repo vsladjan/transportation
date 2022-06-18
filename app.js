@@ -8,8 +8,7 @@ var router = require("./router/router.js");
 var db = require("./sequelize.js");
 const bodyParser = require("body-parser");
 require ("reflect-metadata");
-pkg = require('typeorm');
-const {createConnection} = pkg;
+const {createConnection} = require('typeorm');
 
 var app = express();
 var port = 3000;

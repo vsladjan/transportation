@@ -81,6 +81,7 @@ $(document).ready(function(){
             contentType: "application/json",
             url: "/transportation/route/get",
             success: function(data){
+                $('#routeSelectEdit').empty();
                 $.each(data, function(i, value) {
                     $('#routeSelectEdit').append($('<option>').text(value.Name).attr('value', value.Id));
                 });
@@ -92,6 +93,7 @@ $(document).ready(function(){
             contentType: "applicaiton/json",
             url: "/transportation/station/get",
             success: function(data){
+                $('#stationSelectEdit').empty();
                 $.each(data, function(i, value){
                     $('#stationSelectEdit').append($('<option>').text(value.Name).attr('value', value.Id));
                 });
@@ -103,6 +105,7 @@ $(document).ready(function(){
             contentType: "applicaiton/json",
             url: "/transportation/vehicle/get",
             success: function(data){
+                $('#vehicleSelectEdit').empty();
                 $.each(data, function(i, value){
                     $('#vehicleSelectEdit').append($('<option>').text(value.Name).attr('value', value.Id));
                 });
@@ -140,24 +143,22 @@ $(document).ready(function(){
     });
 
     $("button[name='delete']").click(function(){
+        var datatable = $('#data').DataTable();
+        var datarow = $(this).parents('tr');
         var values=[], i=0;
         $row = $(this).closest('tr');
         $row.find('td').each(function() {
             values[i++] = $(this).attr('name');
         });
         $.ajax({
-            type: "GET",
+            type: "DELETE",
             contentType: "application/json",
-            url: "/transportation/routestation/delete",
-            data: {
-                routeId: values[0].substr(3),
-                stationId: values[1].substr(3),
-                vehicleId: values[2].substr(3),
-                time: values[3]
-            },
+            url: "/transportation/routestation/delete?routeId=" + values[0].substr(3) + 
+                    "&stationId=" + values[1].substr(3) + "&vehicleId=" + values[2].substr(3) +
+                         "&time=" + values[3],
             success: function(data){
                 if (data.message == "Ok"){
-                    $row.remove();
+                    datatable.row($(datarow)).remove().draw(false);
                     $('#message').css('background-color', 'green');
                     $("#message").show();
                     $("#messageText").text("Record is successfully deleted!");
@@ -187,21 +188,22 @@ $(document).ready(function(){
         setCookie('stationId', '', -1);
         setCookie('vehicleId', '', -1);
         setCookie('timeRS', '', -1);
+        var data = {};
+        data.oldRouteId = routeId;
+        data.oldStationId = stationId;
+        data.oldVehicleId = vehicleId;
+        data.oldTime = timeRS;
+        data.routeId = $("#routeSelectEdit").val();
+        data.stationId = $("#stationSelectEdit").val();
+        data.vehicleId = $("#vehicleSelectEdit").val();
+        data.time = $("#timeEdit").val(),
+        data.type = $("#typeEdit").val()
         $.ajax({
-            type: "GET",
+            type: "POST",
             contentType: "application/json",
             url: "/transportation/routestation/edit",
-            data: {
-                oldRouteId: routeId,
-                oldStationId: stationId,
-                oldVehicleId: vehicleId,
-                oldTime: timeRS,
-                routeId:  $("#routeSelectEdit").val(),
-                stationId: $("#stationSelectEdit").val(),
-                vehicleId: $("#vehicleSelectEdit").val(),
-                time: $("#timeEdit").val(),
-                type: $("#typeEdit").val()
-            },
+            data: JSON.stringify(data),
+            contentType: 'application/json',
             success: function(data){
                 var msg = data.message;
                 if (msg.includes("Error"))

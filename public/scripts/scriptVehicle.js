@@ -58,6 +58,7 @@ $(document).ready(function(){
             contentType: "application/json",
             url: "/transportation/type/get",
             success: function(data){
+                $('#typeSelectEdit').empty();
                 $.each(data, function(i, value) {
                     $('#typeSelectEdit').append($('<option>').text(value.Name).attr('value', value.Id));
                 });
@@ -80,13 +81,15 @@ $(document).ready(function(){
     });
 
     $("button[name='delete']").click(function(){
+        var datatable = $('#data').DataTable();
+        var datarow = $(this).parents('tr');
         $.ajax({
-            type: "GET",
+            type: "DELETE",
             contentType: "application/json",
             url: "/transportation/vehicle/delete?id=" + this.id.substr(7),
             success: function(data){
                 if (data.message == "Ok"){
-                    $("#delete_" + data.id).parent().parent().remove();
+                    datatable.row($(datarow)).remove().draw(false);
                     $('#message').css('background-color', 'green');
                     $("#message").show();
                     $("#messageText").text("Record is successfully deleted!");
