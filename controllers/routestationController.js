@@ -22,46 +22,30 @@ var MVehicle = require('../models/mikroorm/entities/Transportationvehicle.js').T
 var getShow = async function(req, res){
     var text = "Message";
     var orm = cookie.getOrm(req, res);
-
+    let data = {};
     
     if (orm == 'MikroORM'){
         let rsRepository = mikroDI.em.fork().getRepository(MRoutestation);
-        rsRepository.findAll(['Route', 'Station', 'Transportationvehicle']).then(function(data){
-            let jsonObj = [];
-            data.forEach(element => {
-                element.RouteId = element.Route.Id;
-                element.StationId = element.Station.Id;
-                element.TransportationVehicleId = element.Transportationvehicle.Id;
-                jsonObj.push(element);
-            });
-            if (req.session.message){
-                text = req.session.message;
-                req.session.message = null;
-            }
-            var response = {};
-            response.routestation = jsonObj;
-            response.message = text;
-            res.render("routestation", {routestations:response});
+        let rs = await rsRepository.findAll({
+            populate: ['Route', 'Station', 'Transportationvehicle']
+        });
+        data = [];
+        rs.forEach(element => {
+            element.RouteId = element.Route.Id;
+            element.StationId = element.Station.Id;
+            element.TransportationVehicleId = element.Transportationvehicle.Id;
+            data.push(element);
         });
     }else if (orm == 'Objection'){
-        ObjRS.query().withGraphFetched(
+        data = await ObjRS.query().withGraphFetched(
                 'Station'
             ).withGraphFetched(
                 'Route'
             ).withGraphFetched(
                 'Transportationvehicle'
-            ).then(function(data){
-                if (req.session.message){
-                    text = req.session.message;
-                    req.session.message = null;
-                }
-                var response = {};
-                response.routestation = data;
-                response.message = text;
-                res.render("routestation", {routestations:response});
-        });
+            );
     }else if (orm == 'Knex'){
-        knex("routestation").join("route", "route.Id", "routestation.RouteId").join(
+        data = await knex("routestation").join("route", "route.Id", "routestation.RouteId").join(
             "station", "station.Id", "routestation.StationId"
         ).join(
             "transportationvehicle", "transportationvehicle.Id", "routestation.TransportationVehicleId"
@@ -74,60 +58,33 @@ var getShow = async function(req, res){
                 knex.ref("route.Name").as('RouteName'),
                 knex.ref("station.Name").as('StationName'),
                 knex.ref("transportationvehicle.Name").as('VehicleName')
-        ).then(function(data){
-            data.forEach(element => {
-                let route = {}, station = {}, vehicle = {};
-                route.Name = element.RouteName;
-                station.Name = element.StationName;
-                vehicle.Name = element.VehicleName;
-                element['Route'] = route;
-                element['Station'] = station;
-                element['Transportationvehicle'] = vehicle;
-            });
-            if (req.session.message){
-                text = req.session.message;
-                req.session.message = null;
-            }
-            var response = {};
-            response.routestation = data;
-            response.message = text;
-            res.render("routestation", {routestations:response});
+        );
+        data.forEach(element => {
+            let route = {}, station = {}, vehicle = {};
+            route.Name = element.RouteName;
+            station.Name = element.StationName;
+            vehicle.Name = element.VehicleName;
+            element['Route'] = route;
+            element['Station'] = station;
+            element['Transportationvehicle'] = vehicle;
         });
     }else if (orm == 'TypeORM'){
-        console.log("TypeORM");
         const rsRepository = typeorm.getConnection().getRepository(TypeORMRoutestation);
-        rsRepository.find({
+        data = await rsRepository.find({
             relations: [
                     "station", 
                     "route", 
                     "transportationvehicle"
             ]
-        }).then(routestation => {
-            if (req.session.message){
-                text = req.session.message;
-                req.session.message = null;
-            }
-            var response = {};
-            response.routestation = service.capitalizeKeys(routestation);
-            response.message = text;
-            res.render("routestation", {routestations:response});
         });
+        data = service.capitalizeKeys(data);
     }else if (orm == 'Bookshelf'){
-        BookshelfRoutestation.fetchAll({
+        data = await BookshelfRoutestation.fetchAll({
             withRelated:['station', 'route', 'transportationvehicle']
-        }).then(routestation => {
-            // Send all routestation to Client
-            if (req.session.message){
-                text = req.session.message;
-                req.session.message = null;
-            }
-            var response = {};
-            response.routestation = service.capitalizeKeys(routestation.toJSON());
-            response.message = text;
-            res.render("routestation", {routestations:response});
         });
+        data = service.capitalizeKeys(data.toJSON());
     }else if (orm == 'Sequelize'){
-        Routestation.findAll({
+        data = await Routestation.findAll({
             include: [
                 { model: Station, required: true },
                 { model: Route, required: true },
@@ -135,53 +92,49 @@ var getShow = async function(req, res){
             ],
             raw: true,
             nest: true
-        }).then(routestation => {
-            // Send all rotuestations to Client
-            if (req.session.message){
-                text = req.session.message;
-                req.session.message = null;
-            }
-            var response = {};
-            response.routestation = service.capitalizeKeys(routestation);
-            response.message = text;
-            res.render("routestation", {routestations:response});
         });
+        data = service.capitalizeKeys(data);
     }
+    // Send all rotuestations to Client
+    if (req.session.message){
+        text = req.session.message;
+        req.session.message = null;
+    }
+    var response = {};
+    response.routestation = data;
+    response.message = text;
+    res.render("routestation", { routestations:response });
 }
 
 // Send routestation in JSON
-var getRoutestation = function(req, res){
+var getRoutestation = async function(req, res){
     var reg = new RegExp("[0-9]+");
     var orm = cookie.getOrm(req, res);
-    console.log(orm);
+    let data = {};
+
     if (orm == 'MikroORM'){
         if (!reg.test(req.query.routeId)){
             let routestationRepository = mikroDI.em.fork().getRepository(MRoutestation);
-            routestationRepository.findAll().then(function(data){
-                res.send(data);
-            });
+            data = await routestationRepository.findAll();
         }else{
             let routestationRepository = mikroDI.em.fork().getRepository(MRoutestation);
-            routestationRepository.findOne({ $and:[
+            let rs = await routestationRepository.findOne({ $and:[
                 {'RouteId': req.query.routeId},
                 {'StationId': req.query.stationId},
                 {'TransportationVehicleId': req.query.vehicleId},
-                {'Time': req.query.time},
-            ]},['Route', 'Station', 'Transportationvehicle']).then(function(data){
-                let jsonObj = data.toJSON();
-                jsonObj.RouteId = data.Route.Id;
-                jsonObj.StationId = data.Station.Id;
-                jsonObj.TransportationVehicleId = data.Transportationvehicle.Id;
-                res.send(jsonObj);
-            });
+                {'Time': req.query.time},]},
+                { populate: ['Route', 'Station', 'Transportationvehicle']}
+            );
+            data = rs.toJSON();
+            data.RouteId = rs.Route.Id;
+            data.StationId = rs.Station.Id;
+            data.TransportationVehicleId = rs.Transportationvehicle.Id;
         }
     }else if (orm == 'Objection'){
         if (!reg.test(req.query.routeId)){
-            ObjRS.query().then(function(data){
-                res.send(data);
-            });
+            data = await ObjRS.query();
         }else{
-            ObjRS.query().withGraphFetched(
+            data = await ObjRS.query().withGraphFetched(
                 'Station'
             ).withGraphFetched(
                 'Route'
@@ -192,17 +145,13 @@ var getRoutestation = function(req, res){
                 req.query.routeId,
                 req.query.vehicleId,
                 req.query.time
-            ]).then(function(data){
-                res.send(data);
-        });
+            ]);
         }
     }else if (orm == 'Knex'){
         if (!reg.test(req.query.routeId)){
-            knex("routestation").then(function(data){
-                res.send(data);
-            });
+            data = await knex("routestation");
         }else{
-            knex("routestation").where({
+            let rs = await knex("routestation").where({
                 RouteId : req.query.routeId,
                 StationId : req.query.stationId,
                 TransportationVehicleId : req.query.vehicleId,
@@ -210,7 +159,9 @@ var getRoutestation = function(req, res){
             }).join("route", "route.Id", "routestation.RouteId").join(
                 "station", "station.Id", "routestation.StationId"
             ).join(
-                "transportationvehicle", "transportationvehicle.Id", "routestation.TransportationVehicleId"
+                "transportationvehicle", 
+                "transportationvehicle.Id", 
+                "routestation.TransportationVehicleId"
             ).select(
                     "Time", 
                     "Type",
@@ -220,28 +171,24 @@ var getRoutestation = function(req, res){
                     knex.ref("route.Name").as('RouteName'),
                     knex.ref("station.Name").as('StationName'),
                     knex.ref("transportationvehicle.Name").as('VehicleName')
-            ).then(function(data){
-                    element = data[0];
-                    let route = {}, station = {}, vehicle = {};
-                    route.Name = element.RouteName;
-                    station.Name = element.StationName;
-                    vehicle.Name = element.VehicleName;
-                    element['Route'] = route;
-                    element['Station'] = station;
-                    element['Transportationvehicle'] = vehicle;
-                    res.send(element);
-            });
+            );
+            data = rs[0];
+            let route = {}, station = {}, vehicle = {};
+            route.Name = data.RouteName;
+            station.Name = data.StationName;
+            vehicle.Name = data.VehicleName;
+            data['Route'] = route;
+            data['Station'] = station;
+            data['Transportationvehicle'] = vehicle;
         }
     }else if (orm == 'TypeORM'){
         if (!reg.test(req.query.routeId)){
             const rsRepository = typeorm.getConnection().getRepository(TypeORMRoutestation);
-            rsRepository.find().then(routestation => {
-                let data = service.capitalizeKeys(routestation);
-                res.send(data);
-            });
+            data = await rsRepository.find();
+            data = service.capitalizeKeys(data);
         }else{
             const rsRepository = typeorm.getConnection().getRepository(TypeORMRoutestation);
-            rsRepository.findOne({
+            data = await rsRepository.findOne({
                 where: { 
                     routeId : req.query.routeId,
                     stationId : req.query.stationId,
@@ -253,41 +200,30 @@ var getRoutestation = function(req, res){
                         "route", 
                         "transportationvehicle"
                 ]
-            }).then(routestation => {
-                let data = service.capitalizeKeys(routestation);
-                res.send(data);
             });
+            data = service.capitalizeKeys(data);
         }
     }else if (orm == 'Bookshelf'){
         if (!reg.test(req.query.routeId)){
-            BookshelfRoutestation.fetchAll().then(routestation => {
-                // Send requested Routestation to Client 
-                let data = service.capitalizeKeys(routestation.toJSON());
-                res.send(data);
-            });
+            data = await BookshelfRoutestation.fetchAll();
+            data = service.capitalizeKeys(data.toJSON());
         }else{
-            BookshelfRoutestation.where({
+            data = await BookshelfRoutestation.where({
                 RouteId : req.query.routeId,
                 StationId : req.query.stationId,
                 TransportationVehicleId : req.query.vehicleId,
                 Time: req.query.time
             }).fetchAll({
                 withRelated:['station', 'route', 'transportationvehicle']
-            }).then(routestation => {
-                // Send requested Routestation to Client
-                var data = service.capitalizeKeys(routestation.toJSON()[0]);
-                res.send(data);
             });
+            data = service.capitalizeKeys(data.toJSON()[0]);;
         }
     }else if (orm == 'Sequelize'){
         if (!reg.test(req.query.routeId)){
-            Routestation.findAll({raw: true, nest: true}).then(routestation => {
-                    // Send routestation to Client
-                    let data = service.capitalizeKeys(routestation);
-                    res.send(data);     
-            });
+            data = await Routestation.findAll({raw: true, nest: true});
+            data = service.capitalizeKeys(data);
         }else{
-            Routestation.findAll({
+            data = await Routestation.findAll({
                 where: {
                     RouteId : req.query.routeId,
                     StationId : req.query.stationId,
@@ -301,13 +237,12 @@ var getRoutestation = function(req, res){
                 ],
                 raw: true,
                 nest: true
-            }).then(routestation => {
-                // Send requested Routestation to Client
-                let data = service.capitalizeKeys(routestation[0]);
-                res.send(data);
             });
+            data = service.capitalizeKeys(data[0]);
         }
     }
+    // Send requested Routestation to Client
+    res.send(data);
 }
 
 // Create routestation

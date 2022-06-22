@@ -15,139 +15,86 @@ var MStation = require('../models/mikroorm/entities/Station.js').Station;
 var MCityarea = require('../models/mikroorm/entities/Cityarea.js').Cityarea;
 
 
-var getShow = function(req, res){
+var getShow = async function(req, res){
     var text = "Message";
     var orm = cookie.getOrm(req, res);
+    let data = {};
     
     if (orm == 'MikroORM'){
         let stationRepository = mikroDI.em.fork().getRepository(MStation);
-        stationRepository.findAll(['Cityarea']).then(function(data){
-            if (req.session.message){
-                text = req.session.message;
-                req.session.message = null;
-            }
-            var response = {};
-            response.station = data;
-            response.message = text;
-            res.render("station", {stations:response});
-        });
+        data = await stationRepository.findAll({ populate: ['Cityarea']});
     }else if (orm == 'Objection'){
-        ObjStation.query().withGraphFetched('Cityarea').then(function(data){
-            if (req.session.message){
-                text = req.session.message;
-                req.session.message = null;
-            }
-            var response = {};
-            response.station = data;
-            response.message = text;
-            res.render("station", {stations:response});
-        });
+        data = await ObjStation.query().withGraphFetched('Cityarea');
     }else if (orm == 'Knex'){
-        knex("station").join("cityarea", "cityarea.Id", "station.CityareaId").select(
+        data = await knex("station").join("cityarea", "cityarea.Id", "station.CityareaId").select(
                 "station.Id", 
                 "station.Name", 
                 "station.Description", 
                 "station.Location", 
                 "station.CityareaId",
                 knex.ref("cityarea.Name").as('CityareaName')
-        ).then(function(data){
-            data.forEach(element => {
-                let cityarea = {};
-                cityarea.Name = element.CityareaName;
-                element['Cityarea'] = cityarea;
-            });
-            if (req.session.message){
-                text = req.session.message;
-                req.session.message = null;
-            }
-            var response = {};
-            response.station = data;
-            response.message = text;
-            res.render("station", {stations:response});
+        );
+        data.forEach(element => {
+            let cityarea = {};
+            cityarea.Name = element.CityareaName;
+            element['Cityarea'] = cityarea;
         });
     }else if (orm == 'TypeORM'){
-        console.log("TypeORM");
         const stationRepository = typeorm.getConnection().getRepository(TypeORMStation);
-        stationRepository.find({relations: ["cityarea"]}).then(station => {
-              if (req.session.message){
-                  text = req.session.message;
-                  req.session.message = null;
-              }
-              var response = {};
-              response.station = service.capitalizeKeys(station);
-              response.message = text;
-              res.render("station", {stations:response});
-        });
+        data = await stationRepository.find({relations: ["cityarea"]});
+        data = service.capitalizeKeys(data);
     }else if (orm == 'Bookshelf'){
-        BookshelfStation.fetchAll({withRelated:['cityarea']}).then(station => {
-            // Send all stations to Client
-            if (req.session.message){
-                text = req.session.message;
-                req.session.message = null;
-            }
-            var response = {};
-            response.station = service.capitalizeKeys(station.toJSON());
-            response.message = text;
-            res.render("station", {stations:response});
-        });
+        data = await BookshelfStation.fetchAll({withRelated:['cityarea']});
+        data = service.capitalizeKeys(data.toJSON());
     }else if (orm == 'Sequelize'){
-        Station.findAll({
+        data = await Station.findAll({
             include: [{
                 model: Cityarea,
                 required: true
             }],
             raw: true,
             nest: true 
-        }).then(station => {
-            // Send all stations to Client
-            if (req.session.message){
-                text = req.session.message;
-                req.session.message = null;
-            }
-            var response = {};
-            response.station = service.capitalizeKeys(station);;
-            response.message = text;
-            res.render("station", {stations:response});
         });
+        data = service.capitalizeKeys(data);
     }
+    // Send all stations to Client
+    if (req.session.message){
+        text = req.session.message;
+        req.session.message = null;
+    }
+    var response = {};
+    response.station = data;
+    response.message = text;
+    res.render("station", {stations:response});
 }
 
 // Send station in JSON
-var getStation = function(req, res){
+var getStation = async function(req, res){
     var reg = new RegExp("[0-9]+");
     var orm = cookie.getOrm(req, res);
+    let data = {};
 
     if (orm == 'MikroORM'){
         if (!reg.test(req.query.id)){
             let stationRepository = mikroDI.em.fork().getRepository(MStation);
-            stationRepository.findAll().then(function(data){
-                res.send(data);
-            });
+            data = await stationRepository.findAll();
         }else{
             let stationRepository = mikroDI.em.fork().getRepository(MStation);
-            stationRepository.findOne(req.query.id, ['Cityarea']).then(function(data){
-                let jsonObj = data.toJSON();
-                jsonObj.CityAreaId = data.Cityarea.Id;
-                res.send(jsonObj);
-            });
+            let station = await stationRepository.findOne(req.query.id, { populate: ['Cityarea'] });
+            data = station.toJSON();
+            data.CityAreaId = station.Cityarea.Id;
         }
     }else if (orm == 'Objection'){
         if (!reg.test(req.query.id)){
-            ObjStation.query().then(function(data){
-                res.send(data);
-            });
+            data = await ObjStation.query();
         }else{
-            ObjStation.query().withGraphFetched('Cityarea').findById(req.query.id).then(function(data){
-                res.send(data);
-            });
+            data = await ObjStation.query().withGraphFetched('Cityarea').findById(req.query.id);
         }
     }else if (orm == 'Knex'){
         if (!reg.test(req.query.id)){
-            knex("station").then(function(data){
-                res.send(data);
-            });
+            data = await knex("station");
         }else{
-            knex("station").where('station.Id', req.query.id).join(
+            let station = await knex("station").where('station.Id', req.query.id).join(
                 "cityarea", "cityarea.Id", "station.CityareaId").select(
                 "station.Id", 
                 "station.Name", 
@@ -155,66 +102,52 @@ var getStation = function(req, res){
                 "station.Location", 
                 knex.ref("station.CityareaId").as('CityAreaId'),
                 knex.ref("cityarea.Name").as('CityareaName')
-            ).then(function(data){
-                element = data[0];
-                let cityarea = {};
-                cityarea.Name = element.CityareaName;
-                element['Cityarea'] = cityarea;
-                res.send(element);
-            });
+            );
+            data = station[0];
+            let cityarea = {};
+            cityarea.Name = data.CityareaName;
+            data['Cityarea'] = cityarea;
         }
     }else if (orm == 'TypeORM'){
         if (!reg.test(req.query.id)){
             const stationRepository = typeorm.getConnection().getRepository(TypeORMStation);
-            stationRepository.find().then(station => {
-                let data = service.capitalizeKeys(station);
-                res.send(data);
-            });
+            data = await stationRepository.find();
+            data = service.capitalizeKeys(data);
         }else{
             const stationRepository = typeorm.getConnection().getRepository(TypeORMStation);
-            stationRepository.findOne(req.query.id, {relations: ["cityarea"]}).then(station => {
-                let data = service.capitalizeKeys(station);
-                res.send(data);
+            data = await stationRepository.findOne({
+                where: { id: req.query.id }, 
+                relations: ["cityarea"]
             });
+            data = service.capitalizeKeys(data);
         }
     }else  if (orm == 'Bookshelf'){
         if (!reg.test(req.query.id)){
-            BookshelfStation.fetchAll().then(station => {
-                // Send requested Stations to Client 
-                let data = service.capitalizeKeys(station.toJSON());
-                res.send(data);
-            });
+            data = await BookshelfStation.fetchAll();
+            data = service.capitalizeKeys(data.toJSON());
         }else{
-            BookshelfStation.where('Id', req.query.id).fetchAll({
+            data = await BookshelfStation.where('Id', req.query.id).fetchAll({
                 withRelated:['cityarea']
-            }).then(station => {
-                // Send requested Station to Client
-                var data = service.capitalizeKeys(station.toJSON()[0]);
-                res.send(data);
             });
+            data = service.capitalizeKeys(data.toJSON()[0]);
         }
     }else if (orm == 'Sequelize'){
         if (!reg.test(req.query.id)){
-            Station.findAll({raw: true, nest: true}).then(station => {
-                    // Send stations to Client
-                    let data = service.capitalizeKeys(station);
-                    res.send(data);       
-            });
+            data = await Station.findAll({raw: true, nest: true});
+            data = service.capitalizeKeys(data);
         }else{
-            Station.findByPk(req.query.id, {
+            data = await Station.findByPk(req.query.id, {
                 include: [{
                     model: Cityarea,
                     required: true
                 }],
                 raw: true,
                 nest: true
-            }).then(station => {
-                // Send requested Station to Client
-                let data = service.capitalizeKeys(station);
-                res.send(data);
             });
+            data = service.capitalizeKeys(data);
         }
     }
+    res.send(data);
 }
 
 // Create station

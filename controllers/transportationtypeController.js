@@ -14,173 +14,104 @@ var MType = require('../models/mikroorm/entities/Transportationtype.js').Transpo
 
 
 // Show all types
-var getShow = function(req, res){
+var getShow = async function(req, res){
     var text = "Message";
     var orm = cookie.getOrm(req, res);
+    let data = {};
     
     if (orm == 'MikroORM'){
         let typeRepository = mikroDI.em.fork().getRepository(MType);
-        typeRepository.findAll().then(function(data){
-            if (req.session.message){
-                text = req.session.message;
-                req.session.message = null;
-            }
-            var response = {};
-            response.type = data;
-            response.message = text;
-            res.render("type", {types:response});
-        });
+        data = await typeRepository.findAll();
     }else if (orm == 'Objection'){
-        ObjType.query().then(function(data){
-            if (req.session.message){
-                text = req.session.message;
-                req.session.message = null;
-            }
-            var response = {};
-            response.type = data;
-            response.message = text;
-            res.render("type", {types:response});
-        });
+        data = await ObjType.query();
     }else if (orm == 'Knex'){
-        knex("transportationtype").then(function(data){
-            if (req.session.message){
-                text = req.session.message;
-                req.session.message = null;
-            }
-            var response = {};
-            response.type = data;
-            response.message = text;
-            res.render("type", {types:response});
-        });
+        data = await knex("transportationtype");
     }else if (orm == 'TypeORM'){
-        console.log("TypeORM");
         const typeRepository = typeorm.getConnection().getRepository(TypeORMTransportationtype);
-        typeRepository.find().then(type => {
-              if (req.session.message){
-                  text = req.session.message;
-                  req.session.message = null;
-              }
-              var response = {};
-              response.type = service.capitalizeKeys(type);
-              response.message = text;
-              res.render("type", {types:response});
-        });
+        data = await typeRepository.find();
+        data = service.capitalizeKeys(data);
     }else if (orm == 'Bookshelf'){
-        BookshelfTransportationtype.fetchAll().then(type => {
-            // Send all types to Client
-            if (req.session.message){
-                text = req.session.message;
-                req.session.message = null;
-            }
-            var response = {};
-            response.type = service.capitalizeKeys(type.toJSON());
-            response.message = text;
-            res.render("type", {types:response});
-        });
+        data = await BookshelfTransportationtype.fetchAll();
+        data = service.capitalizeKeys(data.toJSON())
     }else if (orm == 'Sequelize'){
-        TransportationType.findAll({
+        data = await TransportationType.findAll({
             raw: true, nest: true
-        }).then(type => {
-            // Send all types to Client
-            if (req.session.message){
-                text = req.session.message;
-                req.session.message = null;
-            }
-            var response = {};
-            response.type = service.capitalizeKeys(type);
-            response.message = text;
-            res.render("type", {types:response});
         });
+        data = service.capitalizeKeys(data);
     }
+    // Send all types to Client
+    if (req.session.message){
+        text = req.session.message;
+        req.session.message = null;
+    }
+    var response = {};
+    response.type = data;
+    response.message = text;
+    res.render("type", {types:response});
 }
 
 
 // Send type in JSON
-var getType = function(req, res){
+var getType = async function(req, res){
     var reg = new RegExp("[0-9]+");
     var orm = cookie.getOrm(req, res);
+    let data = {};
 
     if (orm == 'MikroORM'){
         if (!reg.test(req.query.id)){
             let typeRepository = mikroDI.em.fork().getRepository(MType);
-            typeRepository.findAll().then(function(data){
-                res.send(data);
-            });
+            data = await typeRepository.findAll();
         }else{
             let typeRepository = mikroDI.em.fork().getRepository(MType);
-            typeRepository.findOne(req.query.id).then(function(data){
-                res.send(data);
-            });
+            data = await typeRepository.findOne(req.query.id);
         }
     }else if (orm == 'Objection'){
         if (!reg.test(req.query.id)){
-            ObjType.query().then(function(data){
-                res.send(data);
-            });
+            data = await ObjType.query();
         }else{
-            ObjType.query().findById(req.query.id).then(function(data){
-                res.send(data);
-            });
+            data = await ObjType.query().findById(req.query.id);
         }
     }else if (orm == 'Knex'){
         if (!reg.test(req.query.id)){
-            knex("transportationtype").then(function(data){
-                res.send(data);
-            });
+            data = await knex("transportationtype");
         }else{
-            knex("transportationtype").where(
-                'transportationtype.Id', req.query.id).then(function(data){
-                let element = data[0];
-                res.send(element);
-            });
+            data = await knex("transportationtype").where(
+                'transportationtype.Id', req.query.id).select();
+            data = data[0];
         }
     }else if (orm == 'TypeORM'){
         if (!reg.test(req.query.id)){
             const typeRepository = typeorm.getConnection().getRepository(TypeORMTransportationtype);
-            typeRepository.find().then(type => {
-                let data = service.capitalizeKeys(type);
-                res.send(data);
-            });
+            data = await typeRepository.find();
+            data = service.capitalizeKeys(data);
         }else{
             const typeRepository = typeorm.getConnection().getRepository(TypeORMTransportationtype);
-            typeRepository.findOne(req.query.id).then(type => {
-                let data = service.capitalizeKeys(type);
-                res.send(data);
-            });
+            data = await typeRepository.findOneBy( { id: req.query.id });
+            data = service.capitalizeKeys(data);
         }
     }else if (orm == 'Bookshelf'){
         if (!reg.test(req.query.id)){
-            BookshelfTransportationtype.fetchAll().then(type => {
-                // Send requested type to Client 
-                let data = service.capitalizeKeys(type.toJSON());
-                res.send(data);
-            });
+            data = await BookshelfTransportationtype.fetchAll();
+            data = service.capitalizeKeys(data.toJSON());
         }else{
-            BookshelfTransportationtype.where('Id', req.query.id).fetchAll({
-            }).then(type => {
-                // Send requested type to Client
-                var data = service.capitalizeKeys(type.toJSON()[0]);
-                res.send(data);
+            data = await BookshelfTransportationtype.where('Id', req.query.id).fetchAll({
             });
+            data = service.capitalizeKeys(data.toJSON()[0]);
         }
     }else if (orm == 'Sequelize'){
         if (!reg.test(req.query.id)){
-            TransportationType.findAll({raw: true, nest: true}).then(type => {
-                    // Send types to Client
-                    let data = service.capitalizeKeys(type);
-                    res.send(data);  
-            });
+            data = await TransportationType.findAll({raw: true, nest: true});
+            data = service.capitalizeKeys(data);
         }else{
-            TransportationType.findByPk(req.query.id, {
+            data = await TransportationType.findByPk(req.query.id, {
                 raw: true,
                 nest: true
-            }).then(type => {
-                    // Send requested type to Client
-                    let data = service.capitalizeKeys(type);
-                    res.send(data);   
             });
+            data = service.capitalizeKeys(data);
         }
     }
+    // Send requested type to Client
+    res.send(data);
 }
 
 // Create transportation type

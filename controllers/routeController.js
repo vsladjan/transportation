@@ -13,165 +13,96 @@ var mikroDI = require("../mikroormdb.js").DI;
 var MRoute = require('../models/mikroorm/entities/Route.js').Route;
 
 
-var getShow = function(req, res){
+var getShow = async function(req, res){
     var text = "Message";
     var orm = cookie.getOrm(req, res);
+    let data = {};
     
     if (orm == 'MikroORM'){
         let routeRepository = mikroDI.em.fork().getRepository(MRoute);
-        routeRepository.findAll().then(function(data){
-            if (req.session.message){
-                text = req.session.message;
-                req.session.message = null;
-            }
-            var response = {};
-            response.route = data;
-            response.message = text;
-            res.render("route", {routes:response});
-        });
+        data = await routeRepository.findAll();
     }else if (orm == 'Objection'){
-        ObjRoute.query().then(function(data){
-            if (req.session.message){
-                text = req.session.message;
-                req.session.message = null;
-            }
-            var response = {};
-            response.route = data;
-            response.message = text;
-            res.render("route", {routes:response});
-        });
+        data = await ObjRoute.query();
     }else if (orm == 'Knex'){
-        knex("route").then(function(data){
-            if (req.session.message){
-                text = req.session.message;
-                req.session.message = null;
-            }
-            var response = {};
-            response.route = data;
-            response.message = text;
-            res.render("route", {routes:response});
-        });
+        data = await knex("route");
     }else if (orm == 'TypeORM'){
-        console.log("TypeORM");
         const routeRepository = typeorm.getConnection().getRepository(TypeORMRoute);
-        routeRepository.find().then(route => {
-              if (req.session.message){
-                  text = req.session.message;
-                  req.session.message = null;
-              }
-              var response = {};
-              response.route = service.capitalizeKeys(route);
-              response.message = text;
-              res.render("route", {routes:response});
-        });
+        data = await routeRepository.find();
+        data = service.capitalizeKeys(data);
     }else if (orm == 'Bookshelf'){
-        BookshelfRoute.fetchAll().then(route => {
-            // Send all routes to Client
-            if (req.session.message){
-                text = req.session.message;
-                req.session.message = null;
-            }
-            var response = {};
-            response.route = service.capitalizeKeys(route.toJSON());
-            response.message = text;
-            res.render("route", {routes:response});
-        });
+        data = await BookshelfRoute.fetchAll();
+        data = service.capitalizeKeys(data.toJSON());
     }else if (orm == 'Sequelize'){
-        Route.findAll({raw: true, nest: true}).then(route => {
-            // Send all routes to Client
-            if (req.session.message){
-                text = req.session.message;
-                req.session.message = null;
-            }
-            var response = {};
-            response.route = service.capitalizeKeys(route);
-            response.message = text;
-            res.render("route", {routes:response});
-        });
+        data = await Route.findAll({raw: true, nest: true});
+        data = service.capitalizeKeys(data);
     }
+    // Send all routes to Client
+    if (req.session.message){
+        text = req.session.message;
+        req.session.message = null;
+    }
+    var response = {};
+    response.route = data
+    response.message = text;
+    res.render("route", {routes:response});
 }
 
 // Send route in JSON
-var getRoute = function(req, res){
+var getRoute = async function(req, res){
     var reg = new RegExp("[0-9]+");
     var orm = cookie.getOrm(req, res);
+    let data = {};
 
     if (orm == 'MikroORM'){
         if (!reg.test(req.query.id)){
             let routeRepository = mikroDI.em.fork().getRepository(MRoute);
-            routeRepository.findAll().then(function(data){
-                res.send(data);
-            });
+            data = await routeRepository.findAll();
         }else{
             let routeRepository = mikroDI.em.fork().getRepository(MRoute);
-            routeRepository.findOne(req.query.id).then(function(data){
-                res.send(data);
-            });
+            data = await routeRepository.findOne(req.query.id);
         }
     }else if (orm == 'Objection'){
         if (!reg.test(req.query.id)){
-            ObjRoute.query().then(function(data){
-                res.send(data);
-            });
+            data = await ObjRoute.query();
         }else{
-            ObjRoute.query().findById(req.query.id).then(function(data){
-                res.send(data);
-            });
+            data = await ObjRoute.query().findById(req.query.id);
         }
     }else if (orm == 'Knex'){
         if (!reg.test(req.query.id)){
-            knex("route").then(function(data){
-                res.send(data);
-            });
+            data = await knex("route");
         }else{
-            knex("route").where('route.Id', req.query.id).then(function(data){
-                let element = data[0];
-                res.send(element);
-            });
+            data = await knex("route").where('route.Id', req.query.id);
+            data = data[0];
         }
     }else if (orm == 'TypeORM'){
         if (!reg.test(req.query.id)){
             const routeRepository = typeorm.getConnection().getRepository(TypeORMRoute);
-            routeRepository.find().then(route => {
-                let data = service.capitalizeKeys(route);
-                res.send(data);
-            });
+            data = await routeRepository.find();
+            data = service.capitalizeKeys(data);
         }else{
             const routeRepository = typeorm.getConnection().getRepository(TypeORMRoute);
-            routeRepository.findOne(req.query.id).then(route => {
-                let data = service.capitalizeKeys(route);
-                res.send(data);
-            });
+            data = await routeRepository.findOneBy( { id: req.query.id });
+            data = service.capitalizeKeys(data);
         }
     }else if (orm == 'Bookshelf'){
         if (!reg.test(req.query.id)){
-            BookshelfRoute.fetchAll().then(route => {
-                // Send requested Route to Client 
-                let data = service.capitalizeKeys(route.toJSON());
-                res.send(data);
-            });
+            data = await BookshelfRoute.fetchAll();
+            data = service.capitalizeKeys(data.toJSON());
         }else{
-            BookshelfRoute.where('Id', req.query.id).fetchAll().then(route => {
-                // Send requested route to Client
-                var data = service.capitalizeKeys(route.toJSON()[0]);
-                res.send(data);
-            });
+            data = await BookshelfRoute.where('Id', req.query.id).fetchAll();
+            data = service.capitalizeKeys(data.toJSON()[0]);
         }
     }else if (orm == 'Sequelize'){
         if (!reg.test(req.query.id)){
-            Route.findAll({raw: true, nest: true}).then(route => {
-                    // Send routes to Client
-                    let data = service.capitalizeKeys(route);
-                    res.send(data);    
-            });
+            data = await Route.findAll({raw: true, nest: true});
+            data = service.capitalizeKeys(data);
         }else{
-            Route.findByPk(req.query.id, {raw: true, nest: true}).then(route => {
-                // Send requested route to Client
-                let data = service.capitalizeKeys(route);
-                res.send(data);
-            });
+            data = await Route.findByPk(req.query.id, {raw: true, nest: true});
+            data = service.capitalizeKeys(data);
         }
     }
+    // Send routes to Client
+    res.send(data);
 }
 
 // Create route

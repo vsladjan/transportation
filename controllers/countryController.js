@@ -15,168 +15,99 @@ var MCountry = require("../models/mikroorm/entities/Country.js").Country;
 
 
 // Show all countries
-var getShow = function(req, res){
+var getShow = async function(req, res){
     var text = "Message";
     var orm = cookie.getOrm(req, res);
+    let data = {};
     
     if (orm == 'MikroORM'){
         let countryRepository = mikroDI.em.fork().getRepository(MCountry);
-        countryRepository.findAll().then(function(data){
-            if (req.session.message){
-                text = req.session.message;
-                req.session.message = null;
-            }
-            var response = {};
-            response.country = data;
-            response.message = text;
-            res.render("country", {countries:response});
-        });
+        data = await countryRepository.findAll();
     }else if (orm == 'Objection'){
-        ObjCountry.query().then(function(data){
-            if (req.session.message){
-                text = req.session.message;
-                req.session.message = null;
-            }
-            var response = {};
-            response.country = data;
-            response.message = text;
-            res.render("country", {countries:response});
-        });
+        data = await ObjCountry.query();
     }else if (orm == "Knex"){
-        knex("country").then(function(data){
-            if (req.session.message){
-                text = req.session.message;
-                req.session.message = null;
-            }
-            var response = {};
-            response.country = data;
-            response.message = text;
-            res.render("country", {countries:response});
-        });
+        data = await knex("country");
     }else if (orm == 'TypeORM'){
-        console.log("TypeORM");
         const countryRepository = typeorm.getConnection().getRepository(TypeORMCountry);
-        countryRepository.find().then(country => {
-              if (req.session.message){
-                  text = req.session.message;
-                  req.session.message = null;
-              }
-              var response = {};
-              response.country = service.capitalizeKeys(country);
-              response.message = text;
-              res.render("country", {countries:response});
-        });
+        let country = await countryRepository.find();
+        data = service.capitalizeKeys(country);
     }else if (orm == 'Bookshelf'){
-        BookshelfCountry.fetchAll().then(country => {
-                // Send all countries to Client
-                if (req.session.message){
-                text = req.session.message;
-                req.session.message = null;
-                }
-                var response = {};
-                response.country = service.capitalizeKeys(country.toJSON());
-                response.message = text;
-                res.render("country", {countries:response});
-        });
+        let country = await BookshelfCountry.fetchAll();
+        data = service.capitalizeKeys(country.toJSON());
     }else{
-    Country.findAll({raw: true, nest: true}).then(country => {
-                // Send all countries to Client
-                if (req.session.message){
-                    text = req.session.message;
-                    req.session.message = null;
-                }
-                var response = {};
-                response.country = service.capitalizeKeys(country);
-                response.message = text;
-                res.render("country", {countries:response});
-        });
+        let country = await Country.findAll({raw: true, nest: true});
+        data = service.capitalizeKeys(country);
     }
+
+    // Send all countries to client
+    if (req.session.message){
+        text = req.session.message;
+        req.session.message = null;
+    }
+    var response = {};
+    response.country = data;
+    response.message = text;
+    res.render("country", {countries:response});
 }
 
 
 // Send country in JSON
-var getCountry = function(req, res){
+var getCountry = async function(req, res){
     var reg = new RegExp("[0-9]+");
     var orm = cookie.getOrm(req, res);
+    let data = {};
 
     if (orm == 'MikroORM'){
         if (!reg.test(req.query.id)){
             let countryRepository = mikroDI.em.fork().getRepository(MCountry);
-            countryRepository.findAll().then(function(data){
-                res.send(data);
-            });
+            data = await countryRepository.findAll();
         }else{
             let countryRepository = mikroDI.em.fork().getRepository(MCountry);
-            countryRepository.findOne(req.query.id).then(function(data){
-                res.send(data);
-            });
+            data = await countryRepository.findOne(req.query.id);
         }
     }else if (orm == 'Objection'){
         if (!reg.test(req.query.id)){
-            ObjCountry.query().then(function(data){
-                res.send(data);
-            });
+            data = await ObjCountry.query();
         }else{
-            ObjCountry.query().findById(req.query.id).then(function(data){
-                res.send(data);
-            });
+            data = await ObjCountry.query().findById(req.query.id);
         }
     }else if (orm == 'Knex'){
         if (!reg.test(req.query.id)){
-            knex("country").then(function(data){
-                res.send(data);
-            });
+            data = await knex("country");
         }else{
-            knex("country").where('country.Id', req.query.id).select().then(function(data){
-                res.send(data[0]);
-            });
+            data = await knex("country").where('country.Id', req.query.id).select();
+            data = data[0];
         }
     }else if (orm == 'TypeORM'){
         if (!reg.test(req.query.id)){
             const countryRepository = typeorm.getConnection().getRepository(TypeORMCountry);
-            countryRepository.find().then(country => {
-                let data = service.capitalizeKeys(country);
-                res.send(data);
-            });
+            let country = await countryRepository.find();
+            data = service.capitalizeKeys(country);
         }else{
             const countryRepository = typeorm.getConnection().getRepository(TypeORMCountry);
-            countryRepository.findOne(req.query.id).then(country => {
-                let data = service.capitalizeKeys(country);
-                res.send(data);
-            });
+            let country = await countryRepository.findOneBy( { id: req.query.id });
+            data = service.capitalizeKeys(country);
         }
     }else if (orm == 'Bookshelf'){
         if (!reg.test(req.query.id)){
-                BookshelfCountry.fetchAll().then(country => {
-                    // Send requested country to Client 
-                    let data = service.capitalizeKeys(country.toJSON());
-                    res.send(data);
-                });
+            let country = await BookshelfCountry.fetchAll();
+            data = service.capitalizeKeys(country.toJSON());
         }else{
-                BookshelfCountry.where('Id', req.query.id).fetchAll({
-                }).then(country => {
-                // Send requested country to Client
-                    let data = service.capitalizeKeys(country.toJSON()[0]);
-                    res.send(data);
-                });
+            let country = await BookshelfCountry.where('Id', req.query.id).fetchAll({});
+            data = service.capitalizeKeys(country.toJSON()[0]);
         }
     }else if (orm == 'Sequelize'){
         if (!reg.test(req.query.id)){
-                Country.findAll({raw: true, nest: true}).then(country => {
-                    // Send countries to Client
-                    let data = service.capitalizeKeys(country);
-                    res.send(data);       
-                });
+            let country = await Country.findAll({raw: true, nest: true});
+            data = service.capitalizeKeys(country);
         }else{
-                Country.findByPk(req.query.id, {
-                    raw: true, nest: true
-                }).then(country => {
-                    // Send requested Country to Client
-                    let data = service.capitalizeKeys(country);
-                    res.send(data);       
-                });
+            let country = await Country.findByPk(req.query.id, {
+                raw: true, nest: true
+            });
+            data = service.capitalizeKeys(country);
         }
     }
+    res.send(data);
 }
 
 // Create country

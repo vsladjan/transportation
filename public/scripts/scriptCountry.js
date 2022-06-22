@@ -53,6 +53,7 @@ $(document).ready(function(){
                 $("#countryCodeEdit").val(data.Code);
                 $("#populationEdit").val(data.Population);
                 $("#sizeEdit").val(data.Size);
+                $("#continentSelectEdit").val(data.Continent).change();
             }
         });
     });

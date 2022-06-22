@@ -17,32 +17,15 @@ var MType = require('../models/mikroorm/entities/Transportationtype.js').Transpo
 var getShow = async function(req, res){
     var text = "Message";
     var orm = cookie.getOrm(req, res);
+    let data = {};
     
     if (orm == 'MikroORM'){
         let vehicleRepository = mikroDI.em.fork().getRepository(MVehicle);
-        vehicleRepository.findAll(['Transportationtype']).then(function(data){
-            if (req.session.message){
-                text = req.session.message;
-                req.session.message = null;
-            }
-            var response = {};
-            response.vehicle = data;
-            response.message = text;
-            res.render("vehicle", {vehicles:response});
-        });
+        data = await vehicleRepository.findAll({ populate: ['Transportationtype'] });
     }else if (orm == 'Objection'){
-        ObjVehicle.query().withGraphFetched('Transportationtype').then(function(data){
-            if (req.session.message){
-                text = req.session.message;
-                req.session.message = null;
-            }
-            var response = {};
-            response.vehicle = data;
-            response.message = text;
-            res.render("vehicle", {vehicles:response});
-        });
+        data = await ObjVehicle.query().withGraphFetched('Transportationtype');
     }else if (orm == 'Knex'){
-        knex("transportationvehicle").join(
+        data = await knex("transportationvehicle").join(
             "transportationtype",
             "transportationtype.Id",
             "transportationvehicle.TransportationTypeId").select(
@@ -53,176 +36,129 @@ var getShow = async function(req, res){
                 "transportationvehicle.ProductionYear",
                 "transportationvehicle.TransportationTypeId",
                 knex.ref("transportationtype.Name").as('TypeName')
-        ).then(function(data){
-            data.forEach(element => {
-                let type = {};
-                type.Name = element.TypeName;
-                element['Transportationtype'] = type;
-            });
-            if (req.session.message){
-                text = req.session.message;
-                req.session.message = null;
-            }
-            var response = {};
-            response.vehicle = data;
-            response.message = text;
-            res.render("vehicle", {vehicles:response});
+        );
+        data.forEach(element => {
+            let type = {};
+            type.Name = element.TypeName;
+            element['Transportationtype'] = type;
         });
     }else if (orm == 'TypeORM'){
-        console.log("TypeORM");
         const vehicleRepository = typeorm.getConnection().getRepository(TypeORMVehicle);
-        vehicleRepository.find({relations: ["transportationtype"]}).then(vehicle => {
-              if (req.session.message){
-                  text = req.session.message;
-                  req.session.message = null;
-              }
-              var response = {};
-              response.vehicle = service.capitalizeKeys(vehicle);
-              response.message = text;
-              res.render("vehicle", {vehicles:response});
-        });
+        data = await vehicleRepository.find({relations: ["transportationtype"]});
+        data = service.capitalizeKeys(data);
     }else if (orm == 'Bookshelf'){
-        BookshelfVehicle.fetchAll({withRelated:['transportationtype']}).then(vehicle => {
-            // Send all vehicles to Client
-            if (req.session.message){
-                text = req.session.message;
-                req.session.message = null;
-            }
-            var response = {};
-            response.vehicle = service.capitalizeKeys(vehicle.toJSON());
-            response.message = text;
-            res.render("vehicle", {vehicles:response});
-        });
+        data = await BookshelfVehicle.fetchAll({withRelated:['transportationtype']});
+        data = service.capitalizeKeys(data.toJSON());
     }else if (orm == 'Sequelize'){
-        Vehicle.findAll({
+        data = await Vehicle.findAll({
             include: [{
                 model: Type,
                 required: true
             }],
             raw: true,
             nest: true
-        }).then(vehicle => {
-            // Send all vehicles to Client
-            if (req.session.message){
-                text = req.session.message;
-                req.session.message = null;
-            }
-            var response = {};
-            response.vehicle = service.capitalizeKeys(vehicle);
-            response.message = text;
-            res.render("vehicle", {vehicles:response});
         });
+        data = service.capitalizeKeys(data);
     }
+
+    // Send all vehicles to Client
+    if (req.session.message){
+        text = req.session.message;
+        req.session.message = null;
+    }
+    var response = {};
+    response.vehicle = data;
+    response.message = text;
+    res.render("vehicle", {vehicles:response});
 }
 
 // Send vehicle in JSON
-var getVehicle = function(req, res){
+var getVehicle = async function(req, res){
     var reg = new RegExp("[0-9]+");
     var orm = cookie.getOrm(req, res);
+    let data = {};
 
     if (orm == 'MikroORM'){
         if (!reg.test(req.query.id)){
             let vehicleRepository = mikroDI.em.fork().getRepository(MVehicle);
-            vehicleRepository.findAll().then(function(data){
-                res.send(data);
-            });
+            data = await vehicleRepository.findAll();
         }else{
             let vehicleRepository = mikroDI.em.fork().getRepository(MVehicle);
-            vehicleRepository.findOne(req.query.id, ['Transportationtype']).then(function(data){
-                let jsonObj = data.toJSON();
-                jsonObj.TransportationTypeId = data.Transportationtype.Id;
-                res.send(jsonObj);
-            });
+            let vehicle = await vehicleRepository.findOne(req.query.id, { populate: ['Transportationtype'] });
+            data = vehicle.toJSON();
+            data.TransportationTypeId = vehicle.Transportationtype.Id;
         }
     }else if (orm == 'Objection'){
         if (!reg.test(req.query.id)){
-            ObjVehicle.query().then(function(data){
-                res.send(data);
-            });
+            data = await ObjVehicle.query();
         }else{
-            ObjVehicle.query().withGraphFetched('Transportationtype').findById(req.query.id).then(function(data){
-                res.send(data);
-            });
+            data = await ObjVehicle.query().withGraphFetched('Transportationtype').findById(req.query.id);
         }
     }else if (orm == 'Knex'){
         if (!reg.test(req.query.id)){
-            knex("transportationvehicle").then(function(data){
-                res.send(data);
-            });
+            data = await knex("transportationvehicle");
         }else{
-            knex("transportationvehicle").where('transportationvehicle.Id', req.query.id).join(
-                "transportationtype",
-                "transportationtype.Id",
-                "transportationvehicle.TransportationTypeId").select(
-                    "transportationvehicle.Id", 
-                    "transportationvehicle.Name", 
-                    "transportationvehicle.Description", 
-                    "transportationvehicle.Color", 
-                    "transportationvehicle.ProductionYear",
-                    "transportationvehicle.TransportationTypeId",
-                    knex.ref("transportationtype.Name").as('TypeName')
-            ).then(function(data){
-                element = data[0];
-                let type = {};
-                type.Name = element.TypeName;
-                element['Type'] = type;
-                res.send(element);
-            });
+            let vehicle = await knex("transportationvehicle").where(
+                'transportationvehicle.Id', req.query.id).join(
+                    "transportationtype",
+                    "transportationtype.Id",
+                    "transportationvehicle.TransportationTypeId").select(
+                        "transportationvehicle.Id", 
+                        "transportationvehicle.Name", 
+                        "transportationvehicle.Description", 
+                        "transportationvehicle.Color", 
+                        "transportationvehicle.ProductionYear",
+                        "transportationvehicle.TransportationTypeId",
+                        knex.ref("transportationtype.Name").as('TypeName')
+            );
+            data = vehicle[0];
+            let type = {};
+            type.Name = data.TypeName;
+            data['Type'] = type;
         }
     }else if (orm == 'TypeORM'){
         if (!reg.test(req.query.id)){
             const vehicleRepository = typeorm.getConnection().getRepository(TypeORMVehicle);
-            vehicleRepository.find().then(vehicle => {
-                let data = service.capitalizeKeys(vehicle);
-                res.send(data);
-            });
+            data = await vehicleRepository.find();
+            data = service.capitalizeKeys(data);
         }else{
             const vehicleRepository = typeorm.getConnection().getRepository(TypeORMVehicle);
-            vehicleRepository.findOne(req.query.id, {relations: ["transportationtype"]}).then(vehicle => {
-                let data = service.capitalizeKeys(vehicle);
-                res.send(data);
+            data = await vehicleRepository.findOne({
+                where: { id: req.query.id }, 
+                relations: ["transportationtype"]
             });
+            data = service.capitalizeKeys(data);
         }
     }else if (orm == 'Bookshelf'){
         if (!reg.test(req.query.id)){
-            BookshelfVehicle.fetchAll().then(vehicle => {
-                // Send requested vehicle to Client 
-                var data = service.capitalizeKeys(vehicle.toJSON());
-                res.send(data);
-            });
+            data = await BookshelfVehicle.fetchAll();
+            data = service.capitalizeKeys(data.toJSON());
         }else{
-            BookshelfVehicle.where('Id', req.query.id).fetchAll({
+            data = await BookshelfVehicle.where('Id', req.query.id).fetchAll({
                 withRelated:['transportationtype']
-            }).then(vehicle => {
-                // Send requested vehicle to Client
-                var data = service.capitalizeKeys(vehicle.toJSON()[0]);
-                res.send(data);
             });
+            data = service.capitalizeKeys(data.toJSON()[0]);
         }
     }else if (orm == 'Sequelize'){
         if (!reg.test(req.query.id)){
-            Vehicle.findAll({
+            data = await Vehicle.findAll({
                 raw: true, nest: true
-            }).then(vehicle => {
-                    // Send vehicles to Client
-                    var data = service.capitalizeKeys(vehicle);
-                    res.send(data);   
             });
+            data = service.capitalizeKeys(data);
         }else{
-            Vehicle.findByPk(req.query.id, {
+            data = await Vehicle.findByPk(req.query.id, {
                 include: [{
                     model: Type,
                     required: true
                 }],
                 raw: true,
                 nest: true 
-            }).then(vehicle => {
-                // Send requested Vehicle to Client
-                var data = service.capitalizeKeys(vehicle);
-                res.send(data);
             });
+            data = service.capitalizeKeys(data);
         }
     }
+    // Send requested Vehicle to Client
+    res.send(data);
 }
 
 // Create vehicle
