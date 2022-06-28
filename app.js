@@ -8,7 +8,7 @@ var router = require("./router/router.js");
 var db = require("./sequelize.js");
 const bodyParser = require("body-parser");
 require ("reflect-metadata");
-const {createConnection} = require('typeorm');
+const typeorm = require('./typeormdb.js').createConnection();
 
 var app = express();
 var port = 3000;
@@ -20,7 +20,6 @@ app.use(cookieParser());
 
 app.set("view engine", "ejs");
 
-createConnection();
 
 db.sequelize.sync().then(() => {
     console.log('Sync db');
