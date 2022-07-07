@@ -21,31 +21,31 @@ let Transportationvehicle = class Transportationvehicle {
     }
 };
 __decorate([
-    core_1.Property({ fieldName: 'Color', length: 45, nullable: true }),
+    (0, core_1.Property)({ fieldName: 'Color', length: 45, nullable: true }),
     __metadata("design:type", String)
 ], Transportationvehicle.prototype, "Color", void 0);
 __decorate([
-    core_1.Property({ fieldName: 'Description', length: 45, nullable: true }),
+    (0, core_1.Property)({ fieldName: 'Description', length: 45, nullable: true }),
     __metadata("design:type", String)
 ], Transportationvehicle.prototype, "Description", void 0);
 __decorate([
-    core_1.PrimaryKey({ fieldName: 'Id' }),
+    (0, core_1.PrimaryKey)({ fieldName: 'Id' }),
     __metadata("design:type", Number)
 ], Transportationvehicle.prototype, "Id", void 0);
 __decorate([
-    core_1.Property({ fieldName: 'Name', length: 45 }),
+    (0, core_1.Property)({ fieldName: 'Name', length: 45 }),
     __metadata("design:type", String)
 ], Transportationvehicle.prototype, "Name", void 0);
 __decorate([
-    core_1.Property({ fieldName: 'ProductionYear', nullable: true }),
+    (0, core_1.Property)({ fieldName: 'ProductionYear', nullable: true }),
     __metadata("design:type", Number)
 ], Transportationvehicle.prototype, "ProductionYear", void 0);
 __decorate([
-    core_1.ManyToOne({ entity: () => Transportationtype_1.Transportationtype, fieldName: 'TransportationTypeId', cascade: [], index: 'TransportationTypeId' }),
+    (0, core_1.ManyToOne)({ entity: () => Transportationtype_1.Transportationtype, fieldName: 'TransportationTypeId', cascade: [], index: 'TransportationTypeId' }),
     __metadata("design:type", Transportationtype_1.Transportationtype)
 ], Transportationvehicle.prototype, "Transportationtype", void 0);
 Transportationvehicle = __decorate([
-    core_1.Entity(),
+    (0, core_1.Entity)(),
     __metadata("design:paramtypes", [String, String, String, Number])
 ], Transportationvehicle);
 exports.Transportationvehicle = Transportationvehicle;

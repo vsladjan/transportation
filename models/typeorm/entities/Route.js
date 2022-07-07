@@ -15,23 +15,23 @@ const Routestation_1 = require("./Routestation");
 let Route = class Route {
 };
 __decorate([
-    typeorm_1.PrimaryGeneratedColumn({ type: "int", name: "Id" }),
+    (0, typeorm_1.PrimaryGeneratedColumn)({ type: "int", name: "Id" }),
     __metadata("design:type", Number)
 ], Route.prototype, "id", void 0);
 __decorate([
-    typeorm_1.Column("varchar", { name: "Name", length: 45 }),
+    (0, typeorm_1.Column)("varchar", { name: "Name", length: 45 }),
     __metadata("design:type", String)
 ], Route.prototype, "name", void 0);
 __decorate([
-    typeorm_1.Column("varchar", { name: "Description", nullable: true, length: 45 }),
+    (0, typeorm_1.Column)("varchar", { name: "Description", nullable: true, length: 45 }),
     __metadata("design:type", String)
 ], Route.prototype, "description", void 0);
 __decorate([
-    typeorm_1.OneToMany(() => Routestation_1.Routestation, (routestation) => routestation.route),
+    (0, typeorm_1.OneToMany)(() => Routestation_1.Routestation, (routestation) => routestation.route),
     __metadata("design:type", Array)
 ], Route.prototype, "routestations", void 0);
 Route = __decorate([
-    typeorm_1.Entity("route", { schema: "transportation" })
+    (0, typeorm_1.Entity)("route", { schema: "transportation" })
 ], Route);
 exports.Route = Route;
 //# sourceMappingURL=Route.js.map

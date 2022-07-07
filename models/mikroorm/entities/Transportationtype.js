@@ -17,15 +17,15 @@ let Transportationtype = class Transportationtype {
     }
 };
 __decorate([
-    core_1.PrimaryKey({ fieldName: 'Id' }),
+    (0, core_1.PrimaryKey)({ fieldName: 'Id' }),
     __metadata("design:type", Number)
 ], Transportationtype.prototype, "Id", void 0);
 __decorate([
-    core_1.Property({ fieldName: 'Name', length: 45 }),
+    (0, core_1.Property)({ fieldName: 'Name', length: 45 }),
     __metadata("design:type", String)
 ], Transportationtype.prototype, "Name", void 0);
 Transportationtype = __decorate([
-    core_1.Entity(),
+    (0, core_1.Entity)(),
     __metadata("design:paramtypes", [String])
 ], Transportationtype);
 exports.Transportationtype = Transportationtype;

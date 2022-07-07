@@ -16,40 +16,40 @@ const Station_1 = require("./Station");
 let Cityarea = class Cityarea {
 };
 __decorate([
-    typeorm_1.PrimaryGeneratedColumn({ type: "int", name: "Id" }),
+    (0, typeorm_1.PrimaryGeneratedColumn)({ type: "int", name: "Id" }),
     __metadata("design:type", Number)
 ], Cityarea.prototype, "id", void 0);
 __decorate([
-    typeorm_1.Column("varchar", { name: "Name", length: 45 }),
+    (0, typeorm_1.Column)("varchar", { name: "Name", length: 45 }),
     __metadata("design:type", String)
 ], Cityarea.prototype, "name", void 0);
 __decorate([
-    typeorm_1.Column("varchar", { name: "Size", nullable: true, length: 45 }),
+    (0, typeorm_1.Column)("varchar", { name: "Size", nullable: true, length: 45 }),
     __metadata("design:type", String)
 ], Cityarea.prototype, "size", void 0);
 __decorate([
-    typeorm_1.Column("varchar", { name: "Description", nullable: true, length: 90 }),
+    (0, typeorm_1.Column)("varchar", { name: "Description", nullable: true, length: 90 }),
     __metadata("design:type", String)
 ], Cityarea.prototype, "description", void 0);
 __decorate([
-    typeorm_1.Column("int", { name: "CityId" }),
+    (0, typeorm_1.Column)("int", { name: "CityId" }),
     __metadata("design:type", Number)
 ], Cityarea.prototype, "cityId", void 0);
 __decorate([
-    typeorm_1.ManyToOne(() => City_1.City, (city) => city.cityareas, {
+    (0, typeorm_1.ManyToOne)(() => City_1.City, (city) => city.cityareas, {
         onDelete: "NO ACTION",
         onUpdate: "NO ACTION",
     }),
-    typeorm_1.JoinColumn([{ name: "CityId", referencedColumnName: "id" }]),
+    (0, typeorm_1.JoinColumn)([{ name: "CityId", referencedColumnName: "id" }]),
     __metadata("design:type", City_1.City)
 ], Cityarea.prototype, "city", void 0);
 __decorate([
-    typeorm_1.OneToMany(() => Station_1.Station, (station) => station.cityarea),
+    (0, typeorm_1.OneToMany)(() => Station_1.Station, (station) => station.cityarea),
     __metadata("design:type", Array)
 ], Cityarea.prototype, "stations", void 0);
 Cityarea = __decorate([
-    typeorm_1.Index("fk_CityArea_City1_idx", ["cityId"], {}),
-    typeorm_1.Entity("cityarea", { schema: "transportation" })
+    (0, typeorm_1.Index)("fk_CityArea_City1_idx", ["cityId"], {}),
+    (0, typeorm_1.Entity)("cityarea", { schema: "transportation" })
 ], Cityarea);
 exports.Cityarea = Cityarea;
 //# sourceMappingURL=Cityarea.js.map

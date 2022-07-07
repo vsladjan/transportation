@@ -57,19 +57,4 @@ export class Routestation {
   @JoinColumn([{ name: "TransportationVehicleId", referencedColumnName: "id" }])
   transportationvehicle: Transportationvehicle;
 
-  @ManyToMany(
-    () => Transportationvehicle,
-    (transportationvehicle) => transportationvehicle.routestations2
-  )
-  @JoinTable({
-    name: "stationroutes",
-    joinColumns: [
-      { name: "routestationStationId", referencedColumnName: "stationId" },
-    ],
-    inverseJoinColumns: [
-      { name: "TransportationVehicleId", referencedColumnName: "id" },
-    ],
-    schema: "transportation",
-  })
-  transportationvehicles: Transportationvehicle[];
 }

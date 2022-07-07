@@ -6,7 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const config_json_1 = __importDefault(require("./config.json"));
 exports.default = {
     entities: ['./models/mikroorm/entities/**/*.js'],
-    debug: true,
+    debug: false,
     dbName: 'transportation',
     type: 'mysql',
     user: config_json_1.default.db_username,

@@ -15,19 +15,19 @@ const Transportationvehicle_1 = require("./Transportationvehicle");
 let Transportationtype = class Transportationtype {
 };
 __decorate([
-    typeorm_1.PrimaryGeneratedColumn({ type: "int", name: "Id" }),
+    (0, typeorm_1.PrimaryGeneratedColumn)({ type: "int", name: "Id" }),
     __metadata("design:type", Number)
 ], Transportationtype.prototype, "id", void 0);
 __decorate([
-    typeorm_1.Column("varchar", { name: "Name", length: 45 }),
+    (0, typeorm_1.Column)("varchar", { name: "Name", length: 45 }),
     __metadata("design:type", String)
 ], Transportationtype.prototype, "name", void 0);
 __decorate([
-    typeorm_1.OneToMany(() => Transportationvehicle_1.Transportationvehicle, (transportationvehicle) => transportationvehicle.transportationtype),
+    (0, typeorm_1.OneToMany)(() => Transportationvehicle_1.Transportationvehicle, (transportationvehicle) => transportationvehicle.transportationtype),
     __metadata("design:type", Array)
 ], Transportationtype.prototype, "transportationvehicles", void 0);
 Transportationtype = __decorate([
-    typeorm_1.Entity("transportationtype", { schema: "transportation" })
+    (0, typeorm_1.Entity)("transportationtype", { schema: "transportation" })
 ], Transportationtype);
 exports.Transportationtype = Transportationtype;
 //# sourceMappingURL=Transportationtype.js.map

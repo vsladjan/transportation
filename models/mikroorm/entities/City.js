@@ -20,27 +20,27 @@ let City = class City {
     }
 };
 __decorate([
-    core_1.ManyToOne({ entity: () => Country_1.Country, fieldName: 'CountryId', cascade: [], index: 'fk_City_Country_idx' }),
+    (0, core_1.ManyToOne)({ entity: () => Country_1.Country, fieldName: 'CountryId', cascade: [], index: 'fk_City_Country_idx' }),
     __metadata("design:type", Country_1.Country)
 ], City.prototype, "Country", void 0);
 __decorate([
-    core_1.PrimaryKey({ fieldName: 'Id' }),
+    (0, core_1.PrimaryKey)({ fieldName: 'Id' }),
     __metadata("design:type", Number)
 ], City.prototype, "Id", void 0);
 __decorate([
-    core_1.Property({ fieldName: 'Name', length: 45 }),
+    (0, core_1.Property)({ fieldName: 'Name', length: 45 }),
     __metadata("design:type", String)
 ], City.prototype, "Name", void 0);
 __decorate([
-    core_1.Property({ columnType: 'float', fieldName: 'Population' }),
+    (0, core_1.Property)({ columnType: 'float', fieldName: 'Population' }),
     __metadata("design:type", Number)
 ], City.prototype, "Population", void 0);
 __decorate([
-    core_1.Property({ columnType: 'float', fieldName: 'Size' }),
+    (0, core_1.Property)({ columnType: 'float', fieldName: 'Size' }),
     __metadata("design:type", Number)
 ], City.prototype, "Size", void 0);
 City = __decorate([
-    core_1.Entity(),
+    (0, core_1.Entity)(),
     __metadata("design:paramtypes", [String, Number, Number])
 ], City);
 exports.City = City;

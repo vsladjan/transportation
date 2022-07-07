@@ -119,7 +119,6 @@ var getCity = async function(req, res){
                 where: { id: req.query.id }, 
                 relations: ["country"] }
             );
-            console.log(city);
             data = service.capitalizeKeys(city);
         }
     }else if (orm == 'Bookshelf'){

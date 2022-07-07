@@ -21,31 +21,31 @@ let Country = class Country {
     }
 };
 __decorate([
-    core_1.Property({ fieldName: 'Code', length: 3, columnType: 'char' }),
+    (0, core_1.Property)({ fieldName: 'Code', length: 3, columnType: 'char' }),
     __metadata("design:type", String)
 ], Country.prototype, "Code", void 0);
 __decorate([
-    core_1.Property({ fieldName: 'Continent', length: 45 }),
+    (0, core_1.Property)({ fieldName: 'Continent', length: 45 }),
     __metadata("design:type", String)
 ], Country.prototype, "Continent", void 0);
 __decorate([
-    core_1.PrimaryKey({ fieldName: 'Id' }),
+    (0, core_1.PrimaryKey)({ fieldName: 'Id' }),
     __metadata("design:type", Number)
 ], Country.prototype, "Id", void 0);
 __decorate([
-    core_1.Property({ fieldName: 'Name', length: 45 }),
+    (0, core_1.Property)({ fieldName: 'Name', length: 45 }),
     __metadata("design:type", String)
 ], Country.prototype, "Name", void 0);
 __decorate([
-    core_1.Property({ columnType: 'float', fieldName: 'Population' }),
+    (0, core_1.Property)({ columnType: 'float', fieldName: 'Population' }),
     __metadata("design:type", Number)
 ], Country.prototype, "Population", void 0);
 __decorate([
-    core_1.Property({ columnType: 'float', fieldName: 'Size' }),
+    (0, core_1.Property)({ columnType: 'float', fieldName: 'Size' }),
     __metadata("design:type", Number)
 ], Country.prototype, "Size", void 0);
 Country = __decorate([
-    core_1.Entity(),
+    (0, core_1.Entity)(),
     __metadata("design:paramtypes", [String, String, Number, Number, String])
 ], Country);
 exports.Country = Country;

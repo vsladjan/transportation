@@ -33,6 +33,7 @@ $(document).ready(function(){
             contentType: "application/json",
             url: "/transportation/route/get",
             success: function(data){
+                $('#routeSelect').empty();
                 $.each(data, function(i, value) {
                     $('#routeSelect').append($('<option>').text(value.Name).attr('value', value.Id));
                 });
@@ -43,6 +44,7 @@ $(document).ready(function(){
             contentType: "applicaiton/json",
             url: "/transportation/station/get",
             success: function(data){
+                $('#stationSelect').empty();
                 $.each(data, function(i, value){
                     $('#stationSelect').append($('<option>').text(value.Name).attr('value', value.Id));
                 });
@@ -53,6 +55,7 @@ $(document).ready(function(){
             contentType: "applicaiton/json",
             url: "/transportation/vehicle/get",
             success: function(data){
+                $('#vehicleSelect').empty();
                 $.each(data, function(i, value){
                     $('#vehicleSelect').append($('<option>').text(value.Name).attr('value', value.Id));
                 });

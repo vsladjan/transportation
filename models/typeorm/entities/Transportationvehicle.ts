@@ -38,12 +38,6 @@ export class Transportationvehicle {
   )
   routestations: Routestation[];
 
-  @ManyToMany(
-    () => Routestation,
-    (routestation) => routestation.transportationvehicles
-  )
-  routestations2: Routestation[];
-
   @ManyToOne(
     () => Transportationtype,
     (transportationtype) => transportationtype.transportationvehicles,

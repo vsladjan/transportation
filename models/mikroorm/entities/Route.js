@@ -18,19 +18,19 @@ let Route = class Route {
     }
 };
 __decorate([
-    core_1.Property({ fieldName: 'Description', length: 45, nullable: true }),
+    (0, core_1.Property)({ fieldName: 'Description', length: 45, nullable: true }),
     __metadata("design:type", String)
 ], Route.prototype, "Description", void 0);
 __decorate([
-    core_1.PrimaryKey({ fieldName: 'Id' }),
+    (0, core_1.PrimaryKey)({ fieldName: 'Id' }),
     __metadata("design:type", Number)
 ], Route.prototype, "Id", void 0);
 __decorate([
-    core_1.Property({ fieldName: 'Name', length: 45 }),
+    (0, core_1.Property)({ fieldName: 'Name', length: 45 }),
     __metadata("design:type", String)
 ], Route.prototype, "Name", void 0);
 Route = __decorate([
-    core_1.Entity(),
+    (0, core_1.Entity)(),
     __metadata("design:paramtypes", [String, String])
 ], Route);
 exports.Route = Route;

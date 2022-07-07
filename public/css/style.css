@@ -16,6 +16,6 @@ input:read-only {
     display: none;
 }
 
-.dataTables_wrapper .dataTables_paginate .paginate_button {
-    color: white !important;
+.dataTables_wrapper .dataTables_paginate .paginate_button .dataTables_info{
+    color: green !important;
 }

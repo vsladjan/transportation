@@ -17,27 +17,27 @@ const Transportationvehicle_1 = require("./Transportationvehicle");
 let Routestation = class Routestation {
 };
 __decorate([
-    core_1.ManyToOne({ entity: () => Route_1.Route, fieldName: 'RouteId', cascade: [], primary: true, index: 'fk_RouteStation_Route1_idx' }),
+    (0, core_1.ManyToOne)({ entity: () => Route_1.Route, fieldName: 'RouteId', cascade: [], primary: true, index: 'fk_RouteStation_Route1_idx' }),
     __metadata("design:type", Route_1.Route)
 ], Routestation.prototype, "Route", void 0);
 __decorate([
-    core_1.ManyToOne({ entity: () => Station_1.Station, fieldName: 'StationId', cascade: [], primary: true, index: 'fk_RouteStation_Station1_idx' }),
+    (0, core_1.ManyToOne)({ entity: () => Station_1.Station, fieldName: 'StationId', cascade: [], primary: true, index: 'fk_RouteStation_Station1_idx' }),
     __metadata("design:type", Station_1.Station)
 ], Routestation.prototype, "Station", void 0);
 __decorate([
-    core_1.PrimaryKey({ fieldName: 'Time', columnType: 'time' }),
+    (0, core_1.PrimaryKey)({ fieldName: 'Time', columnType: 'time' }),
     __metadata("design:type", String)
 ], Routestation.prototype, "Time", void 0);
 __decorate([
-    core_1.ManyToOne({ entity: () => Transportationvehicle_1.Transportationvehicle, fieldName: 'TransportationVehicleId', cascade: [], primary: true, index: 'fk_RouteStation_TransportationVehicle1_idx' }),
+    (0, core_1.ManyToOne)({ entity: () => Transportationvehicle_1.Transportationvehicle, fieldName: 'TransportationVehicleId', cascade: [], primary: true, index: 'fk_RouteStation_TransportationVehicle1_idx' }),
     __metadata("design:type", Transportationvehicle_1.Transportationvehicle)
 ], Routestation.prototype, "Transportationvehicle", void 0);
 __decorate([
-    core_1.Property({ fieldName: 'Type', length: 10 }),
+    (0, core_1.Property)({ fieldName: 'Type', length: 10 }),
     __metadata("design:type", String)
 ], Routestation.prototype, "Type", void 0);
 Routestation = __decorate([
-    core_1.Entity()
+    (0, core_1.Entity)()
 ], Routestation);
 exports.Routestation = Routestation;
 //# sourceMappingURL=Routestation.js.map

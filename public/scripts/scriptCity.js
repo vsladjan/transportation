@@ -32,6 +32,7 @@ $(document).ready(function(){
             contentType: "application/json",
             url: "/transportation/country/get",
             success: function(data){
+                $('#countrySelect').empty();
                 $.each(data, function(i, value) {
                     $('#countrySelect').append($('<option>').text(value.Name).attr('value', value.Id));
                 });

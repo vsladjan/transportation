@@ -20,27 +20,27 @@ let Station = class Station {
     }
 };
 __decorate([
-    core_1.ManyToOne({ entity: () => Cityarea_1.Cityarea, fieldName: 'CityAreaId', cascade: [], index: 'fk_Station_CityArea1_idx' }),
+    (0, core_1.ManyToOne)({ entity: () => Cityarea_1.Cityarea, fieldName: 'CityAreaId', cascade: [], index: 'fk_Station_CityArea1_idx' }),
     __metadata("design:type", Cityarea_1.Cityarea)
 ], Station.prototype, "Cityarea", void 0);
 __decorate([
-    core_1.Property({ fieldName: 'Description', length: 45, nullable: true }),
+    (0, core_1.Property)({ fieldName: 'Description', length: 45, nullable: true }),
     __metadata("design:type", String)
 ], Station.prototype, "Description", void 0);
 __decorate([
-    core_1.PrimaryKey({ fieldName: 'Id' }),
+    (0, core_1.PrimaryKey)({ fieldName: 'Id' }),
     __metadata("design:type", Number)
 ], Station.prototype, "Id", void 0);
 __decorate([
-    core_1.Property({ fieldName: 'Location', length: 45, nullable: true }),
+    (0, core_1.Property)({ fieldName: 'Location', length: 45, nullable: true }),
     __metadata("design:type", String)
 ], Station.prototype, "Location", void 0);
 __decorate([
-    core_1.Property({ fieldName: 'Name', length: 45 }),
+    (0, core_1.Property)({ fieldName: 'Name', length: 45 }),
     __metadata("design:type", String)
 ], Station.prototype, "Name", void 0);
 Station = __decorate([
-    core_1.Entity(),
+    (0, core_1.Entity)(),
     __metadata("design:paramtypes", [String, String, String])
 ], Station);
 exports.Station = Station;

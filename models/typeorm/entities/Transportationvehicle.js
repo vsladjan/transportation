@@ -16,45 +16,41 @@ const Transportationtype_1 = require("./Transportationtype");
 let Transportationvehicle = class Transportationvehicle {
 };
 __decorate([
-    typeorm_1.PrimaryGeneratedColumn({ type: "int", name: "Id" }),
+    (0, typeorm_1.PrimaryGeneratedColumn)({ type: "int", name: "Id" }),
     __metadata("design:type", Number)
 ], Transportationvehicle.prototype, "id", void 0);
 __decorate([
-    typeorm_1.Column("varchar", { name: "Name", length: 45 }),
+    (0, typeorm_1.Column)("varchar", { name: "Name", length: 45 }),
     __metadata("design:type", String)
 ], Transportationvehicle.prototype, "name", void 0);
 __decorate([
-    typeorm_1.Column("varchar", { name: "Description", nullable: true, length: 45 }),
+    (0, typeorm_1.Column)("varchar", { name: "Description", nullable: true, length: 45 }),
     __metadata("design:type", String)
 ], Transportationvehicle.prototype, "description", void 0);
 __decorate([
-    typeorm_1.Column("varchar", { name: "Color", nullable: true, length: 45 }),
+    (0, typeorm_1.Column)("varchar", { name: "Color", nullable: true, length: 45 }),
     __metadata("design:type", String)
 ], Transportationvehicle.prototype, "color", void 0);
 __decorate([
-    typeorm_1.Column("int", { name: "ProductionYear", nullable: true }),
+    (0, typeorm_1.Column)("int", { name: "ProductionYear", nullable: true }),
     __metadata("design:type", Number)
 ], Transportationvehicle.prototype, "productionYear", void 0);
 __decorate([
-    typeorm_1.Column("int", { name: "TransportationTypeId" }),
+    (0, typeorm_1.Column)("int", { name: "TransportationTypeId" }),
     __metadata("design:type", Number)
 ], Transportationvehicle.prototype, "transportationTypeId", void 0);
 __decorate([
-    typeorm_1.OneToMany(() => Routestation_1.Routestation, (routestation) => routestation.transportationvehicle),
+    (0, typeorm_1.OneToMany)(() => Routestation_1.Routestation, (routestation) => routestation.transportationvehicle),
     __metadata("design:type", Array)
 ], Transportationvehicle.prototype, "routestations", void 0);
 __decorate([
-    typeorm_1.ManyToMany(() => Routestation_1.Routestation, (routestation) => routestation.transportationvehicles),
-    __metadata("design:type", Array)
-], Transportationvehicle.prototype, "routestations2", void 0);
-__decorate([
-    typeorm_1.ManyToOne(() => Transportationtype_1.Transportationtype, (transportationtype) => transportationtype.transportationvehicles, { onDelete: "NO ACTION", onUpdate: "NO ACTION" }),
-    typeorm_1.JoinColumn([{ name: "TransportationTypeId", referencedColumnName: "id" }]),
+    (0, typeorm_1.ManyToOne)(() => Transportationtype_1.Transportationtype, (transportationtype) => transportationtype.transportationvehicles, { onDelete: "NO ACTION", onUpdate: "NO ACTION" }),
+    (0, typeorm_1.JoinColumn)([{ name: "TransportationTypeId", referencedColumnName: "id" }]),
     __metadata("design:type", Transportationtype_1.Transportationtype)
 ], Transportationvehicle.prototype, "transportationtype", void 0);
 Transportationvehicle = __decorate([
-    typeorm_1.Index("TransportationTypeId", ["transportationTypeId"], {}),
-    typeorm_1.Entity("transportationvehicle", { schema: "transportation" })
+    (0, typeorm_1.Index)("TransportationTypeId", ["transportationTypeId"], {}),
+    (0, typeorm_1.Entity)("transportationvehicle", { schema: "transportation" })
 ], Transportationvehicle);
 exports.Transportationvehicle = Transportationvehicle;
 //# sourceMappingURL=Transportationvehicle.js.map

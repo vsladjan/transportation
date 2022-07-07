@@ -5,7 +5,7 @@ const sequelize = new Sequelize('transportation', config.db_username, config.db_
     host: 'localhost',
     dialect: 'mysql',
     logging: false,
-    operatorsAliases: false,
+    operatorsAliases: 0,
     define: {
       timestamps: false,
       freezeTableName: true
@@ -40,8 +40,8 @@ db.transportationvehicle.belongsTo(db.transportationtype);
 db.routestation.belongsTo(db.station);
 db.routestation.belongsTo(db.route);
 db.routestation.belongsTo(db.transportationvehicle);
-db.station.belongsToMany(db.routestation, {through: 'Stationroutes', foreignKey: 'StationId', as: 'stations'});
-db.route.belongsToMany(db.routestation, {through: 'Stationroutes', foreignKey: 'RouteId', as: 'routes'});
-db.transportationvehicle.belongsToMany(db.routestation, {through: 'Stationroutes', foreignKey: 'TransportationVehicleId', as: 'vehicles'});
+db.station.hasMany(db.routestation);
+db.route.hasMany(db.routestation);
+db.transportationvehicle.hasMany(db.routestation);
 
 module.exports = db;

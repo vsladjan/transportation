@@ -16,40 +16,40 @@ const Cityarea_1 = require("./Cityarea");
 let City = class City {
 };
 __decorate([
-    typeorm_1.PrimaryGeneratedColumn({ type: "int", name: "Id" }),
+    (0, typeorm_1.PrimaryGeneratedColumn)({ type: "int", name: "Id" }),
     __metadata("design:type", Number)
 ], City.prototype, "id", void 0);
 __decorate([
-    typeorm_1.Column("varchar", { name: "Name", length: 45 }),
+    (0, typeorm_1.Column)("varchar", { name: "Name", length: 45 }),
     __metadata("design:type", String)
 ], City.prototype, "name", void 0);
 __decorate([
-    typeorm_1.Column("float", { name: "Population", precision: 12 }),
+    (0, typeorm_1.Column)("float", { name: "Population", precision: 12 }),
     __metadata("design:type", Number)
 ], City.prototype, "population", void 0);
 __decorate([
-    typeorm_1.Column("float", { name: "Size", precision: 12 }),
+    (0, typeorm_1.Column)("float", { name: "Size", precision: 12 }),
     __metadata("design:type", Number)
 ], City.prototype, "size", void 0);
 __decorate([
-    typeorm_1.Column("int", { name: "CountryId" }),
+    (0, typeorm_1.Column)("int", { name: "CountryId" }),
     __metadata("design:type", Number)
 ], City.prototype, "countryId", void 0);
 __decorate([
-    typeorm_1.ManyToOne(() => Country_1.Country, (country) => country.cities, {
+    (0, typeorm_1.ManyToOne)(() => Country_1.Country, (country) => country.cities, {
         onDelete: "NO ACTION",
         onUpdate: "NO ACTION",
     }),
-    typeorm_1.JoinColumn([{ name: "CountryId", referencedColumnName: "id" }]),
+    (0, typeorm_1.JoinColumn)([{ name: "CountryId", referencedColumnName: "id" }]),
     __metadata("design:type", Country_1.Country)
 ], City.prototype, "country", void 0);
 __decorate([
-    typeorm_1.OneToMany(() => Cityarea_1.Cityarea, (cityarea) => cityarea.city),
+    (0, typeorm_1.OneToMany)(() => Cityarea_1.Cityarea, (cityarea) => cityarea.city),
     __metadata("design:type", Array)
 ], City.prototype, "cityareas", void 0);
 City = __decorate([
-    typeorm_1.Index("fk_City_Country_idx", ["countryId"], {}),
-    typeorm_1.Entity("city", { schema: "transportation" })
+    (0, typeorm_1.Index)("fk_City_Country_idx", ["countryId"], {}),
+    (0, typeorm_1.Entity)("city", { schema: "transportation" })
 ], City);
 exports.City = City;
 //# sourceMappingURL=City.js.map
