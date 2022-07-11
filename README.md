@@ -8,8 +8,8 @@ After that navigate to root dir of project and run npm install to install all th
 Add config.json file in root of project with following data:
 ```json
 {
-    "db_username": "user",
+    "db_username": "tsuser",
     "db_password": "password"
 }
 ```
-Run **node app.js**, if everything is fine server should be listening on port 3000. Enter in browser **http://localhost:3000/transportation/**
+Run **node app.js**, if everything is fine server should be listening on port 3000. Enter in browser [http://localhost:3000/transportation/](http://localhost:3000/transportation/)

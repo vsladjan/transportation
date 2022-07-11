@@ -16,9 +16,9 @@ CREATE SCHEMA IF NOT EXISTS `transportation` DEFAULT CHARACTER SET utf8 ;
 USE `transportation` ;
 
 -- -----------------------------------------------------
--- Table `transportation`.`Country`
+-- Table `transportation`.`country`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `transportation`.`Country` (
+CREATE TABLE IF NOT EXISTS `transportation`.`country` (
   `Id` INT NOT NULL AUTO_INCREMENT,
   `Name` VARCHAR(45) NOT NULL,
   `Code` CHAR(3) NOT NULL,
@@ -30,9 +30,9 @@ ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `transportation`.`City`
+-- Table `transportation`.`city`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `transportation`.`City` (
+CREATE TABLE IF NOT EXISTS `transportation`.`city` (
   `Id` INT NOT NULL AUTO_INCREMENT,
   `Name` VARCHAR(45) NOT NULL,
   `Population` FLOAT NOT NULL,
@@ -42,16 +42,16 @@ CREATE TABLE IF NOT EXISTS `transportation`.`City` (
   INDEX `fk_City_Country_idx` (`CountryId` ASC) VISIBLE,
   CONSTRAINT `fk_City_Country`
     FOREIGN KEY (`CountryId`)
-    REFERENCES `transportation`.`Country` (`Id`)
+    REFERENCES `transportation`.`country` (`Id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `transportation`.`CityArea`
+-- Table `transportation`.`cityarea`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `transportation`.`CityArea` (
+CREATE TABLE IF NOT EXISTS `transportation`.`cityarea` (
   `Id` INT NOT NULL AUTO_INCREMENT,
   `Name` VARCHAR(45) NOT NULL,
   `Size` VARCHAR(45) NULL,
@@ -61,16 +61,16 @@ CREATE TABLE IF NOT EXISTS `transportation`.`CityArea` (
   INDEX `fk_CityArea_City1_idx` (`CityId` ASC) VISIBLE,
   CONSTRAINT `fk_CityArea_City1`
     FOREIGN KEY (`CityId`)
-    REFERENCES `transportation`.`City` (`Id`)
+    REFERENCES `transportation`.`city` (`Id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `transportation`.`Station`
+-- Table `transportation`.`station`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `transportation`.`Station` (
+CREATE TABLE IF NOT EXISTS `transportation`.`station` (
   `Id` INT NOT NULL AUTO_INCREMENT,
   `Name` VARCHAR(45) NOT NULL,
   `Description` VARCHAR(45) NULL,
@@ -80,16 +80,16 @@ CREATE TABLE IF NOT EXISTS `transportation`.`Station` (
   INDEX `fk_Station_CityArea1_idx` (`CityAreaId` ASC) VISIBLE,
   CONSTRAINT `fk_Station_CityArea1`
     FOREIGN KEY (`CityAreaId`)
-    REFERENCES `transportation`.`CityArea` (`Id`)
+    REFERENCES `transportation`.`cityarea` (`Id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `transportation`.`TransportationType`
+-- Table `transportation`.`transportationtype`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `transportation`.`TransportationType` (
+CREATE TABLE IF NOT EXISTS `transportation`.`transportationtype` (
   `Id` INT NOT NULL AUTO_INCREMENT,
   `Name` VARCHAR(45) NOT NULL,
   PRIMARY KEY (`Id`))
@@ -97,9 +97,9 @@ ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `transportation`.`TransportationVehicle`
+-- Table `transportation`.`transportationvehicle`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `transportation`.`TransportationVehicle` (
+CREATE TABLE IF NOT EXISTS `transportation`.`transportationvehicle` (
   `Id` INT NOT NULL AUTO_INCREMENT,
   `Name` VARCHAR(45) NOT NULL,
   `Description` VARCHAR(45) NULL,
@@ -110,16 +110,16 @@ CREATE TABLE IF NOT EXISTS `transportation`.`TransportationVehicle` (
   INDEX `fk_TransportationVehicle_TransoprtationType1_idx` (`TransportationTypeId` ASC) VISIBLE,
   CONSTRAINT `fk_TransportationVehicle_TransoprtationType1`
     FOREIGN KEY (`TransportationTypeId`)
-    REFERENCES `transportation`.`TransportationType` (`Id`)
+    REFERENCES `transportation`.`transportationtype` (`Id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `transportation`.`Route`
+-- Table `transportation`.`route`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `transportation`.`Route` (
+CREATE TABLE IF NOT EXISTS `transportation`.`route` (
   `Id` INT NOT NULL AUTO_INCREMENT,
   `Name` VARCHAR(45) NOT NULL,
   `Description` VARCHAR(45) NULL,
@@ -128,9 +128,9 @@ ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `transportation`.`RouteStation`
+-- Table `transportation`.`routestation`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `transportation`.`RouteStation` (
+CREATE TABLE IF NOT EXISTS `transportation`.`routestation` (
   `StationId` INT NOT NULL,
   `RouteId` INT NOT NULL,
   `TransportationVehicleId` INT NOT NULL,
@@ -142,17 +142,17 @@ CREATE TABLE IF NOT EXISTS `transportation`.`RouteStation` (
   INDEX `fk_RouteStation_TransportationVehicle1_idx` (`TransportationVehicleId` ASC) VISIBLE,
   CONSTRAINT `fk_RouteStation_Station1`
     FOREIGN KEY (`StationId`)
-    REFERENCES `transportation`.`Station` (`Id`)
+    REFERENCES `transportation`.`station` (`Id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_RouteStation_Route1`
     FOREIGN KEY (`RouteId`)
-    REFERENCES `transportation`.`Route` (`Id`)
+    REFERENCES `transportation`.`route` (`Id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_RouteStation_TransportationVehicle1`
     FOREIGN KEY (`TransportationVehicleId`)
-    REFERENCES `transportation`.`TransportationVehicle` (`Id`)
+    REFERENCES `transportation`.`transportationvehicle` (`Id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
@@ -364,3 +364,9 @@ INSERT INTO `routestation` (`RouteId`, `StationId`, `TransportationVehicleId`, `
 INSERT INTO `routestation` (`RouteId`, `StationId`, `TransportationVehicleId`, `Time`, `Type`) VALUES (6, 17, 3, '14:30', 'Type6');
 INSERT INTO `routestation` (`RouteId`, `StationId`, `TransportationVehicleId`, `Time`, `Type`) VALUES (6, 13, 3, '18:00', 'Type6');
 INSERT INTO `routestation` (`RouteId`, `StationId`, `TransportationVehicleId`, `Time`, `Type`) VALUES (6, 15, 3, '21:00', 'Type6');
+
+
+DROP USER IF EXISTS 'tsuser'@'%';
+CREATE USER 'tsuser'@'%' IDENTIFIED BY 'password';
+GRANT ALL PRIVILEGES ON transportation.* TO 'tsuser'@'%' WITH GRANT OPTION;
+ALTER USER 'tsuser'@'%' IDENTIFIED WITH mysql_native_password BY 'password';
