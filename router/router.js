@@ -209,6 +209,8 @@ router.delete("/routestation/delete/", function(req, res){
     routestationController.deleteRoutestation(req, res);
  });
 
-
+ router.get("/", function(req, res){
+    countryController.getShow(req, res);
+ });
 
 module.exports = router;
